@@ -103,6 +103,10 @@ function hasArmorTier(id){  return tierRank(ARMOR_ORDER, S.inventory.armor)   >=
 function hasBagTier(id){    return tierRank(BAG_ORDER, S.inventory.bag)       >= tierRank(BAG_ORDER, id); }
 function hasTool(id){       return S.inventory.tools.includes(id); }
 function hasSecret(id){     return S.secrets.includes(id); }
+function hasSkillUnlocked(id){
+  const sk = SKILLS[id];
+  return !!(sk && (!sk.reqWeapon || hasWeaponTier(sk.reqWeapon)));
+}
 
 /* ---------- preferencias, tema e som ---------- */
 let prefs = { theme: 0, sound: false };
@@ -453,7 +457,13 @@ function buyItem(id){
       S.inventory.weapon = id;
       sfx('buy');
       npcSay(npcId, `"${w.name} equipada! ${w.passive !== 'Nenhuma' ? 'Passiva: ' + w.passive + '.' : 'O cabo range, mas resolve.'}"`);
-      notify(`${w.name} equipada (+${w.atk} ATK).`, 'amber'); break;
+      notify(`${w.name} equipada (+${w.atk} ATK).`, 'amber');
+      for(const sid in SKILLS){
+        if(SKILLS[sid].reqWeapon === id){
+          showToast(`Nova habilidade desbloqueada: [${SKILLS[sid].key}] ${SKILLS[sid].name}!`);
+        }
+      }
+      break;
     }
     case 'casaco_pano_mofado':
     case 'mascara_antipoeira':
@@ -866,7 +876,7 @@ function handleMonsterDefeated(){
 function useSkill(id){
   const c = S.combat;
   const sk = SKILLS[id];
-  if(!sk || !c.active || !c.monster) return;
+  if(!sk || !hasSkillUnlocked(id) || !c.active || !c.monster) return;
   if((uiEphemeral.skillCd[id] || 0) > 0) return;
 
   uiEphemeral.skillCd[id] = sk.cd;
@@ -1606,6 +1616,7 @@ function viewAventura(){
 
     h += `<div class="skill-bar">`;
     for(const sid in SKILLS){
+      if(!hasSkillUnlocked(sid)) continue;
       const sk = SKILLS[sid];
       const cd = uiEphemeral.skillCd[sid] || 0;
       const lbl = cd > 0 ? `[${sk.key}] ${sk.name} (${Math.ceil(cd)}s)` : `[${sk.key}] ${sk.name}`;
@@ -1657,6 +1668,11 @@ function viewCompendio(){
     for(const id in TOOLS){
       const t = TOOLS[id];
       h += renderEntry(hasTool(id), t.name, t.effect, t.desc, t.hint);
+    }
+    h += `</div><div class="box"><span class="box-title">— HABILIDADES DE COMBATE —</span>`;
+    for(const sid in SKILLS){
+      const sk = SKILLS[sid];
+      h += renderEntry(hasSkillUnlocked(sid), `[${sk.key}] ${sk.name}`, `Cooldown ${sk.cd}s`, sk.desc, sk.hint);
     }
     h += `</div>`;
   } else if(ct === 'bestiario'){

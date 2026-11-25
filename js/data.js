@@ -57,9 +57,9 @@ const POTIONS = {
 };
 
 const SKILLS = {
-  sweep:  { name: 'Varredura', key: 'Q', cd: 6,  desc: 'Golpe pesado de 2.2x ATK.' },
-  cloud:  { name: 'Nuvem de Poeira', key: 'W', cd: 10, desc: 'Cega o inimigo (-50% dano por 3 turnos).' },
-  sneeze: { name: 'Espirro Sônico', key: 'E', cd: 12, desc: 'Empurra o inimigo, causa 1.2x ATK e atordoa.' }
+  sweep:  { name: 'Varredura', key: 'Q', cd: 6,  reqWeapon: 'vassoura_quebrada', desc: 'Golpe pesado de 2.2x ATK.', hint: 'Desbloqueada ao empunhar sua primeira arma.' },
+  cloud:  { name: 'Nuvem de Poeira', key: 'W', cd: 10, reqWeapon: 'espanador_pena', desc: 'Cega o inimigo (-50% dano por 3 turnos).', hint: 'Desbloqueada com penas ancestrais.' },
+  sneeze: { name: 'Espirro Sônico', key: 'E', cd: 12, reqWeapon: 'rodo_combate', desc: 'Empurra o inimigo, causa 1.2x ATK e atordoa.', hint: 'Desbloqueada com a arma clássica do zelador.' }
 };
 
 const ITEM_LABELS = {
