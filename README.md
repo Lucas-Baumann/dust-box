@@ -9,6 +9,8 @@
 
 > **Status: Em desenvolvimento ativo (WIP)**  
 > Este projeto está nos estágios iniciais — a base jogável já funciona de ponta a ponta, mas a história, os segredos, a exploração e novas mecânicas continuam sendo construídos e expandidos.
+>
+> **Jogue agora no navegador:** https://lucas-baumann.github.io/dust-box/ *(atualizado automaticamente a cada push na `main`)*
 
 ---
 
