@@ -334,6 +334,44 @@ button.cmd.subtle:hover:not(:disabled) { border-color: var(--ink); color: var(--
   cursor: pointer;
   user-select: none;
 }
+.corridor-track {
+  display: inline-block;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.25;
+  margin: 8px auto;
+  color: var(--ink);
+}
+.skill-bar {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 10px 0 6px 0;
+}
+.skill-btn {
+  font-family: inherit;
+  background: var(--bg2);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.skill-btn:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--bg);
+}
+.skill-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.buff-bar {
+  font-size: 12px;
+  color: var(--dim);
+  min-height: 18px;
+  margin-bottom: 4px;
+}
 
 /* Inventario e Compendio responsivos */
 .inv-grid {

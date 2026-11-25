@@ -6,7 +6,7 @@ const PREFS_KEY = 'dustbox_prefs_v1';
 
 const {
   THEMES, WEAPON_ORDER, ARMOR_ORDER, BAG_ORDER,
-  ACCELS, WEAPONS, ARMORS, BAGS, TOOLS,
+  ACCELS, WEAPONS, ARMORS, BAGS, TOOLS, POTIONS, SKILLS,
   ITEM_LABELS, SECRETS, ACHIEVEMENT_INFO,
   COMBAT_ZONES, ALL_MONSTERS, LEVERS
 } = window.DustData;
@@ -15,11 +15,11 @@ const DIALOGUES = window.DustDialogues;
 
 function defaultState(){
   return {
-    version: "1.3.0",
+    version: "1.4.0",
     resources: { dust: 0, magicDust: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
     unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, victory:false },
     accelerators: { window:0, cat:0, carpet:0, fan:0 },
-    inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], items:[] },
+    inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], potions:{ cha_poeira:0, tonico_cafeina:0 }, items:[] },
     player: { hp:100, maxHp:100, attack:2 },
     puzzle: { solution:null, current:[0,0,0], attempts:0 },
     key: { fragments:0, complete:false },
@@ -48,7 +48,10 @@ const uiEphemeral = {
   barataClicks: 0,
   idleSeconds: 0,
   moteTimer: 45,
-  moteEl: null
+  moteEl: null,
+  track: { ppos: 2, mpos: 28, fx: '' },
+  skillCd: { sweep: 0, cloud: 0, sneeze: 0 },
+  buffs: { cloudTurns: 0, stunTurns: 0, tonicSec: 0 }
 };
 
 function save(){
@@ -69,6 +72,7 @@ function load(){
     S.inventory = Object.assign(def.inventory, d.inventory||{});
     if(!Array.isArray(S.inventory.tools)) S.inventory.tools = [];
     if(!Array.isArray(S.inventory.items)) S.inventory.items = [];
+    S.inventory.potions = Object.assign({ cha_poeira:0, tonico_cafeina:0 }, S.inventory.potions||{});
     S.player = Object.assign(def.player, d.player||{});
     S.puzzle = Object.assign(def.puzzle, d.puzzle||{});
     S.key = Object.assign(def.key, d.key||{});
@@ -709,7 +713,68 @@ function spawnGoldenMote(){
   }, 11000);
 }
 
-/* ---------- combate (sem pausa, 3 fases, passivas reais) ---------- */
+function buyPotion(id){
+  const p = POTIONS[id];
+  if(!p) return;
+  const npcId = id === 'cha_poeira' ? 'moth' : 'beetle';
+  if(S.resources.dust < p.price){
+    sfx('error');
+    npcSay(npcId, '"Poeira insuficiente para essa poção."');
+    notify('Poeira insuficiente.');
+    render();
+    return;
+  }
+  S.resources.dust -= p.price;
+  S.inventory.potions[id] = (S.inventory.potions[id] || 0) + 1;
+  sfx('buy');
+  npcSay(npcId, `"${p.name} pronta! Agora você tem x${S.inventory.potions[id]}."`);
+  notify(`${p.name} adquirida (x${S.inventory.potions[id]}).`, 'amber');
+  save(); render();
+}
+
+function usePotion(id){
+  const p = POTIONS[id];
+  const qty = (S.inventory.potions && S.inventory.potions[id]) || 0;
+  if(!p || qty <= 0){
+    sfx('error');
+    notify('Você não tem essa poção.');
+    return;
+  }
+  if(!S.combat.active){
+    notify('Guarde suas poções para quando estiver em combate!');
+    return;
+  }
+  if(id === 'cha_poeira'){
+    if(S.player.hp >= S.player.maxHp){ notify('Seu HP já está cheio!'); return; }
+    S.inventory.potions[id]--;
+    const heal = Math.round(S.player.maxHp * 0.50);
+    S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
+    S.combat.clog.unshift(`Você bebeu Chá de Poeira (+${heal} HP)!`);
+    S.combat.clog = S.combat.clog.slice(0, 6);
+    sfx('unlock');
+    save(); render();
+  } else if(id === 'tonico_cafeina'){
+    S.inventory.potions[id]--;
+    uiEphemeral.buffs.tonicSec = 15;
+    S.combat.clog.unshift('Tônico de Cafeína Mofada! (+50% ATK por 15s)');
+    S.combat.clog = S.combat.clog.slice(0, 6);
+    sfx('unlock');
+    save(); render();
+  }
+}
+
+/* ---------- combate (sem pausa, pista lateral ASCII, 3 fases, habilidades e passivas) ---------- */
+function effectiveAtk(){
+  const mult = uiEphemeral.buffs.tonicSec > 0 ? 1.5 : 1.0;
+  return Math.round(S.player.attack * mult);
+}
+
+function resetCombatRuntime(){
+  uiEphemeral.track = { ppos: 2, mpos: 28, fx: '' };
+  uiEphemeral.skillCd = { sweep: 0, cloud: 0, sneeze: 0 };
+  uiEphemeral.buffs = { cloudTurns: 0, stunTurns: 0, tonicSec: 0 };
+}
+
 function selectZone(z){
   if(S.combat.active) return;
   if(z < 0 || z >= S.combat.unlockedZones || z >= COMBAT_ZONES.length) return;
@@ -728,6 +793,9 @@ function spawnMonster(){
   c.monster = Object.assign({}, base, { atk: Math.max(1, Math.round(base.atk * atkMult)) });
   c.mhp = Math.round(base.hp * hpMult);
   c.mmax = c.mhp;
+  uiEphemeral.track = { ppos: 2, mpos: 28, fx: '' };
+  uiEphemeral.buffs.cloudTurns = 0;
+  uiEphemeral.buffs.stunTurns = 0;
   if(!S.discoveredMonsters[base.id]) S.discoveredMonsters[base.id] = 0;
 }
 
@@ -739,6 +807,7 @@ function startExpedition(){
   }
   if(S.combat.active) return;
   const zone = COMBAT_ZONES[S.combat.zone] || COMBAT_ZONES[0];
+  resetCombatRuntime();
   S.combat.active = true;
   S.combat.idx = 0;
   S.combat.clog = [`@ entra em ${zone.short} empunhando ${WEAPONS[S.inventory.weapon].name}...`];
@@ -753,8 +822,85 @@ function retreatExpedition(){
   S.combat.monster = null;
   S.combat.idx = 0;
   S.combat.mhp = 0;
+  resetCombatRuntime();
   sfx('click');
   notify('Você recuou para fora da fase. A próxima entrada começa do início.');
+  save(); render();
+}
+
+function handleMonsterDefeated(){
+  const c = S.combat;
+  const zone = COMBAT_ZONES[c.zone] || COMBAT_ZONES[0];
+  const loop = (c.zoneLoops && c.zoneLoops[c.zone]) || 1;
+  const toolMult = hasTool('pa_lixo') ? 1.20 : 1.0;
+  const rw = Math.round(c.monster.reward * (1 + (loop - 1) * 0.45) * toolMult);
+  S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + rw);
+  S.resources.totalEarned += rw;
+  let extra = '';
+  if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra = ` +${c.monster.magic} MÁGICA`; }
+  else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra = ' +1 MÁGICA'; }
+  c.clog.unshift(`${c.monster.name} virou poeira! +${rw} poeiras${extra}.`);
+  c.kills++;
+  S.discoveredMonsters[c.monster.id] = (S.discoveredMonsters[c.monster.id] || 0) + 1;
+
+  if(c.monster.boss){
+    if(c.monster.id === 'rei_mofo') achievement('mofo', 'Assassino de Mofo Real', 'Derrotou o REI MOFO');
+    if(c.monster.id === 'baratao') achievement('baratao', 'Pânico da Cozinha', 'Derrotou o BARATÃO BLINDADO');
+    if(c.monster.id === 'lorde_acaro') achievement('ancestral', 'Senhor da Alergia', 'Derrotou o LORDE ÁCARO ANCESTRAL');
+
+    c.zoneLoops[c.zone] = loop + 1;
+    if(c.zone + 1 >= c.unlockedZones && c.zone + 1 < COMBAT_ZONES.length){
+      c.unlockedZones = c.zone + 2;
+      showToast(`Nova fase desbloqueada: ${COMBAT_ZONES[c.zone + 1].name}!`);
+    }
+    c.clog.unshift(`${zone.short} concluída! Loop ${c.zoneLoops[c.zone]} liberado.`);
+    c.idx = 0;
+  } else {
+    c.idx++;
+  }
+  spawnMonster();
+  if(c.kills === 1) once('k1', 'Primeiro abate! A poeira agora tem medo de você.');
+  if(c.kills === 10) achievement('exterminador', 'Exterminador de Sujeira', '10 abates nas expedições');
+}
+
+function useSkill(id){
+  const c = S.combat;
+  const sk = SKILLS[id];
+  if(!sk || !c.active || !c.monster) return;
+  if((uiEphemeral.skillCd[id] || 0) > 0) return;
+
+  uiEphemeral.skillCd[id] = sk.cd;
+  if(id === 'sweep'){
+    let dmg = Math.round(effectiveAtk() * 2.2);
+    if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.15);
+    c.mhp -= dmg;
+    uiEphemeral.track.fx = '>>';
+    let note = '';
+    if(S.inventory.weapon === 'aspirador_entupido'){
+      const heal = Math.max(1, Math.round(dmg * 0.10));
+      S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
+      note = ` (+${heal} HP)`;
+    }
+    c.clog.unshift(`[Varredura] @ acerta ${dmg}${note} em ${c.monster.name}!`);
+    sfx('unlock');
+    if(c.mhp <= 0) handleMonsterDefeated();
+  } else if(id === 'cloud'){
+    uiEphemeral.buffs.cloudTurns = 3;
+    uiEphemeral.track.fx = '~~';
+    c.clog.unshift(`[Nuvem de Poeira] ${c.monster.name} cego (-50% dano por 3 turnos)!`);
+    sfx('click');
+  } else if(id === 'sneeze'){
+    let dmg = Math.round(effectiveAtk() * 1.2);
+    if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.15);
+    c.mhp -= dmg;
+    uiEphemeral.track.mpos = Math.min(30, uiEphemeral.track.mpos + 8);
+    uiEphemeral.buffs.stunTurns = 1;
+    uiEphemeral.track.fx = '!!';
+    c.clog.unshift(`[Espirro Sônico] @ empurra ${c.monster.name} (${dmg} dano + atordoado)!`);
+    sfx('unlock');
+    if(c.mhp <= 0) handleMonsterDefeated();
+  }
+  c.clog = c.clog.slice(0, 6);
   save(); render();
 }
 
@@ -762,11 +908,17 @@ function combatRound(){
   const c = S.combat;
   if(!c.active || !c.monster) return;
   if(S.player.hp <= 0) return;
-  const zone = COMBAT_ZONES[c.zone] || COMBAT_ZONES[0];
-  const loop = (c.zoneLoops && c.zoneLoops[c.zone]) || 1;
+
+  // se ainda estao se aproximando na pista, avanca!
+  if(uiEphemeral.track.mpos - uiEphemeral.track.ppos > 3){
+    uiEphemeral.track.ppos = Math.min(uiEphemeral.track.ppos + 3, uiEphemeral.track.mpos - 3);
+    uiEphemeral.track.mpos = Math.max(uiEphemeral.track.ppos + 3, uiEphemeral.track.mpos - 2);
+    uiEphemeral.track.fx = '';
+    return;
+  }
 
   const variance = Math.floor(Math.random()*3);
-  let dmg = S.player.attack + variance;
+  let dmg = effectiveAtk() + variance;
   let note = '';
 
   if(S.inventory.weapon === 'espanador_pena' && Math.random() < 0.15){
@@ -782,6 +934,7 @@ function combatRound(){
   }
 
   c.mhp -= dmg;
+  uiEphemeral.track.fx = '*';
   sfx('hit');
 
   if(S.inventory.weapon === 'aspirador_entupido'){
@@ -793,45 +946,26 @@ function combatRound(){
   c.clog.unshift(`@ bate ${dmg}${note} em ${c.monster.name} (${Math.max(0,c.mhp)}/${c.mmax})`);
 
   if(c.mhp <= 0){
-    const toolMult = hasTool('pa_lixo') ? 1.20 : 1.0;
-    const rw = Math.round(c.monster.reward * (1 + (loop - 1) * 0.45) * toolMult);
-    S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + rw);
-    S.resources.totalEarned += rw;
-    let extra = '';
-    if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra = ` +${c.monster.magic} MÁGICA`; }
-    else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra = ' +1 MÁGICA'; }
-    c.clog.unshift(`${c.monster.name} virou poeira! +${rw} poeiras${extra}.`);
-    c.kills++;
-    S.discoveredMonsters[c.monster.id] = (S.discoveredMonsters[c.monster.id] || 0) + 1;
-
-    if(c.monster.boss){
-      if(c.monster.id === 'rei_mofo') achievement('mofo', 'Assassino de Mofo Real', 'Derrotou o REI MOFO');
-      if(c.monster.id === 'baratao') achievement('baratao', 'Pânico da Cozinha', 'Derrotou o BARATÃO BLINDADO');
-      if(c.monster.id === 'lorde_acaro') achievement('ancestral', 'Senhor da Alergia', 'Derrotou o LORDE ÁCARO ANCESTRAL');
-
-      c.zoneLoops[c.zone] = loop + 1;
-      if(c.zone + 1 >= c.unlockedZones && c.zone + 1 < COMBAT_ZONES.length){
-        c.unlockedZones = c.zone + 2;
-        showToast(`Nova fase desbloqueada: ${COMBAT_ZONES[c.zone + 1].name}!`);
-      }
-      c.clog.unshift(`${zone.short} concluída! Loop ${c.zoneLoops[c.zone]} liberado.`);
-      c.idx = 0;
-    } else {
-      c.idx++;
-    }
-    spawnMonster();
-    if(c.kills === 1) once('k1', 'Primeiro abate! A poeira agora tem medo de você.');
-    if(c.kills === 10) achievement('exterminador', 'Exterminador de Sujeira', '10 abates nas expedições');
+    handleMonsterDefeated();
   } else {
-    const stunned = S.inventory.weapon === 'rodo_combate' && Math.random() < 0.20;
-    if(stunned){
-      c.clog.unshift(`Empurrão do Rodo! ${c.monster.name} perdeu o equilíbrio.`);
+    if(uiEphemeral.buffs.stunTurns > 0){
+      uiEphemeral.buffs.stunTurns--;
+      c.clog.unshift(`${c.monster.name} ainda está atordoado!`);
     } else {
-      let md = Math.max(1, c.monster.atk + Math.floor(Math.random()*3) - 1);
-      if(hasTool('luva_borracha')) md = Math.max(1, Math.round(md * 0.85));
-      S.player.hp -= md;
-      c.clog.unshift(`${c.monster.name} revida ${md} em você.`);
-      if(S.player.hp <= 0){ faint(); return; }
+      const stunned = S.inventory.weapon === 'rodo_combate' && Math.random() < 0.20;
+      if(stunned){
+        c.clog.unshift(`Empurrão do Rodo! ${c.monster.name} perdeu o equilíbrio.`);
+      } else {
+        let md = Math.max(1, c.monster.atk + Math.floor(Math.random()*3) - 1);
+        if(hasTool('luva_borracha')) md = Math.max(1, Math.round(md * 0.85));
+        if(uiEphemeral.buffs.cloudTurns > 0){
+          md = Math.max(1, Math.round(md * 0.50));
+          uiEphemeral.buffs.cloudTurns--;
+        }
+        S.player.hp -= md;
+        c.clog.unshift(`${c.monster.name} revida ${md} em você.`);
+        if(S.player.hp <= 0){ faint(); return; }
+      }
     }
   }
   c.clog = c.clog.slice(0, 6);
@@ -845,8 +979,34 @@ function faint(){
   S.combat.monster = null;
   S.combat.idx = 0;
   S.combat.mhp = 0;
+  resetCombatRuntime();
   sfx('error');
   notify(`Você desmaiou na poeira e perdeu ${fmt(lost)} poeiras (20%). A fase foi reiniciada.`, 'red');
+}
+
+function renderCorridorTrack(){
+  const width = 36;
+  const z = S.combat.zone || 0;
+  const wallChar = z === 0 ? '=' : z === 1 ? '#' : '~';
+  const floorChar = z === 0 ? '.' : z === 1 ? '_' : ':';
+  const border = wallChar.repeat(width);
+  const chars = Array(width).fill(' ');
+  for(let i = 0; i < width; i += 5) chars[i] = floorChar;
+
+  const p = Math.max(1, Math.min(width - 6, uiEphemeral.track.ppos));
+  const m = Math.max(p + 3, Math.min(width - 4, uiEphemeral.track.mpos));
+  chars[p] = '@';
+  chars[p + 1] = '>';
+
+  if(uiEphemeral.track.fx && (m - p <= 4)){
+    const fx = uiEphemeral.track.fx;
+    for(let k = 0; k < fx.length && (p + 2 + k) < m; k++) chars[p + 2 + k] = fx[k];
+  }
+
+  const mToken = (S.combat.monster && S.combat.monster.boss) ? '[B]' : 'o_o';
+  for(let k = 0; k < mToken.length && (m + k) < width; k++) chars[m + k] = mToken[k];
+
+  return `${border}\n${chars.join('')}\n${border}`;
 }
 
 function rest(){
@@ -968,6 +1128,17 @@ function refreshDynamic(){
   if(dynDust) dynDust.textContent = fmt(d);
   const dynHp = document.getElementById('dyn-hp');
   if(dynHp) dynHp.textContent = `${Math.ceil(S.player.hp)}/${S.player.maxHp}`;
+
+  if(S.ui.tab === 'aventura' && S.combat.active){
+    root.querySelectorAll('button[data-skill]').forEach(btn => {
+      const sid = btn.getAttribute('data-skill');
+      const sk = SKILLS[sid];
+      if(!sk) return;
+      const cd = uiEphemeral.skillCd[sid] || 0;
+      btn.disabled = cd > 0;
+      btn.textContent = cd > 0 ? `[${sk.key}] ${sk.name} (${Math.ceil(cd)}s)` : `[${sk.key}] ${sk.name}`;
+    });
+  }
 }
 
 function renderIntro(){
@@ -1086,6 +1257,9 @@ function viewHall(){
   h += item('lanterna','Lanterna',300,'Ilumina lugares escuros demais para entrar no breu.');
   h += item('pedra_peso','Pedra de Peso',500,'Pesada o bastante para encarar correntes de ar.');
   h += item('pa_lixo', TOOLS.pa_lixo.name, TOOLS.pa_lixo.price, `${TOOLS.pa_lixo.effect}. ${TOOLS.pa_lixo.desc}`);
+  const cha = POTIONS.cha_poeira;
+  const chaQty = (S.inventory.potions && S.inventory.potions.cha_poeira) || 0;
+  h += `<div class="shop-item"><b>${cha.name}</b> <span class="muted">(você tem x${chaQty})</span> — <b>${cha.price} poeira</b><br><span class="muted">${cha.effect}. ${cha.desc}</span><br><button class="cmd" data-cost="${cha.price}" onclick="Game.buyPotion('cha_poeira')" ${S.resources.dust<cha.price?'disabled':''}>Comprar</button></div>`;
   h += `</div>`;
 
   h += `<div class="box"><span class="box-title">— MELHORIAS DO CASTELO —</span><div class="muted">compre sujeira para atrair mais sujeira. Economia circular.</div>`;
@@ -1139,11 +1313,19 @@ function viewInventario(){
   }
   h += `</div>`;
 
-  h += `<div class="inv-card"><div class="inv-card-title">Itens (${S.inventory.items.length})</div>`;
+  h += `<div class="inv-card"><div class="inv-card-title">Itens & Poções</div>`;
   if(!S.inventory.items.length){
-    h += `<div class="muted">Seus bolsos têm apenas poeira e arrependimento.</div>`;
+    h += `<div class="muted">Nenhum item-chave ainda.</div>`;
   } else {
     h += S.inventory.items.map(i => `<span class="inv-tag">${esc(ITEM_LABELS[i]||i)}</span>`).join('');
+  }
+  const chaQ = (S.inventory.potions && S.inventory.potions.cha_poeira) || 0;
+  const tonQ = (S.inventory.potions && S.inventory.potions.tonico_cafeina) || 0;
+  if(chaQ > 0 || tonQ > 0){
+    h += `<div style="margin-top:8px;border-top:1px dotted var(--line);padding-top:6px">`;
+    if(chaQ > 0) h += `<span class="inv-tag">Chá de Poeira x${chaQ}</span>`;
+    if(tonQ > 0) h += `<span class="inv-tag">Tônico Cafeína x${tonQ}</span>`;
+    h += `</div>`;
   }
   h += `</div></div>`;
 
@@ -1311,6 +1493,9 @@ function viewSub(sub){
     h += renderNpcTalkControls('beetle');
     h += `<div class="box"><span class="box-title">— TRANSMUTAÇÃO —</span><div class="muted">10.000 Poeiras -&gt; 1 Poeira Mágica</div>
     <div class="actions"><button class="cmd" data-cost="10000" onclick="Game.transmute()" ${S.resources.dust<10000?'disabled':''}>Compactar (10.000 poeira -&gt; 1 mágica)</button></div></div>`;
+    const ton = POTIONS.tonico_cafeina;
+    const tonQty = (S.inventory.potions && S.inventory.potions.tonico_cafeina) || 0;
+    h += `<div class="box"><span class="box-title">— POÇÕES DE POEIRA —</span><div class="shop-item"><b>${ton.name}</b> <span class="muted">(você tem x${tonQty})</span> — <b>${fmt(ton.price)} poeira</b><br><span class="muted">${ton.effect}. ${ton.desc}</span><br><button class="cmd" data-cost="${ton.price}" onclick="Game.buyPotion('tonico_cafeina')" ${S.resources.dust<ton.price?'disabled':''}>Preparar</button></div></div>`;
     h += `<div class="box"><span class="box-title">— GRANDE CHAVE DO PORTÃO —</span><div class="muted">Cada fragmento: 2 Mágicas + 5.000 poeiras — Precisa de 3.<br>Fragmentos atuais: <b>${S.key.fragments}/3</b></div>
     <div class="actions">
       <button class="cmd" data-cost="5000" data-magic-cost="2" data-req-ok="${S.key.fragments<3?1:0}" onclick="Game.craftFragment()" ${(S.resources.magicDust<2||S.resources.dust<5000||S.key.fragments>=3)?'disabled':''}>Forjar fragmento</button>
@@ -1407,11 +1592,31 @@ function viewAventura(){
     const mmax = c.mmax || c.monster.hp || 1;
     const pct = Math.max(0, Math.min(100, c.mhp/mmax*100));
     const steps = Math.floor(pct/10);
+    const buffs = [];
+    if(uiEphemeral.buffs.tonicSec > 0) buffs.push(`Tônico +50% ATK (${Math.ceil(uiEphemeral.buffs.tonicSec)}s)`);
+    if(uiEphemeral.buffs.cloudTurns > 0) buffs.push(`Inimigo cego (${uiEphemeral.buffs.cloudTurns}t)`);
+    if(uiEphemeral.buffs.stunTurns > 0) buffs.push(`Atordoado`);
+
     h += `<div class="box">`;
     h += `<div class="muted" style="margin-bottom:4px">Encontro ${c.idx + 1}/${zone.monsters.length}</div>`;
     h += `<pre class="ascii-art monster-art" onclick="Game.pokeMonster()">${esc(c.monster.art||'')}</pre>`;
-    h += `<div><b>${esc(c.monster.name)}</b> ${c.monster.boss?'<b class="red">[CHEFE]</b>':''} — HP ${Math.max(0,Math.ceil(c.mhp))}/${mmax}</div>`;
-    h += `<pre style="margin:6px auto"><span class="blink">@-&gt;</span>  [${'#'.repeat(steps)}${'.'.repeat(10-steps)}]</pre>`;
+    h += `<div><b>${esc(c.monster.name)}</b> ${c.monster.boss?'<b class="red">[CHEFE]</b>':''} — HP ${Math.max(0,Math.ceil(c.mhp))}/${mmax} [${'#'.repeat(steps)}${'.'.repeat(10-steps)}]</div>`;
+    h += `<pre class="corridor-track">${esc(renderCorridorTrack())}</pre>`;
+    h += `<div class="buff-bar">${buffs.join(' · ')}</div>`;
+
+    h += `<div class="skill-bar">`;
+    for(const sid in SKILLS){
+      const sk = SKILLS[sid];
+      const cd = uiEphemeral.skillCd[sid] || 0;
+      const lbl = cd > 0 ? `[${sk.key}] ${sk.name} (${Math.ceil(cd)}s)` : `[${sk.key}] ${sk.name}`;
+      h += `<button class="skill-btn" data-skill="${sid}" title="${esc(sk.desc)}" onclick="Game.useSkill('${sid}')" ${cd>0?'disabled':''}>${esc(lbl)}</button>`;
+    }
+    const chaQty = (S.inventory.potions && S.inventory.potions.cha_poeira) || 0;
+    const tonQty = (S.inventory.potions && S.inventory.potions.tonico_cafeina) || 0;
+    if(chaQty > 0) h += `<button class="skill-btn" onclick="Game.usePotion('cha_poeira')" title="${esc(POTIONS.cha_poeira.effect)}">[R] Chá x${chaQty}</button>`;
+    if(tonQty > 0) h += `<button class="skill-btn" onclick="Game.usePotion('tonico_cafeina')" title="${esc(POTIONS.tonico_cafeina.effect)}">[T] Tônico x${tonQty}</button>`;
+    h += `</div>`;
+
     h += `<div class="combat-log">${c.clog.map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   } else {
     h += `<div class="box muted">${esc(zone.desc)}<br>Entre preparado — não há pausa no meio do caminho.</div>`;
@@ -1674,7 +1879,13 @@ function tick(dt){
   if(S.resources.totalEarned >= 1000) once('m1', '1.000 poeiras acumuladas! Sua alergia evoluiu para orgulho.');
 
   if(S.combat.active){
-    const interval = hasSecret('cafe_ontem') ? 0.72 : 0.80;
+    for(const sid in uiEphemeral.skillCd){
+      if(uiEphemeral.skillCd[sid] > 0) uiEphemeral.skillCd[sid] = Math.max(0, uiEphemeral.skillCd[sid] - dt);
+    }
+    if(uiEphemeral.buffs.tonicSec > 0) uiEphemeral.buffs.tonicSec = Math.max(0, uiEphemeral.buffs.tonicSec - dt);
+
+    const approaching = (uiEphemeral.track.mpos - uiEphemeral.track.ppos) > 3;
+    const interval = approaching ? 0.25 : (hasSecret('cafe_ontem') ? 0.72 : 0.80);
     combatAcc += dt;
     if(combatAcc >= interval){ combatAcc = 0; combatRound(); render(); }
   }
@@ -1745,6 +1956,15 @@ function boot(){
       const list = tabs();
       const idx = parseInt(e.key, 10) - 1;
       if(list[idx]){ sfx('click'); go(list[idx].id); }
+      return;
+    }
+    if(S.ui.tab === 'aventura' && S.combat.active && !e.ctrlKey && !e.altKey && !e.metaKey){
+      const k = e.key.toLowerCase();
+      if(k === 'q') useSkill('sweep');
+      else if(k === 'w') useSkill('cloud');
+      else if(k === 'e') useSkill('sneeze');
+      else if(k === 'r') usePotion('cha_poeira');
+      else if(k === 't') usePotion('tonico_cafeina');
     }
   });
 
@@ -1753,9 +1973,9 @@ function boot(){
 }
 
 window.Game = {
-  buyAccel, lubricate, cleanBody, buyItem, transmute, craftFragment, fuseKey, openGate,
+  buyAccel, lubricate, cleanBody, buyItem, buyPotion, usePotion, transmute, craftFragment, fuseKey, openGate,
   cycleLever, testLevers, searchCandy, enterWind, pullBook,
-  selectZone, startExpedition, retreatExpedition, rest,
+  selectZone, startExpedition, retreatExpedition, useSkill, rest,
   talkNpc, chooseDialogue,
   pokeRat, pokeSpiderWord, pokeTermite, pokeMonster,
   go, setCompTab, setMapHint,

@@ -51,6 +51,17 @@ const TOOLS = {
   flanela_microfibra: { name: 'Flanela de Microfibra', price: 3500, where: 'Asa Leste', effect: 'Regen de HP 2x fora de luta', desc: 'Um carinho nas feridas entre uma expedição e outra.', hint: 'Guardada na oficina a leste.' }
 };
 
+const POTIONS = {
+  cha_poeira:     { name: 'Chá de Poeira', price: 400, key: 'R', effect: 'Cura 50% do HP em combate', desc: 'Quente, cinzento e surpreendentemente revigorante.', hint: 'Vendido no Hall Principal.' },
+  tonico_cafeina: { name: 'Tônico de Cafeína Mofada', price: 1200, key: 'T', effect: '+50% ATK por 15s', desc: 'Destilado no Porão. Faz seu @ vibrar em alta frequência.', hint: 'Preparado no Porão Obscuro.' }
+};
+
+const SKILLS = {
+  sweep:  { name: 'Varredura', key: 'Q', cd: 6,  desc: 'Golpe pesado de 2.2x ATK.' },
+  cloud:  { name: 'Nuvem de Poeira', key: 'W', cd: 10, desc: 'Cega o inimigo (-50% dano por 3 turnos).' },
+  sneeze: { name: 'Espirro Sônico', key: 'E', cd: 12, desc: 'Empurra o inimigo, causa 1.2x ATK e atordoa.' }
+};
+
 const ITEM_LABELS = {
   mapa_castelo: 'Mapa do Castelo',
   lanterna: 'Lanterna (pilhas vazando)',
@@ -154,7 +165,7 @@ const LEVERS = ['|','/','\\'];
 
 global.DustData = {
   THEMES, WEAPON_ORDER, ARMOR_ORDER, BAG_ORDER,
-  ACCELS, WEAPONS, ARMORS, BAGS, TOOLS,
+  ACCELS, WEAPONS, ARMORS, BAGS, TOOLS, POTIONS, SKILLS,
   ITEM_LABELS, SECRETS, ACHIEVEMENT_INFO,
   COMBAT_ZONES, ALL_MONSTERS, LEVERS
 };
