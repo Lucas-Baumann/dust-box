@@ -1,0 +1,289 @@
+/* Dust Box - Terminal monocromatico */
+:root {
+  --bg: #000000;
+  --bg2: #050505;
+  --ink: #e8e8e8;
+  --dim: #8a8a8a;
+  --faint: #555555;
+  --line: #333333;
+}
+body.theme-green {
+  --bg: #030a04;
+  --bg2: #061408;
+  --ink: #33ff66;
+  --dim: #1f9e3d;
+  --faint: #125422;
+  --line: #195228;
+}
+body.theme-amber {
+  --bg: #0d0800;
+  --bg2: #160e00;
+  --ink: #ffb000;
+  --dim: #a67300;
+  --faint: #593e00;
+  --line: #4a3402;
+}
+body.crt::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 999;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Courier New', Consolas, monospace;
+  margin: 0;
+  padding: 0 12px 60px 12px;
+  line-height: 1.5;
+}
+#boot {
+  max-width: 860px;
+  margin: 24px auto 0 auto;
+  background: transparent;
+  padding: 16px 18px;
+}
+#boot h1 {
+  margin: 0 0 10px 0;
+  letter-spacing: 4px;
+  font-size: 28px;
+  font-weight: bold;
+}
+#stats {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+#stats b { color: #fff; }
+nav#tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+nav#tabs button {
+  font-family: inherit;
+  background: #000;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 14px;
+}
+nav#tabs button.active,
+nav#tabs button:hover {
+  background: var(--ink);
+  color: #000;
+}
+nav#tabs button.locked {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+#content {
+  min-height: 55vh;
+  background: transparent;
+  padding: 16px;
+  position: relative;
+}
+#log {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 13px;
+  color: var(--dim);
+}
+#log div {
+  margin-bottom: 3px;
+}
+#log div:first-child {
+  color: var(--ink);
+}
+pre {
+  white-space: pre;
+  font-family: inherit;
+  margin: 0;
+  overflow-x: auto;
+}
+.box {
+  padding: 6px 0;
+  margin: 12px 0;
+}
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+button.cmd {
+  font-family: inherit;
+  background: #000;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  cursor: pointer;
+  margin: 4px 4px 4px 0;
+}
+button.cmd:hover:not(:disabled) {
+  background: var(--ink);
+  color: #000;
+}
+button.cmd:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+button.cmd.danger { border-style: double; border-width: 3px; }
+.muted { color: var(--dim); font-size: 13px; }
+.amber { color: #fff; font-weight: bold; }
+.red { color: #fff; font-weight: bold; }
+.white { color: var(--ink); }
+#footer {
+  max-width: 860px;
+  margin: 10px auto 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--faint);
+}
+.footer-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+#footer button {
+  font-family: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 3px 8px;
+}
+#footer button:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.tab-key {
+  color: var(--dim);
+  font-size: 11px;
+  margin-left: 3px;
+}
+.npc { color: #fff; font-style: italic; }
+.shop-item { padding: 8px 0; }
+.hpbar {
+  display: inline-block;
+  width: 160px;
+  border: 1px solid var(--ink);
+  height: 12px;
+  vertical-align: middle;
+}
+.hpbar > span { display: block; height: 100%; background: var(--ink); }
+.map-ascii { color: var(--ink); font-size: 13px; }
+.blink { animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* modal de export / import */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modal.hidden { display: none; }
+.modal-box {
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  padding: 20px;
+  width: 100%;
+  max-width: 580px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.9);
+}
+.modal-title {
+  font-weight: bold;
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.modal-desc { margin-bottom: 12px; font-size: 13px; }
+#modal-text {
+  width: 100%;
+  height: 140px;
+  background: var(--bg2);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 8px;
+  resize: vertical;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+}
+#modal-text:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+.modal-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* o rato vive fisicamente no canto do quarto */
+.rat-corner {
+  position: absolute;
+  left: 22px;
+  bottom: 4px;
+  opacity: 0.9;
+}
+.rat-corner pre {
+  font-size: 13px;
+  animation: rat-fidget 7s steps(1) infinite;
+  transform-origin: bottom left;
+}
+@keyframes rat-fidget {
+  0%, 88% { transform: translate(0, 0); }
+  90%     { transform: translate(4px, -1px); }
+  92%     { transform: translate(-2px, 0); }
+  94%     { transform: translate(2px, 0); }
+  96%, 100% { transform: translate(0, 0); }
+}
+.rat-line { color: var(--dim); font-size: 14px; }
+
+/* botao debug: oculto por padrao (toggle via Ctrl+Shift+D) */
+.dbgbtn {
+  display: none;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--faint);
+  border: 1px dashed var(--faint);
+  background: transparent;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.dbgbtn.visible { display: block; }
+.dbgbtn:hover { color: var(--ink); border-color: var(--ink); }
+/* intro: nada alem do contador e do texto central - sem logo, sem bordas, sem abas/rodape */
+body.intro nav#tabs, body.intro #footer,
+body.intro #boot h1, body.intro #log { display: none; }
+body.intro #boot { border: none; background: transparent; box-shadow: none; padding-top: 10vh; }
+body.intro #content {
+  border: none;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+body.intro #stats { justify-content: center; border: none; }
+.intro-text pre { margin-bottom: 10px; }
