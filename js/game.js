@@ -1,4 +1,4 @@
-/* DUST BOX v1.0.0 - Castelo da Poeira Eterna */
+/* DUST BOX v1.1.0 — Castelo da Poeira Eterna */
 (function(){
 "use strict";
 const SAVE_KEY = 'dustbox_save_v1';
@@ -7,9 +7,9 @@ const PREFS_KEY = 'dustbox_prefs_v1';
 const THEMES = [
   { id: 'mono', label: 'mono', classes: [] },
   { id: 'green', label: 'verde', classes: ['theme-green'] },
-  { id: 'amber', label: 'ambar', classes: ['theme-amber'] },
+  { id: 'amber', label: 'âmbar', classes: ['theme-amber'] },
   { id: 'green-crt', label: 'crt verde', classes: ['theme-green', 'crt'] },
-  { id: 'amber-crt', label: 'crt ambar', classes: ['theme-amber', 'crt'] }
+  { id: 'amber-crt', label: 'crt âmbar', classes: ['theme-amber', 'crt'] }
 ];
 
 const WEAPON_ORDER = ['none', 'vassoura_quebrada', 'espanador_pena', 'rodo_combate'];
@@ -18,8 +18,8 @@ const BAG_ORDER    = ['bolso_furado', 'saco_teia', 'saco_compactado'];
 
 const ACCELS = {
   window: { name: 'Janela Entreaberta', desc: 'Deixa a brisa da rua entrar trazendo poeira.', base: 50, bonus: 0.5 },
-  cat:    { name: 'Gato Preguicoso', desc: 'Nao limpa nada e troca de pelo duas vezes ao dia.', base: 200, bonus: 2.0 },
-  carpet: { name: 'Carpete de 1980', desc: 'Retem sujeira de quatro decadas diferentes.', base: 1000, bonus: 10.0 },
+  cat:    { name: 'Gato Preguiçoso', desc: 'Não limpa nada e troca de pelo duas vezes ao dia.', base: 200, bonus: 2.0 },
+  carpet: { name: 'Carpete de 1980', desc: 'Retém sujeira de quatro décadas diferentes.', base: 1000, bonus: 10.0 },
   fan:    { name: 'Ventilador Troncho', desc: 'Gira devagar e espalha a poeira pelo recinto.', base: 5000, bonus: 45.0 }
 };
 
@@ -30,30 +30,122 @@ const WEAPONS = {
 };
 const ARMORS = {
   roupa_mofada:        { name: 'Roupa Mofada', maxHp: 100, price: 0, desc: 'Cheira a guarda-roupa fechado.' },
-  casaco_pano_mofado:  { name: 'Casaco de Pano Mofado', maxHp: 130, price: 600, desc: '+30 HP max. Quentinho e questionavel.' },
-  mascara_antipoeira:  { name: 'Mascara Anti-Poeira', maxHp: 160, price: 1200, req: 'casaco_pano_mofado', desc: '+60 HP max. Respire com estilo.' }
+  casaco_pano_mofado:  { name: 'Casaco de Pano Mofado', maxHp: 130, price: 600, desc: '+30 HP máx. Quentinho e questionável.' },
+  mascara_antipoeira:  { name: 'Máscara Anti-Poeira', maxHp: 160, price: 1200, req: 'casaco_pano_mofado', desc: '+60 HP máx. Respire com estilo.' }
 };
 const BAGS = {
   bolso_furado:    { name: 'Bolso Furado', max: 1000, price: 0 },
-  saco_teia:       { name: 'Saco de Teia', max: 5000, price: 1500, desc: 'Tecelagem aracnidea premium.' },
+  saco_teia:       { name: 'Saco de Teia', max: 5000, price: 1500, desc: 'Tecelagem aracnídea premium.' },
   saco_compactado: { name: 'Saco Compactado', max: 25000, price: 4000, req: 'saco_teia', desc: 'Poeira prensada cabe em qualquer lugar.' }
 };
 
+const ITEM_LABELS = {
+  mapa_castelo: 'Mapa do Castelo',
+  lanterna: 'Lanterna (pilhas vazando)',
+  pedra_peso: 'Pedra de Peso',
+  grande_chave: 'Grande Chave do Portão'
+};
+
+const ACHIEVEMENT_INFO = {
+  chave:        { name: 'Chaveiro do Apocalipse Higiênico', desc: 'Fundiu a Grande Chave do Portão.' },
+  fuga:         { name: 'Ar Puro (alegadamente)', desc: 'Abriu o Portão Principal.' },
+  eletricista:  { name: 'Eletricista de Ruína', desc: 'Acendeu a Sala dos Puzzles.' },
+  dieta:        { name: 'Caixa de Doces Vazia', desc: 'Revirou o easter egg e achou 1 Poeira Mágica.' },
+  vento:        { name: 'Perdeu Tudo no Vento', desc: 'Entrou na Sala do Vento Forte sem a Pedra de Peso.' },
+  mofo:         { name: 'Assassino de Mofo Real', desc: 'Derrotou o REI MOFO.' },
+  exterminador: { name: 'Exterminador de Sujeira', desc: '10 abates nos Corredores.' }
+};
+
 const MONSTERS = [
-  { id:'acaro', name:'Acaro Sabio', hp:15, atk:1, reward:30, art:'(o_o)' },
-  { id:'bola', name:'Bola de Poeira Rolante', hp:35, atk:3, reward:80, art:'@(   )~' },
-  { id:'barata', name:'Barata Tonta', hp:80, atk:6, reward:200, art:'<==(oO)==>' },
-  { id:'traca_selv', name:'Traca Selvagem', hp:150, atk:10, reward:400, magicChance:0.15, art:'\\  /\n (o.o)\n/ -- \\' },
-  { id:'rei_mofo', name:'REI MOFO', hp:400, atk:15, reward:1000, magic:1, boss:true, art:' [MOFO]\n(#####)\n |###|' }
+  { id:'acaro', name:'Ácaro Sábio', hp:15, atk:1, reward:30,
+    art:'   \\ /\n  (o_o)\n /|___|\\\n  "   "' },
+  { id:'bola', name:'Bola de Poeira Rolante', hp:35, atk:3, reward:80,
+    art:'   .---.\n ~( @ @ )~\n   \'---\'' },
+  { id:'barata', name:'Barata Tonta', hp:80, atk:6, reward:200,
+    art:'  \\     /\n ==(o.O)==\n  /|###|\\\n  / | | \\' },
+  { id:'traca_selv', name:'Traça Selvagem', hp:150, atk:10, reward:400, magicChance:0.15,
+    art:' .--.   .--.\n( o  \\ /  o )\n \'--(o.o)--\'\n    /---\\' },
+  { id:'rei_mofo', name:'REI MOFO', hp:400, atk:15, reward:1000, magic:1, boss:true,
+    art:'     .  *  .\n    _|_/|\\_|_\n   /  MOFO   \\\n  | (O)   (O) |\n  |   .===.   |\n /| ######### |\\\n/ |  #######  | \\\n  \'._|#####|_.\'\n    ~ ~ ~ ~ ~' }
 ];
 
-const RAT_ART = "  (\\_/)\n  ( o_o)\n  />[__]";
-const MOTH_ART = "   \\  /\n  ( o.o )  \n  / -- \\";
+const ART = {
+  rat: [
+    '       (\\_/)',
+    '       ( o.o)  ~?',
+    '      />[___]',
+    '    ._/_____\\_..::..'
+  ].join('\n'),
+
+  moth: [
+    '  .---.           .---.',
+    ' / .-. \\   \\ /   / .-. \\',
+    '| ( o ) \\_(o.o)_/ ( o ) |',
+    ' \\ \'-\'  / (   ) \\  \'-\' /',
+    '  \'----\'  /===\\  \'----\'',
+    '~~~~~~~~~|LOJA |~~~~~~~~~',
+    '| [===]  |_____|  [===] |',
+    '+-----------------------+'
+  ].join('\n'),
+
+  termite: [
+    '        \\   /',
+    '       .-(o.o)-.     ___',
+    '      (  \\===/  )   |   |',
+    '       \'-/   \\-\'====|###|',
+    '        /  |  \\     |___|',
+    '     __/__/ \\__\\__',
+    '    |   BIGORNA   |',
+    '    |  DE MADEIRA |',
+    '    +-------------+'
+  ].join('\n'),
+
+  spider: [
+    '           |',
+    '           |',
+    '       \\  _|_  /',
+    '     ---\\(. .)/---',
+    '     ---/( _ )\\---',
+    '       /  / \\  \\',
+    '      (o)     (o)  [teia]'
+  ].join('\n'),
+
+  beetle: [
+    '           .---.',
+    '         .\'  *  \'.',
+    '        /  * . *  \\',
+    '       |  .  *  .  |',
+    '        \\  *   *  /',
+    '   \\ /   \'.__.__.\'',
+    '  (o_o)===//  \\\\',
+    ' /[###]\\ //',
+    '  /   \\'
+  ].join('\n'),
+
+  gate: [
+    '      ____  ____  ____  _____  ____  ____',
+    '     ||P ||||O ||||R ||||T ||||Ã ||||O ||',
+    '     ||__||||__||||__||||__||||__||||__||',
+    '     |/__\\||/__\\||/__\\||/__\\||/__\\||/__\\|',
+    '    ======================================',
+    '     ||   ||   ||    ()    ||   ||   ||',
+    '     ||___||___||__________||___||___||'
+  ].join('\n'),
+
+  candy: [
+    '      +-------------------+',
+    '      |  [ CANDY BOX ]    |',
+    '      |                   |',
+    '      |  (Está vazia...)  |',
+    '      +-------------------+'
+  ].join('\n')
+};
+
 const LEVERS = ['|','/','\\'];
 
 function defaultState(){
   return {
-    version: "1.0.0",
+    version: "1.1.0",
     resources: { dust: 0, magicDust: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
     unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, candyLooted:false, windLooted:false, puzzleSolved:false, victory:false },
     accelerators: { window:0, cat:0, carpet:0, fan:0 },
@@ -62,7 +154,7 @@ function defaultState(){
     puzzle: { solution:null, current:[0,0,0], attempts:0 },
     key: { fragments:0, complete:false },
     achievements: [],
-    combat: { active:false, idx:0, distance:0, monster:null, mhp:0, clog:[], kills:0, loop:1 },
+    combat: { active:false, idx:0, distance:0, monster:null, mhp:0, mmax:1, clog:[], kills:0, loop:1 },
     flags: {},
     ui: { tab:'quarto', subview:null },
     intro: { cleans: 0, done: false },
@@ -71,6 +163,15 @@ function defaultState(){
 }
 
 let S = defaultState();
+
+// estado efemero de UI (nao precisa ir pro save)
+const uiEphemeral = {
+  npcSpeech: {},
+  feedbackTimer: null,
+  toastTimer: null,
+  lastIntroReady: false,
+  lastRatVisible: false
+};
 
 function save(){
   if(window.__dustboxSkipSave) return;
@@ -198,30 +299,75 @@ function recalc(){
   if(b) S.resources.maxDust = b.max;
 }
 
-/* ---------- log ---------- */
-const logEl = () => document.getElementById('log');
-function log(msg, cls){
-  const L = logEl();
-  if(!L) return;
-  const el = document.createElement('div');
-  if(cls) el.className = cls;
-  const t = new Date().toLocaleTimeString('pt-BR',{hour12:false});
-  el.textContent = `[${t}] ${msg}`;
-  L.prepend(el);
-  while(L.children.length > 60) L.removeChild(L.lastChild);
+/* ---------- feedback limpo (Opcao A: sem terminal #log) ---------- */
+function notify(msg, cls){
+  const el = document.getElementById('feedback');
+  if(!el) return;
+  el.className = 'feedback visible' + (cls ? ' ' + cls : '');
+  el.textContent = msg;
+  if(uiEphemeral.feedbackTimer) clearTimeout(uiEphemeral.feedbackTimer);
+  uiEphemeral.feedbackTimer = setTimeout(()=>{
+    el.classList.remove('visible');
+  }, 5000);
+}
+function showToast(msg){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  if(uiEphemeral.toastTimer) clearTimeout(uiEphemeral.toastTimer);
+  uiEphemeral.toastTimer = setTimeout(()=>{
+    el.classList.add('hidden');
+  }, 4500);
+}
+function npcSay(npcId, text){
+  uiEphemeral.npcSpeech[npcId] = text;
 }
 function once(key, msg, cls){
   if(S.flags[key]) return;
   S.flags[key] = true;
-  log(msg, cls||'');
+  notify(msg, cls||'');
 }
 function achievement(id, name, desc){
   if(S.achievements.includes(id)) return;
   S.achievements.push(id);
-  log(`* Conquista desbloqueada: ${name} - ${desc}`, 'amber');
+  showToast(`★ Conquista: ${name} — ${desc}`);
 }
 
-/* ---------- acoes ---------- */
+/* ---------- helpers de texto e balao ASCII ---------- */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function wrapLines(text, maxWidth){
+  const out = [];
+  String(text).split('\n').forEach(para => {
+    const words = para.split(/\s+/).filter(Boolean);
+    if(!words.length){ out.push(''); return; }
+    let line = words[0];
+    for(let i = 1; i < words.length; i++){
+      if((line + ' ' + words[i]).length <= maxWidth){
+        line += ' ' + words[i];
+      } else {
+        out.push(line);
+        line = words[i];
+      }
+    }
+    out.push(line);
+  });
+  return out;
+}
+
+function speechBubble(text, maxWidth){
+  const lines = wrapLines(text, maxWidth || 44);
+  const w = Math.max(12, ...lines.map(l => l.length));
+  const top = ' .' + '-'.repeat(w + 2) + '.';
+  const body = lines.map(l => ' | ' + l + ' '.repeat(w - l.length) + ' |');
+  const leftDash = Math.floor((w - 2) / 2);
+  const rightDash = w - 2 - leftDash;
+  const bot = " '" + '-'.repeat(leftDash) + '.  .' + '-'.repeat(rightDash) + "'";
+  const tail = ' '.repeat(leftDash + 3) + '\\/';
+  return `<pre class="speech-bubble">${esc([top, ...body, bot, tail].join('\n'))}</pre>`;
+}
+
 function fmt(n){
   if(n >= 1000000) return (n/1000000).toFixed(2)+'M';
   if(n >= 10000) return (n/1000).toFixed(1)+'k';
@@ -229,138 +375,184 @@ function fmt(n){
   return Math.floor(n).toString();
 }
 
+/* ---------- acoes ---------- */
 function buyAccel(k){
   const c = accelCost(k);
-  if(S.resources.dust < c) { sfx('error'); log('Poeira insuficiente. A pobreza tambem acumula.'); return; }
+  if(S.resources.dust < c){
+    sfx('error');
+    npcSay('moth', '"Poeira insuficiente. A pobreza também acumula, mas não paga a conta."');
+    notify('Poeira insuficiente.');
+    render();
+    return;
+  }
   S.resources.dust -= c;
   S.accelerators[k]++;
   sfx('buy');
+  npcSay('moth', `"${ACCELS[k].name} instalado! (+${ACCELS[k].bonus} P/s). Seu quarto está objetivamente pior."`);
+  notify(`${ACCELS[k].name} adquirido (+${ACCELS[k].bonus} P/s).`, 'amber');
   recalc(); save(); render();
-  log(`${ACCELS[k].name} adquirido! (+${ACCELS[k].bonus} P/s). Seu quarto esta objetivamente pior.`);
 }
+
 function lubricate(){
-  if(S.resources.dust < 100){ sfx('error'); log('Faltam poeiras para lubrificar. A porta range em julgamento.'); return; }
+  if(S.resources.dust < 100){
+    sfx('error');
+    npcSay('rat', '"Faltam poeiras para lubrificar. A porta range em julgamento."');
+    notify('Faltam poeiras para abrir a porta (precisa de 100).');
+    render();
+    return;
+  }
   S.resources.dust -= 100;
   S.unlocks.outOfRoom = true;
   S.unlocks.metMoth = true;
   S.ui.tab = 'hall';
   sfx('unlock');
+  npcSay('moth', '"Olha só... mais uma pessoa! Deixa eu adivinhar: passa tempo demais no computador, né? Bem-vindo ao Castelo da Poeira Eterna."');
+  showToast('Porta aberta — você chegou ao Hall Principal.');
   recalc(); save(); render();
-  log('Voce lubrificou as dobradicas com 100 de poeira. Engenharia reversa da faxina.', 'amber');
-  log('TRACA: "Olha so... mais uma pessoa! Passa tempo demais no computador, ne?"', 'npc');
 }
 
 function buyItem(id){
   const R = S.resources;
   const inv = S.inventory.items;
-  const has = (x)=> inv.includes(x) || hasWeaponTier(x) || hasArmorTier(x) || hasBagTier(x);
-  const need = (cost)=>{
-    if(R.dust < cost){ sfx('error'); log('Poeira insuficiente. A traca finge que nao te julgou.'); return false; }
-    R.dust -= cost; return true;
+  const need = (cost, npcId)=>{
+    if(R.dust < cost){
+      sfx('error');
+      if(npcId) npcSay(npcId, '"Poeira insuficiente. Prometo fingir que não te julguei."');
+      notify('Poeira insuficiente.');
+      render();
+      return false;
+    }
+    R.dust -= cost;
+    return true;
   };
   switch(id){
     case 'mapa_castelo':
       if(inv.includes('mapa_castelo')) return;
-      if(!need(150)) return;
+      if(!need(150, 'moth')) return;
       inv.push('mapa_castelo'); S.unlocks.hasMap = true;
       sfx('unlock');
-      log('MAPA DO CASTELO adquirido! Spoiler: e tudo sujo.', 'amber'); break;
+      npcSay('moth', '"Aqui está o Mapa do Castelo. Spoiler: está tudo sujo."');
+      showToast('Aba [ Mapa ] desbloqueada!'); break;
     case 'lanterna':
       if(inv.includes('lanterna')) return;
-      if(!need(300)) return;
+      if(!need(300, 'moth')) return;
       inv.push('lanterna'); S.unlocks.hasLantern = true;
       sfx('unlock');
-      log('LANTERNA adquirida! Ela ilumina, mas revela coisas que voce preferia nao ver.'); break;
+      npcSay('moth', '"Ela ilumina o Porão... mas revela coisas que você preferia não ver."');
+      notify('Lanterna adquirida! O Porão agora pode ser explorado.', 'amber'); break;
     case 'pedra_peso':
       if(inv.includes('pedra_peso')) return;
-      if(!need(500)) return;
+      if(!need(500, 'moth')) return;
       inv.push('pedra_peso');
       sfx('buy');
-      log('PEDRA DE PESO adquirida! Sim, e so uma pedra. Nao questione.'); break;
+      npcSay('moth', '"Sim, é só uma pedra. Tecnologia ancestral: gravidade."');
+      notify('Pedra de Peso adquirida!', 'amber'); break;
     case 'vassoura_quebrada':
       if(hasWeaponTier('vassoura_quebrada')) return;
-      if(!need(WEAPONS.vassoura_quebrada.price)) return;
+      if(!need(WEAPONS.vassoura_quebrada.price, S.ui.subview==='leste' ? 'termite' : 'moth')) return;
       S.inventory.weapon = 'vassoura_quebrada';
       sfx('buy');
-      log('VASSOURA QUEBRADA equipada! +2 ATK. O cabo range perigosamente.'); break;
+      npcSay(S.ui.subview==='leste' ? 'termite' : 'moth', '"Vassoura Quebrada equipada! O cabo range perigosamente, mas resolve."');
+      notify('Vassoura Quebrada equipada (+2 ATK).', 'amber'); break;
     case 'espanador_pena':
       if(hasWeaponTier('espanador_pena') || !hasWeaponTier('vassoura_quebrada')) return;
-      if(!need(WEAPONS.espanador_pena.price)) return;
+      if(!need(WEAPONS.espanador_pena.price, 'termite')) return;
       S.inventory.weapon = 'espanador_pena';
       sfx('buy');
-      log('ESPANADOR DE PENA forjado pelo Cupim! +8 ATK. Cocegas letais.'); break;
+      npcSay('termite', '"Espanador de Pena forjado! Cócegas letais de pombo ancestral."');
+      notify('Espanador de Pena equipado (+8 ATK).', 'amber'); break;
     case 'rodo_combate':
       if(hasWeaponTier('rodo_combate') || !hasWeaponTier('espanador_pena')) return;
-      if(!need(WEAPONS.rodo_combate.price)) return;
+      if(!need(WEAPONS.rodo_combate.price, 'termite')) return;
       S.inventory.weapon = 'rodo_combate';
       sfx('buy');
-      log('RODO DE COMBATE empunhado! +25 ATK. O chao teme voce agora.'); break;
+      npcSay('termite', '"O Rodo de Combate! O chão inteiro teme você agora."');
+      notify('Rodo de Combate empunhado (+25 ATK).', 'amber'); break;
     case 'casaco_pano_mofado':
       if(hasArmorTier('casaco_pano_mofado')) return;
-      if(!need(ARMORS.casaco_pano_mofado.price)) return;
+      if(!need(ARMORS.casaco_pano_mofado.price, 'spider')) return;
       S.inventory.armor = 'casaco_pano_mofado';
       sfx('buy');
-      log('CASACO DE PANO MOFADO vestido! HP max 130. Estiloso e alergico.'); break;
+      npcSay('spider', '"Caimento impecável! Estiloso, quentinho e levemente alérgico."');
+      notify('Casaco de Pano Mofado vestido (HP máx 130).', 'amber'); break;
     case 'mascara_antipoeira':
       if(hasArmorTier('mascara_antipoeira') || !hasArmorTier('casaco_pano_mofado')) return;
-      if(!need(ARMORS.mascara_antipoeira.price)) return;
+      if(!need(ARMORS.mascara_antipoeira.price, 'spider')) return;
       S.inventory.armor = 'mascara_antipoeira';
       sfx('buy');
-      log('MASCARA ANTI-POEIRA equipada! HP max 160. Voce agora respira 40% menos historia.'); break;
+      npcSay('spider', '"Alta costura de sótão. Você agora respira 40% menos história."');
+      notify('Máscara Anti-Poeira equipada (HP máx 160).', 'amber'); break;
     case 'saco_teia':
       if(hasBagTier('saco_teia')) return;
-      if(!need(BAGS.saco_teia.price)) return;
+      if(!need(BAGS.saco_teia.price, 'spider')) return;
       S.inventory.bag = 'saco_teia';
       sfx('buy');
-      log('SACO DE TEIA equipado! Estoque max 5.000. Fibra de aranha, cheiro de sotao.'); break;
+      npcSay('spider', '"Fibra de aranha 100% orgânica. Cabe 5.000 grãos sem rasgar."');
+      notify('Saco de Teia equipado (máx 5.000 poeira).', 'amber'); break;
     case 'saco_compactado':
       if(hasBagTier('saco_compactado') || !hasBagTier('saco_teia')) return;
-      if(!need(BAGS.saco_compactado.price)) return;
+      if(!need(BAGS.saco_compactado.price, 'spider')) return;
       S.inventory.bag = 'saco_compactado';
       sfx('buy');
-      log('SACO COMPACTADO equipado! Estoque max 25.000. Leve sua sujeira para todo lugar.'); break;
+      npcSay('spider', '"Poeira prensada a vácuo. Leve sua sujeira para qualquer lugar."');
+      notify('Saco Compactado equipado (máx 25.000 poeira).', 'amber'); break;
     default:
-      void has;
       return;
   }
   recalc(); save(); render();
 }
 
 function transmute(){
-  if(S.resources.dust < 10000){ sfx('error'); log('O Besouro fareja seu bolso: "Isso aqui mal da pra umedecer uma asa. Traga 10.000."'); return; }
+  if(S.resources.dust < 10000){
+    sfx('error');
+    npcSay('beetle', '"Isso aí mal dá pra umedecer uma asa. Traga 10.000 poeiras."');
+    notify('Faltam poeiras para compactar (precisa de 10.000).');
+    render();
+    return;
+  }
   S.resources.dust -= 10000;
   S.resources.magicDust += 1;
   sfx('unlock');
+  npcSay('beetle', '"*CRONCH!* 10.000 poeiras viraram 1 Poeira Mágica. Alquimia ou digestão? Melhor não perguntar."');
+  notify('+1 Poeira Mágica obtida!', 'amber');
   save(); render();
-  log('*CRONCH* 10.000 poeiras viraram 1 POEIRA MAGICA. Alquimia ou digestao? Nunca saberemos.', 'amber');
 }
+
 function craftFragment(){
-  if(S.key.complete){ log('A chave ja esta pronta. Ansiedade e poeira da alma.'); return; }
-  if(S.key.fragments >= 3){ log('Voce ja tem os 3 fragmentos! Use "Fundir a Grande Chave".'); return; }
-  if(S.resources.magicDust < 2){ sfx('error'); log('Faltam Poeiras Magicas (precisa de 2 por fragmento). O Besouro ri com a boca cheia.'); return; }
-  if(S.resources.dust < 5000){ sfx('error'); log('Faltam 5.000 poeiras comuns para liga metalica.'); return; }
+  if(S.key.complete){ npcSay('beetle', '"A chave já está pronta. Ansiedade é poeira da alma."'); render(); return; }
+  if(S.key.fragments >= 3){ npcSay('beetle', '"Você já tem os 3 fragmentos! Agora é hora de fundir."'); render(); return; }
+  if(S.resources.magicDust < 2){ sfx('error'); npcSay('beetle', '"Faltam Poeiras Mágicas — preciso de 2 por fragmento."'); notify('Precisa de 2 Poeiras Mágicas.'); render(); return; }
+  if(S.resources.dust < 5000){ sfx('error'); npcSay('beetle', '"Faltam 5.000 poeiras comuns para a liga."'); notify('Precisa de 5.000 poeiras.'); render(); return; }
   S.resources.magicDust -= 2;
   S.resources.dust -= 5000;
   S.key.fragments++;
   sfx('unlock');
-  log(`Fragmento ${S.key.fragments}/3 da Grande Chave forjado! Brilha como arrependimento.`, 'amber');
-  if(S.key.fragments === 3) log('Os 3 fragmentos zumem juntos. Esta na hora de FUNDIR.');
+  npcSay('beetle', S.key.fragments === 3
+    ? '"Os 3 fragmentos zumbem juntos! Pode fundir a Grande Chave agora."'
+    : `"Fragmento ${S.key.fragments}/3 forjado! Brilha feito arrependimento."`);
+  notify(`Fragmento ${S.key.fragments}/3 da Grande Chave forjado!`, 'amber');
   save(); render();
 }
+
 function fuseKey(){
-  if(S.key.fragments < 3){ sfx('error'); log('Sem os 3 fragmentos, fundir e so derreter esperanca.'); return; }
+  if(S.key.fragments < 3){ sfx('error'); npcSay('beetle', '"Sem os 3 fragmentos, fundir é só derreter esperança."'); render(); return; }
   S.key.complete = true;
   if(!S.inventory.items.includes('grande_chave')) S.inventory.items.push('grande_chave');
   sfx('victory');
-  achievement('chave', 'Chaveiro do Apocalipse Higienico', 'fundiu a Grande Chave do Portao');
-  log('[CHAVE] A GRANDE CHAVE DO PORTAO foi fundida em Poeira Magica Comprimida! Pesa 3 desculpas.', 'amber');
+  npcSay('beetle', '"Pronto! A Grande Chave do Portão, compactada em Poeira Mágica. Pesa três desculpas."');
+  achievement('chave', 'Chaveiro do Apocalipse Higiênico', 'Fundiu a Grande Chave do Portão');
   save(); render();
 }
+
 function openGate(){
-  if(!S.key.complete){ sfx('error'); log('O Portao nem range. Ele sabe que voce nao tem a chave. Portas sentem essas coisas.'); return; }
+  if(!S.key.complete){
+    sfx('error');
+    notify('O Portão nem range. Ele sabe que você não tem a chave.', 'red');
+    return;
+  }
   S.unlocks.victory = true;
   sfx('victory');
-  achievement('fuga', 'Ar Puro (alegadamente)', 'abriu o Portao Principal');
+  achievement('fuga', 'Ar Puro (alegadamente)', 'Abriu o Portão Principal');
   save(); render();
 }
 
@@ -384,50 +576,52 @@ function testLevers(){
       S.unlocks.puzzleSolved = true;
       S.resources.magicDust += 2;
       sfx('unlock');
-      achievement('eletricista', 'Eletricista de Ruina', 'acendeu a Sala dos Puzzles');
-      log('CLICK-CLACK-BZZZ! As luzes acendem! Um bau cospe 2 POEIRAS MAGICAS e um recibo de 1987.', 'amber');
+      achievement('eletricista', 'Eletricista de Ruína', 'Acendeu a Sala dos Puzzles');
+      notify('CLICK-CLACK-BZZZ! As luzes acendem! Um baú cospe 2 Poeiras Mágicas e um recibo de 1987.', 'amber');
     } else {
       S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + 200);
       sfx('buy');
-      log('As luzes ja estao acesas. O bau, com pena, cospe 200 poeiras de troco.');
+      notify('As luzes já estão acesas. O baú, com pena, cospe 200 poeiras de troco.');
     }
   } else {
     S.player.hp -= 2;
     S.resources.dust = Math.min(S.resources.dust + 10, S.resources.maxDust);
     S.puzzle.attempts++;
     sfx('error');
-    log('A lampada pisca, solta faiscas e derruba poeira no seu olho! (+10 Poeiras, -2 HP). A sala ri.', 'red');
+    notify('A lâmpada pisca, solta faíscas e joga poeira no seu olho! (+10 Poeiras, -2 HP).', 'red');
     if(S.player.hp <= 0) faint();
   }
   save(); render();
 }
+
 function searchCandy(){
-  if(S.unlocks.candyLooted){ log('A caixa continua vazia. Como seus planos de limpar o quarto.'); return; }
+  if(S.unlocks.candyLooted){ notify('A caixa continua vazia. Como seus planos de limpar o quarto.'); return; }
   S.unlocks.candyLooted = true;
   S.resources.magicDust += 1;
   sfx('unlock');
-  achievement('dieta', 'Caixa de Doces Vazia', 'revirou o easter egg e achou 1 Poeira Magica');
-  log('"Uma caixa de doces? Que coisa inutil... Faz sentido estar coberta de poeira." - voce encontra 1 POEIRA MAGICA no fundo!', 'amber');
+  achievement('dieta', 'Caixa de Doces Vazia', 'Revirou o easter egg e achou 1 Poeira Mágica');
+  notify('Você encontra 1 Poeira Mágica esquecida no fundo da caixa!', 'amber');
   save(); render();
 }
+
 function enterWind(){
   const has = S.inventory.items.includes('pedra_peso');
   if(!has){
     const lost = Math.floor(S.resources.dust);
     S.resources.dust = 0;
     sfx('error');
-    achievement('vento', 'Perdeu Tudo no Vento', 'entrou na Sala do Vento Forte sem a Pedra de Peso');
-    log(`VUUUSH! O ventilador industrial sopra ${fmt(lost)} poeiras da sua mao direto pro infinito. Conquista desbloqueada, dignidade perdida.`, 'red');
+    achievement('vento', 'Perdeu Tudo no Vento', 'Entrou na Sala do Vento Forte sem a Pedra de Peso');
+    notify(`VUUUSH! O ventilador sopra ${fmt(lost)} poeiras da sua mão direto pro infinito.`, 'red');
   } else {
     if(!S.unlocks.windLooted){
       S.unlocks.windLooted = true;
       S.resources.magicDust += 1;
       sfx('unlock');
-      log('Agarrado a Pedra de Peso, voce atravessa o vendaval como uma estatua determinada. No fundo: 1 POEIRA MAGICA!', 'amber');
+      notify('Agarrado à Pedra de Peso, você atravessa o vendaval e acha 1 Poeira Mágica!', 'amber');
     } else {
       S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + 300);
       sfx('buy');
-      log('Travessia tranquila com sua pedra emocional. +300 poeiras que o vento deixou pra tras.');
+      notify('Travessia tranquila com sua pedra emocional. +300 poeiras.');
     }
   }
   save(); render();
@@ -443,24 +637,29 @@ function spawnMonster(){
   c.mmax = c.mhp;
 }
 function startExpedition(){
-  if(S.inventory.weapon === 'none'){ log('Sem arma, sua estrategia e espirrar nos inimigos. Compre a Vassoura Quebrada no Hall.'); return; }
-  if(S.combat.active){ log('A expedicao ja esta em andamento. O @ nao tem sindicato, mas tem limite.'); return; }
+  if(S.inventory.weapon === 'none'){
+    sfx('error');
+    notify('Sem arma, sua estratégia é espirrar nos inimigos. Compre a Vassoura Quebrada no Hall.');
+    return;
+  }
+  if(S.combat.active) return;
   S.combat.active = true;
-  S.combat.clog = ['O guerreiro @ entra no corredor empunhando ' + (WEAPONS[S.inventory.weapon]?WEAPONS[S.inventory.weapon].name:'as maos') + '...'];
-  if(!S.combat.monster) { spawnMonster(); }
-  log('Expedicao iniciada! O @ anda para a direita. Como na vida: sem volta.', 'amber');
+  S.combat.clog = ['O guerreiro @ entra no corredor empunhando ' + (WEAPONS[S.inventory.weapon]?WEAPONS[S.inventory.weapon].name:'as mãos') + '...'];
+  if(!S.combat.monster) spawnMonster();
+  sfx('click');
+  notify('Expedição iniciada! O @ anda para a direita.');
   save(); render();
 }
 function stopExpedition(){
   S.combat.active = false;
-  log('Expedicao pausada. O @ senta na poeira e finge que isso foi planejado.');
+  sfx('click');
+  notify('Expedição pausada. O @ senta na poeira e finge que foi planejado.');
   save(); render();
 }
 function combatRound(){
   const c = S.combat;
   if(!c.active || !c.monster) return;
   if(S.player.hp <= 0) return;
-  // jogador ataca
   const variance = Math.floor(Math.random()*3);
   const dmg = S.player.attack + variance;
   c.mhp -= dmg;
@@ -470,28 +669,27 @@ function combatRound(){
     const rw = Math.round(c.monster.reward * (1+(c.loop-1)*0.5));
     S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + rw);
     let extra = '';
-    if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra = ` +${c.monster.magic} MAGICA`; }
-    else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra = ' +1 MAGICA (a traca selvagem tossiu brilho)'; }
+    if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra = ` +${c.monster.magic} MÁGICA`; }
+    else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra = ' +1 MÁGICA (a traça tossiu brilho)'; }
     c.clog.unshift(`${c.monster.name} virou poeira! +${rw} poeiras${extra}.`);
     c.kills++;
     if(c.monster.boss){
-      achievement('mofo', 'Assassino de Mofo Real', 'derrotou o REI MOFO');
+      achievement('mofo', 'Assassino de Mofo Real', 'Derrotou o REI MOFO');
       c.clog.unshift('O REI MOFO se dissolve em nostalgia e esporos. O castelo inteiro espirra.');
     }
     c.idx++;
     c.distance = 0;
-    if(c.idx % MONSTERS.length === 0){ c.loop++; c.clog.unshift(`O corredor escurece... volta ${c.loop}x mais empoeirada. (loop ${c.loop})`); }
+    if(c.idx % MONSTERS.length === 0){ c.loop++; c.clog.unshift(`O corredor escurece... volta ${c.loop}x mais empoeirada (loop ${c.loop}).`); }
     spawnMonster();
-    if(c.kills === 1) once('k1', 'Primeira morte! A poeira agora tem medo de voce. Progresso moral questionavel.');
+    if(c.kills === 1) once('k1', 'Primeiro abate! A poeira agora tem medo de você.');
     if(c.kills === 10) achievement('exterminador', 'Exterminador de Sujeira', '10 abates nos Corredores');
   } else {
-    // monstro ataca
     const md = Math.max(1, c.monster.atk + Math.floor(Math.random()*3) - 1);
     S.player.hp -= md;
-    c.clog.unshift(`${c.monster.name} revida ${md} em voce.`);
+    c.clog.unshift(`${c.monster.name} revida ${md} em você.`);
     if(S.player.hp <= 0){ faint(); return; }
   }
-  c.clog = c.clog.slice(0, 9);
+  c.clog = c.clog.slice(0, 6);
   c.distance++;
 }
 function faint(){
@@ -501,20 +699,27 @@ function faint(){
   S.combat.active = false;
   S.combat.monster = null;
   S.combat.mhp = 0;
-  log(`X Voce desmaiou na poeira e perdeu ${fmt(lost)} poeiras (20%). O Rato escreveu um haicai sobre isso.`, 'red');
+  sfx('error');
+  notify(`Você desmaiou na poeira e perdeu ${fmt(lost)} poeiras (20%). O Rato escreveu um haicai sobre isso.`, 'red');
 }
 function rest(){
-  if(S.player.hp >= S.player.maxHp){ log('HP cheio. Descansar mais seria hibernacao.'); return; }
+  if(S.player.hp >= S.player.maxHp){ notify('HP cheio. Descansar mais seria hibernação.'); return; }
   S.player.hp = S.player.maxHp;
-  log('Voce deitou no chao e fingiu que e "terapia de poeira". HP restaurado!');
+  sfx('unlock');
+  notify('Você deitou no chão e chamou de "terapia de poeira". HP restaurado!', 'amber');
   save(); render();
 }
 
 /* ---------- navegacao ---------- */
 function go(tab, subview){
   S.ui.tab = tab;
-  S.ui.subview = (subview===undefined? null : subview);
+  S.ui.subview = (subview===undefined ? null : subview);
   save(); render();
+}
+
+function setMapHint(text){
+  const el = document.getElementById('map-hint');
+  if(el) el.textContent = text;
 }
 
 /* ---------- render ---------- */
@@ -522,25 +727,22 @@ function tabs(){
   const t = [];
   t.push({id:'quarto', label:'[ Quarto ]'});
   if(S.unlocks.outOfRoom) t.push({id:'hall', label:'[ Hall ]'});
-  if(S.unlocks.outOfRoom) t.push({id:'inventario', label:'[ Inventario ]'});
+  if(S.unlocks.outOfRoom) t.push({id:'inventario', label:'[ Inventário ]'});
   if(S.unlocks.hasMap) t.push({id:'mapa', label:'[ Mapa ]'});
   if(S.unlocks.outOfRoom) t.push({id:'aventura', label:'[ Aventura ]'});
   return t;
 }
 
-function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-
 function paintStats(){
   document.getElementById('stat-dust').textContent = fmt(Math.floor(S.resources.dust));
-  // o maximo do saco so aparece quando o HUD desbloqueia
   document.getElementById('stat-max').textContent = S.intro.done ? `/${fmt(S.resources.maxDust)}` : '';
   document.getElementById('stat-magic').textContent = S.resources.magicDust;
   document.getElementById('stat-ps').textContent = S.resources.dustPerSecond.toFixed(2);
   document.getElementById('stat-hp').textContent = `${Math.max(0,Math.ceil(S.player.hp))}/${S.player.maxHp}`;
   document.getElementById('hp-fill').style.width = Math.max(0, (S.player.hp/S.player.maxHp*100)) + '%';
   document.getElementById('stat-atk').textContent = S.player.attack;
-  // revelacao progressiva: cada etapa da intro revela um pedaco do HUD
-  const show = (id, v)=>{ document.getElementById(id).style.display = v ? '' : 'none'; };
+
+  const show = (id, v)=>{ const el = document.getElementById(id); if(el) el.style.display = v ? '' : 'none'; };
   const step = S.intro.done ? 3 : (S.intro.cleans || 0);
   show('s-magic', S.resources.magicDust > 0 || S.unlocks.candyLooted || S.unlocks.puzzleSolved || S.unlocks.windLooted);
   show('s-ps', step >= 1);
@@ -573,39 +775,83 @@ function render(){
   else if(S.ui.tab==='aventura') c.innerHTML = viewAventura();
 }
 
+function refreshDynamic(){
+  const d = Math.floor(S.resources.dust);
+  if(!S.intro.done){
+    const ready = d >= 20;
+    if(ready !== uiEphemeral.lastIntroReady){
+      uiEphemeral.lastIntroReady = ready;
+      render();
+      return;
+    }
+    const counter = document.getElementById('intro-counter');
+    if(counter) counter.textContent = `\n[${d}/20]`;
+    return;
+  }
+
+  // se o rato acabou de aparecer no Quarto, re-renderiza uma vez
+  if(S.ui.tab === 'quarto' && !S.unlocks.victory){
+    const ratNow = S.resources.dust >= 20 || !!S.flags.rat;
+    if(ratNow !== uiEphemeral.lastRatVisible){
+      uiEphemeral.lastRatVisible = ratNow;
+      render();
+      return;
+    }
+  }
+
+  // atualiza botoes com data-cost / data-magic-cost / data-req-ok sem destruir o DOM
+  const root = document.getElementById('content');
+  if(!root || !root.querySelectorAll) return;
+  root.querySelectorAll('button[data-cost]').forEach(btn => {
+    const cost = Number(btn.getAttribute('data-cost')) || 0;
+    const mcost = Number(btn.getAttribute('data-magic-cost')) || 0;
+    const reqOk = btn.getAttribute('data-req-ok') !== '0';
+    btn.disabled = (S.resources.dust < cost) || (S.resources.magicDust < mcost) || !reqOk;
+  });
+  const dynDust = document.getElementById('dyn-dust');
+  if(dynDust) dynDust.textContent = fmt(d);
+  const dynHp = document.getElementById('dyn-hp');
+  if(dynHp) dynHp.textContent = `${Math.ceil(S.player.hp)}/${S.player.maxHp}`;
+}
+
 function renderIntro(){
   document.getElementById('tabs').innerHTML = '';
   const c = document.getElementById('content');
   const d = Math.floor(S.resources.dust);
   const n = S.intro.cleans;
-  // dialogos substitutivos: cada etapa apaga a anterior, tudo em rima
+  uiEphemeral.lastIntroReady = d >= 20;
+
+  // Proposta 1: poetico + ironico com acentuacao pt-BR
   const T = {
     0: [
-      'Voce acorda no escuro, sem cama e sem lar,',
-      'num quarto esquecido que ninguem quis limpar.',
-      'So ha poeira aqui, caindo devagar:',
-      'uma por segundo... e voce comeca a contar.'
+      'Você acorda no escuro, sem cama e sem lar,',
+      'num quarto esquecido que ninguém quis limpar.',
+      'Só cai poeira do teto, num lento bailar:',
+      'um grão por segundo... e você põe-se a contar.'
     ],
     1: [
-      'Voce sacode a roupa, limpa o corpo com a mao -',
-      'mas a poeira da sala insiste em voltar do chao.',
-      'Ela cai devagar, grao a grao, segundo a segundo:',
-      'e a barra agora mostra o seu ritmo no mundo.'
+      'Você bate na roupa e sacode a poeira,',
+      'mas ela retorna de forma certeira.',
+      'Grão sobre grão, num compasso profundo —',
+      'agora você vê o seu ritmo no mundo.'
     ],
     2: [
-      'Faz de novo a faxina, e o ciclo acontece:',
-      'quem adota a sujeira essa rotina nao esquece.',
-      'Seu corpo agora mostra o limite da vida:',
-      'HP na tela, barra cheia... e talvez ferida.'
-    ],
-    3: []
+      'Mais uma faxina, e o ciclo insiste:',
+      'quanto mais você limpa, mais sujeira existe.',
+      'Seu pulso desperta, o corpo responde —',
+      'há vida na tela... mas o perigo se esconde.'
+    ]
   };
-  const BT = { 0:'Limpar a poeira do corpo', 1:'Jogar a poeira no chao', 2:'Sacudir a roupa uma ultima vez' };
-  if(n >= 3){ renderPostIntroRoom(); return; }
-  let h = `<div class="intro-text"><pre>${T[n].join('\n')}</pre>`;
+  const BT = {
+    0: 'Limpar a poeira da roupa',
+    1: 'Jogar a poeira no chão',
+    2: 'Sacudir os ombros uma última vez'
+  };
+  if(n >= 3){ S.intro.done = true; render(); return; }
+  let h = `<div class="stage intro-text"><pre>${esc(T[n].join('\n'))}</pre>`;
   h += d >= 20
-    ? `<br><button class="cmd" onclick="Game.cleanBody()">${BT[n]}</button>`
-    : `<pre class="muted">\n[${d}/20]</pre>`;
+    ? `<div class="actions"><button class="cmd" onclick="Game.cleanBody()">${BT[n]}</button></div>`
+    : `<pre id="intro-counter" class="muted">\n[${d}/20]</pre>`;
   h += `</div>`;
   c.innerHTML = h;
 }
@@ -614,87 +860,92 @@ function cleanBody(){
   if(S.intro.done || S.resources.dust < 20) return;
   S.resources.dust = 0;
   S.intro.cleans++;
+  uiEphemeral.lastIntroReady = false;
   sfx('unlock');
   if(S.intro.cleans === 1){
-    log('A barra agora mostra o ritmo: P/s 1.00', 'amber');
-    log('[ CONTADOR DE RITMO (P/s) DESBLOQUEADO ]', 'amber');
+    showToast('Contador de ritmo (P/s) desbloqueado.');
   }
   if(S.intro.cleans === 2){
-    log('Aparece no alto a sua barra de vida: 100/100', 'amber');
-    log('[ HP E FORCA (ATK) DESBLOQUEADOS ]', 'amber');
+    showToast('Barra de vida (HP) desbloqueada.');
   }
   if(S.intro.cleans >= 3){
     S.intro.done = true;
     document.body.classList.remove('intro');
-    log('Sacudindo o corpo mais uma vez, seu ombro esbarra em algo no alto.', 'amber');
-    log('E uma barra com numeros... e ela se multiplica em abas.', 'amber');
-    log('[ HUD BASICO DESBLOQUEADO ]', 'amber');
+    showToast('O quarto se revela — interface básica desbloqueada.');
   }
   save(); render();
 }
 
-function renderPostIntroRoom(){
-  // primeira "pagina" pos-intro: o quarto agora com HUD visivel
-  S.ui.tab = 'quarto';
-  document.getElementById('content').innerHTML = viewQuarto();
-}
-
 function viewQuarto(){
-  // o rato so surge depois do HUD pronto, quando a poeira acumula 20 de novo
   const seenRat = S.intro.done && (S.resources.dust >= 20 || S.flags.rat);
-  let h = `<pre>A barra no alto pisca numeros sozinha.\nO quarto continua escuro, mas agora voce sabe:\n\n   . . . P O E I R A . . .\n\nEla cai. Voce conta. E assim que funciona aqui.</pre>`;
+  uiEphemeral.lastRatVisible = seenRat;
+  let h = `<div class="stage"><div class="scene-title">— O Quarto Inicial —</div>`;
   if(!seenRat){
-    h += `<pre class="muted">continue observando... algo vai se mexer num canto aos 20 de poeira.\n(dica: deixe a aba aberta e va beber agua)</pre>`;
+    h += `<div class="scene-text">A barra no alto pisca números sozinha.<br>O quarto continua escuro, mas agora você sabe:<br><br><b>. . . P O E I R A . . .</b><br><br>Ela cai. Você conta. É assim que funciona aqui.</div>`;
+    h += `<div class="muted">continue observando... algo vai se mexer aos 20 de poeira.<br>(dica: deixe a aba aberta e vá beber água)</div>`;
   } else {
-    once('rat', 'Um RATO se mexeu no canto embaixo do quarto! Ele parece julgar e acolher ao mesmo tempo.');
-    h += `<pre class="rat-line">Do canto, uma voz pequena:\n\n   "O tempo passa, a poeira acumula.\n    Voce esta estatico... mas a sujeira jamais para."\n\n   - Rato Filosofo, provavelmente formado em algo inutil</pre>`;
-    if(!S.unlocks.outOfRoom){
-      h += `<div style="margin-top:8px">A porta range. As dobradicas pedem <b>100 Poeiras</b> de lubrificante.<br>
-      <button class="cmd" onclick="Game.lubricate()" ${S.resources.dust<100?'disabled':''}>Lubrificar dobradicas (100 poeira)</button>
-      <span class="muted">voce tem ${fmt(Math.floor(S.resources.dust))}</span></div>`;
-    } else {
-      h += `<div class="muted">A porta esta aberta. La fora: responsabilidade e um castelo.</div>
-      <button class="cmd" onclick="Game.go('hall')">Ir ao Hall Principal -></button>`;
+    if(!S.flags.rat){
+      S.flags.rat = true;
+      showToast('Um Rato Filósofo surgiu da penumbra!');
     }
+    const speech = uiEphemeral.npcSpeech.rat ||
+      '"O tempo passa, a poeira acumula.\nVocê está estático... mas a sujeira jamais para."';
+    h += speechBubble(speech, 42);
+    h += `<pre class="ascii-art npc-idle">${esc(ART.rat)}</pre>`;
+    h += `<div class="muted">Rato Filósofo — provavelmente formado em algo inútil</div>`;
+    h += `<div class="box">`;
+    if(!S.unlocks.outOfRoom){
+      h += `<div class="scene-text">A porta range. As dobradiças pedem <b>100 Poeiras</b> de lubrificante.</div>
+      <div class="actions">
+        <button class="cmd" data-cost="100" onclick="Game.lubricate()" ${S.resources.dust<100?'disabled':''}>Lubrificar dobradiças (100 poeira)</button>
+      </div>
+      <div class="muted">você tem <span id="dyn-dust">${fmt(Math.floor(S.resources.dust))}</span> poeira</div>`;
+    } else {
+      h += `<div class="muted">A porta está aberta. Lá fora: responsabilidade e um castelo.</div>
+      <div class="actions">
+        <button class="cmd" onclick="Game.go('hall')">Ir ao Hall Principal -&gt;</button>
+        <button class="cmd" onclick="Game.rest()">Deitar no chão (curar HP)</button>
+      </div>
+      <div class="muted">HP: <span id="dyn-hp">${Math.ceil(S.player.hp)}/${S.player.maxHp}</span></div>`;
+    }
+    h += `</div>`;
   }
-  if(S.unlocks.outOfRoom){
-    h += `<button class="cmd" onclick="Game.rest()">Deitar no chao (curar HP)</button> <span class="muted">HP: ${Math.ceil(S.player.hp)}/${S.player.maxHp}</span>`;
-  }
-  if(seenRat){
-    h += `<div class="rat-corner"><pre>(\\_/)\n( o_o)\n/>[__]</pre></div>`;
-  }
+  h += `</div>`;
   return h;
 }
 
 function viewHall(){
-  let h = `<pre class="npc">${esc(MOTH_ART)}\n  "Nham... Nham... Poeira de excelente qualidade!"</pre>`;
-  h += `<div class="box"><b class="amber">- A TRACA GIGANTE - mercadora central -</b><br>
-  <span class="white">"Olha so... mais uma pessoa! Deixa eu adivinhar: voce passa tempo demais no computador, ne?<br>
-  Por isso veio parar aqui. Tudo no mundo real que acumula poeira por ficar parado acaba caindo dentro do Dust Box.<br>
-  Alias, voce nao esta numa caixa qualquer... este lugar E o <b>Castelo da Poeira Eterna</b>."</span></div>`;
-  h += `<div class="box"><b>- LOJA DA TRACA -</b>`;
+  const speech = uiEphemeral.npcSpeech.moth ||
+    '"Nham... poeira de excelente qualidade! Tudo no mundo real que fica parado acaba caindo aqui dentro do Castelo da Poeira Eterna."';
+  let h = `<div class="stage"><div class="scene-title">— Hall Principal — A Traça Gigante —</div>`;
+  h += speechBubble(speech, 46);
+  h += `<pre class="ascii-art npc-idle">${esc(ART.moth)}</pre>`;
+
+  h += `<div class="box"><span class="box-title">— LOJA DA TRAÇA —</span>`;
   const has = (x)=> S.inventory.items.includes(x) || (x in WEAPONS && hasWeaponTier(x));
   const item = (id, name, price, desc)=>{
     const owned = has(id);
-    return `<div class="shop-item"><b>${name}</b> ${owned?'<span class="muted">[adquirido]</span>':`<b>${price} poeira</b>`} <span class="muted">- ${desc}</span><br>
-    ${owned?'':`<button class="cmd" onclick="Game.buyItem('${id}')" ${S.resources.dust<price?'disabled':''}>Comprar</button>`}</div>`;
+    return `<div class="shop-item"><b>${name}</b> ${owned?'<span class="muted">[adquirido]</span>':`— <b>${price} poeira</b>`}<br><span class="muted">${desc}</span><br>
+    ${owned?'':`<button class="cmd" data-cost="${price}" onclick="Game.buyItem('${id}')" ${S.resources.dust<price?'disabled':''}>Comprar</button>`}</div>`;
   };
   h += item('mapa_castelo','Mapa do Castelo',150,'Desbloqueia a aba [ Mapa ] e revela as asas. Rabiscado com poeira.');
-  h += item('vassoura_quebrada','Vassoura Quebrada',100,'+2 ATK. Pre-requisito para nao apanhar de acaros.');
-  h += item('lanterna','Lanterna',300,'Permite entrar no Porao Obscuro. Pilhas incluidas (vazando).');
-  h += item('pedra_peso','Pedra de Peso',500,'Segura voce na Sala do Vento Forte. Tecnologia ancestral: peso.');
+  h += item('vassoura_quebrada','Vassoura Quebrada',100,'+2 ATK. Pré-requisito para não apanhar de ácaros.');
+  h += item('lanterna','Lanterna',300,'Permite entrar no Porão Obscuro. Pilhas incluídas (vazando).');
+  h += item('pedra_peso','Pedra de Peso',500,'Segura você na Sala do Vento Forte. Tecnologia ancestral: peso.');
   h += `</div>`;
-  h += `<div class="box"><b>- MELHORIAS DO CASTELO -</b><div class="muted">compre sujeira para atrair mais sujeira. Economia circular.</div>`;
+
+  h += `<div class="box"><span class="box-title">— MELHORIAS DO CASTELO —</span><div class="muted">compre sujeira para atrair mais sujeira. Economia circular.</div>`;
   for(const k in ACCELS){
     const a = ACCELS[k], owned = S.accelerators[k]||0, cost = accelCost(k);
-    h += `<div class="shop-item"><b>${a.name}</b> x${owned} <span class="muted">- ${a.desc}</span><br>
-    <span>+${a.bonus} P/s cada - proximo: <b>${cost}</b> poeira</span><br>
-    <button class="cmd" onclick="Game.buyAccel('${k}')" ${S.resources.dust<cost?'disabled':''}>Comprar (${cost})</button></div>`;
+    h += `<div class="shop-item"><b>${a.name}</b> x${owned}<br><span class="muted">${a.desc} (+${a.bonus} P/s cada)</span><br>
+    <button class="cmd" data-cost="${cost}" onclick="Game.buyAccel('${k}')" ${S.resources.dust<cost?'disabled':''}>Comprar (${cost} poeira)</button></div>`;
   }
   h += `</div>`;
-  h += `<div class="muted">Fragmentos da Grande Chave: <b>${S.key.fragments}/3</b> ${S.key.complete?'[CHAVE] PRONTA':''}</div>`;
-  if(S.unlocks.hasMap) h += `<button class="cmd" onclick="Game.go('mapa')">Abrir Mapa do Castelo -></button> `;
-  h += `<button class="cmd" onclick="Game.go('aventura')">Corredores de Batalha -></button>`;
+
+  h += `<div class="muted">Fragmentos da Grande Chave: <b>${S.key.fragments}/3</b> ${S.key.complete?'— CHAVE PRONTA':''}</div>`;
+  h += `<div class="actions">`;
+  if(S.unlocks.hasMap) h += `<button class="cmd" onclick="Game.go('mapa')">Abrir Mapa do Castelo -&gt;</button>`;
+  h += `<button class="cmd" onclick="Game.go('aventura')">Corredores de Batalha -&gt;</button></div></div>`;
   return h;
 }
 
@@ -702,66 +953,123 @@ function viewInventario(){
   const w = WEAPONS[S.inventory.weapon];
   const a = ARMORS[S.inventory.armor];
   const b = BAGS[S.inventory.bag];
-  let h = `<div class="box"><b>- EQUIPAMENTO -</b><br>
+  let h = `<div class="stage"><div class="scene-title">— Inventário & Conquistas —</div>`;
+  h += `<div class="box"><span class="box-title">— EQUIPAMENTO —</span>
   Arma: <b>${w?w.name:'(punhos + espirros)'}</b> ${w?`(+${w.atk} ATK)`:'(+0)'}<br>
-  Armadura: <b>${a?a.name:'-'}</b> (HP max ${a?a.maxHp:'?'})<br>
-  Recipiente: <b>${b?b.name:'-'}</b> (max ${b?fmt(b.max):'?'})<br>
-  [CHAVE] Fragmentos da Chave: <b>${S.key.fragments}/3</b> ${S.key.complete?'- GRANDE CHAVE PRONTA':''}<br>
-  Poeira magica: <b class="amber">${S.resources.magicDust}</b></div>`;
-  h += `<div class="box"><b>- ITENS -</b><br>`;
-  if(S.inventory.items.length===0) h += `<span class="muted">Nada. Seus bolsos tem apenas poeira e arrependimento.</span>`;
-  else h += S.inventory.items.map(i=>`<span>- ${esc(i)}</span>`).join('<br>');
+  Armadura: <b>${a?a.name:'—'}</b> (HP máx ${a?a.maxHp:'?'})<br>
+  Recipiente: <b>${b?b.name:'—'}</b> (máx ${b?fmt(b.max):'?'})<br>
+  Fragmentos da Chave: <b>${S.key.fragments}/3</b> ${S.key.complete?'— GRANDE CHAVE PRONTA':''}<br>
+  Poeira Mágica: <b class="amber">${S.resources.magicDust}</b></div>`;
+
+  h += `<div class="box"><span class="box-title">— ITENS —</span>`;
+  if(S.inventory.items.length===0){
+    h += `<span class="muted">Nada. Seus bolsos têm apenas poeira e arrependimento.</span>`;
+  } else {
+    h += S.inventory.items.map(i=>`<div>• ${esc(ITEM_LABELS[i]||i)}</div>`).join('');
+  }
   h += `</div>`;
-  h += `<div class="box"><b>- CONQUISTAS (${S.achievements.length}) -</b><br>`;
-  h += S.achievements.length? S.achievements.map(x=>`* ${esc(x)}`).join('<br>') : `<span class="muted">Nenhuma. Ate a poeira conquistou mais que voce.</span>`;
-  h += `</div>`;
+
+  h += `<div class="box"><span class="box-title">— CONQUISTAS (${S.achievements.length}) —</span>`;
+  if(S.achievements.length){
+    h += S.achievements.map(id=>{
+      const info = ACHIEVEMENT_INFO[id];
+      return info
+        ? `<div>★ <b>${esc(info.name)}</b> <span class="muted">— ${esc(info.desc)}</span></div>`
+        : `<div>★ ${esc(id)}</div>`;
+    }).join('');
+  } else {
+    h += `<span class="muted">Nenhuma. Até a poeira conquistou mais que você.</span>`;
+  }
+  h += `</div></div>`;
   return h;
 }
 
+function mapBtn(label, sub, hint, locked){
+  const safeHint = esc(hint).replace(/'/g, '&#39;');
+  if(locked){
+    return `<button class="map-node" disabled onmouseenter="Game.setMapHint('${safeHint}')" title="${safeHint}">${label}</button>`;
+  }
+  return `<button class="map-node" onclick="Game.go('mapa','${sub}')" onmouseenter="Game.setMapHint('${safeHint}')" onfocus="Game.setMapHint('${safeHint}')">${label}</button>`;
+}
+
 function viewMapa(){
-  let h = `<pre class="map-ascii">                        [ Porao do Besouro ]
-                                 |
-[ Sala dos Puzzles ] &lt;--- [ Hall Principal ] ---&gt; [ Corredores de Batalha ]
-  (Aranha Alfaiate)       (Traca Gigante)             (Cupim Marceneiro)
-                                 |
-                        [ O Quarto Inicial ]
-                           (Rato Filosofo)
-                                 |
-                    [ O Portao Principal ] (Fim)</pre>`;
-  h += `<div class="box"><b>- NAVEGACAO -</b><br>`;
-  const btn = (label, sub)=>`<button class="cmd" onclick="Game.go('mapa','${sub}')">${label}</button>`;
-  h += btn('Hall Principal','hall');
-  h += btn('Asa Leste (Cupim Ferreiro)','leste');
-  h += btn('Asa Oeste (Aranha Alfaiate)','oeste');
-  h += S.unlocks.hasLantern ? btn('Porao Obscuro (Besouro)','porao') : `<button class="cmd" disabled title="Precisa da Lanterna">Porao (trancado - precisa de luz)</button>`;
-  h += btn('Sala dos Puzzles','puzzles');
-  h += btn('Sala da Caixa de Doces','candy');
-  h += btn('Sala do Vento Forte','vento');
-  h += btn('Portao Principal','portao');
+  const bHall   = mapBtn('[Hall]',       'hall',    'Hall Principal — Traça Gigante (loja e melhorias)');
+  const bOeste  = mapBtn('[Oeste]',      'oeste',   'Asa Oeste — Aranha Alfaiate (armaduras e sacos)');
+  const bLeste  = mapBtn('[Leste]',      'leste',   'Asa Leste — Cupim Marceneiro (forja de armas)');
+  const bPuz    = mapBtn('[Puzzles]',    'puzzles', 'Sala dos Puzzles — alavancas quebradas no escuro');
+  const bCandy  = mapBtn('[Doces]',      'candy',   'Sala da Caixa de Doces — uma relíquia empoeirada');
+  const bVento  = mapBtn('[Vento]',      'vento',   'Sala do Vento Forte — cuidado sem a Pedra de Peso');
+  const bAvent  = `<button class="map-node" onclick="Game.go('aventura')" onmouseenter="Game.setMapHint('Corredores de Batalha — enfrente as criaturas da poeira')" onfocus="Game.setMapHint('Corredores de Batalha — enfrente as criaturas da poeira')">[Corredores]</button>`;
+  const bQuarto = `<button class="map-node" onclick="Game.go('quarto')" onmouseenter="Game.setMapHint('O Quarto Inicial — Rato Filósofo e descanso')" onfocus="Game.setMapHint('O Quarto Inicial — Rato Filósofo e descanso')">[Quarto]</button>`;
+  const bPortao = mapBtn('[Portão]',     'portao',  S.key.complete ? 'O Portão Principal — você tem a Grande Chave!' : 'O Portão Principal — trancado (requer a Grande Chave)');
+  const bPorao  = mapBtn(S.unlocks.hasLantern ? '[Porão]' : '[Porão?]', 'porao',
+    S.unlocks.hasLantern ? 'Porão Obscuro — Besouro Rola-Poeira (alquimia e chave)' : 'Porão Obscuro — escuro demais (compre a Lanterna no Hall)',
+    !S.unlocks.hasLantern);
+
+  const castle = [
+    `                       /\\`,
+    `                      /  \\`,
+    `            /\\       /____\\       /\\`,
+    `           /  \\     |  ::  |     /  \\`,
+    `          /____\\====|${bHall}|====/____\\`,
+    `         |${bOeste}|  |  ||  |  |${bLeste}|`,
+    `         | (Teia)|  |  ||  |  |(Forja)|`,
+    `          \\__  _/   |  ||  |   \\_  __/`,
+    `             ||     |  ||  |     ||`,
+    `      .------''-.   |  ||  |   .-''---------.`,
+    `     ( ${bPuz} )  |  ||  |  ( ${bAvent} )`,
+    `     ( ${bCandy}   )  |  ||  |  (   Batalha    )`,
+    `     ( ${bVento}   )  |  ||  |   '------------'`,
+    `      '---------'   |  ||  |`,
+    `                 .--'  ''  '--. `,
+    `                /   ${bQuarto}   \\`,
+    `               |    _..--.._    |`,
+    `               |   /${bPortao}\\   |`,
+    `               |__|__________|__|`,
+    `                       ..`,
+    `                 . ~ ' || ' ~ .`,
+    `                (    ${bPorao}   )`,
+    `                 ' ~ . .. . ~ '`
+  ].join('\n');
+
+  let h = `<div class="stage"><div class="scene-title">— Mapa do Castelo da Poeira Eterna —</div>`;
+  h += `<pre class="map-ascii">${castle}</pre>`;
+  h += `<div id="map-hint" class="map-hint">clique diretamente em qualquer sala do castelo</div>`;
   h += `</div>`;
   return h;
 }
 
 function viewSub(sub){
-  let h = `<button class="cmd" onclick="Game.go('mapa')"><- Voltar ao Mapa</button><br><br>`;
-  if(sub==='hall') return h + viewHall();
+  let h = `<div class="stage"><div class="actions"><button class="cmd subtle" onclick="Game.go('mapa')">&lt;- Voltar ao Mapa</button></div>`;
+  if(sub==='hall') return h + `</div>` + viewHall();
+
   if(sub==='leste'){
-    h += `<div class="box"><b>O CUPIM MARCENEIRO - ferreiro da Asa Leste</b><br><span class="white">"Trago restos de moveis velhos e uno com poeira. Sustentavel e rangente."</span></div><div class="box"><b>- FORJA -</b>`;
+    const speech = uiEphemeral.npcSpeech.termite ||
+      '"Trago restos de móveis velhos e uno com poeira. Sustentável, artesanal e rangente."';
+    h += `<div class="scene-title">— Asa Leste — O Cupim Marceneiro —</div>`;
+    h += speechBubble(speech, 44);
+    h += `<pre class="ascii-art npc-idle">${esc(ART.termite)}</pre>`;
+    h += `<div class="box"><span class="box-title">— FORJA —</span>`;
     const wrow = (id)=>{
       const w = WEAPONS[id];
       const equipped = S.inventory.weapon===id;
       const owned = hasWeaponTier(id);
       const okReq = !w.req || hasWeaponTier(w.req);
-      const badge = equipped ? '<span class="muted">[equipado]</span>' : owned ? '<span class="muted">[adquirido]</span>' : `<b>${w.price} poeira</b>`;
-      return `<div class="shop-item"><b>${w.name}</b> ${badge} <span class="muted">- ${w.desc}</span><br>${(!owned)?`<button class="cmd" onclick="Game.buyItem('${id}')" ${(S.resources.dust<w.price||!okReq)?'disabled':''}>Forjar</button>${!okReq?` <span class="muted">requer ${WEAPONS[w.req].name}</span>`:''}`:''}</div>`;
+      const badge = equipped ? '<span class="muted">[equipado]</span>' : owned ? '<span class="muted">[adquirido]</span>' : `— <b>${w.price} poeira</b>`;
+      return `<div class="shop-item"><b>${w.name}</b> ${badge}<br><span class="muted">${w.desc}</span><br>${(!owned)?`<button class="cmd" data-cost="${w.price}" data-req-ok="${okReq?1:0}" onclick="Game.buyItem('${id}')" ${(S.resources.dust<w.price||!okReq)?'disabled':''}>Forjar</button>${!okReq?`<div class="muted">requer ${WEAPONS[w.req].name}</div>`:''}`:''}</div>`;
     };
     h += wrow('vassoura_quebrada') + wrow('espanador_pena') + wrow('rodo_combate');
-    h += `</div>`;
-    h += `<button class="cmd" onclick="Game.go('aventura')">Testar arma nos Corredores -></button>`;
+    h += `</div><div class="actions"><button class="cmd" onclick="Game.go('aventura')">Testar arma nos Corredores -&gt;</button></div></div>`;
     return h;
   }
+
   if(sub==='oeste'){
-    h += `<div class="box"><b>A ARANHA ALFAIATE - armadeira da Asa Oeste</b><br><span class="white">"Teco vestimentas com teia e poeira compactada. Outono/Inverno 1987."</span></div><div class="box"><b>- ATELIE -</b>`;
+    const speech = uiEphemeral.npcSpeech.spider ||
+      '"Teço vestimentas com teia e poeira compactada. Coleção Outono/Inverno 1987."';
+    h += `<div class="scene-title">— Asa Oeste — A Aranha Alfaiate —</div>`;
+    h += speechBubble(speech, 44);
+    h += `<pre class="ascii-art npc-idle">${esc(ART.spider)}</pre>`;
+    h += `<div class="box"><span class="box-title">— ATELIÊ —</span>`;
     const arow = (id, kind)=>{
       const table = kind==='armor' ? ARMORS : BAGS;
       const item = table[id];
@@ -769,121 +1077,150 @@ function viewSub(sub){
       const owned = kind==='armor' ? hasArmorTier(id) : hasBagTier(id);
       const reqOk = !item.req || (kind==='armor' ? hasArmorTier(item.req) : hasBagTier(item.req));
       const reqName = item.req ? table[item.req].name : '';
-      const badge = equipped ? '<span class="muted">[equipado]</span>' : owned ? '<span class="muted">[adquirido]</span>' : `<b>${item.price} poeira</b>`;
-      return `<div class="shop-item"><b>${item.name}</b> ${badge} <span class="muted">- ${item.desc}</span><br>${!owned?`<button class="cmd" onclick="Game.buyItem('${id}')" ${(S.resources.dust<item.price||!reqOk)?'disabled':''}>Adquirir</button>${!reqOk?` <span class="muted">requer ${reqName}</span>`:''}`:''}</div>`;
+      const badge = equipped ? '<span class="muted">[equipado]</span>' : owned ? '<span class="muted">[adquirido]</span>' : `— <b>${item.price} poeira</b>`;
+      return `<div class="shop-item"><b>${item.name}</b> ${badge}<br><span class="muted">${item.desc}</span><br>${!owned?`<button class="cmd" data-cost="${item.price}" data-req-ok="${reqOk?1:0}" onclick="Game.buyItem('${id}')" ${(S.resources.dust<item.price||!reqOk)?'disabled':''}>Adquirir</button>${!reqOk?`<div class="muted">requer ${reqName}</div>`:''}`:''}</div>`;
     };
     h += arow('saco_teia','bag') + arow('saco_compactado','bag');
     h += arow('casaco_pano_mofado','armor') + arow('mascara_antipoeira','armor');
-    h += `</div>`;
+    h += `</div></div>`;
     return h;
   }
+
   if(sub==='porao'){
-    if(!S.unlocks.hasLantern) return h + `<span class="red">Escuro demais. Volte com uma lanterna e coragem (a lanterna e mais importante).</span>`;
-    h += `<div class="box"><b>O BESOURO ROLA-POEIRA - alquimista do Porao</b><br><span class="white">"Compacto volumes astronomicos em brilho. Dieta balanceada: 99% poeira."</span></div>`;
-    h += `<div class="box"><b>- TRANSMUTACAO -</b><br>10.000 Poeiras -> 1 poeira magica<br><button class="cmd" onclick="Game.transmute()" ${S.resources.dust<10000?'disabled':''}>Compactar (10.000 poeira -> 1 magica)</button></div>`;
-    h += `<div class="box"><b>- GRANDE CHAVE DO PORTAO -</b><br>Cada fragmento: 2 magica + 5.000 poeira - Precisa de 3.<br>Fragmentos: <b>${S.key.fragments}/3</b><br>
-    <button class="cmd" onclick="Game.craftFragment()" ${(S.resources.magicDust<2||S.resources.dust<5000||S.key.fragments>=3)?'disabled':''}>Forjar fragmento</button>
-    <button class="cmd" onclick="Game.fuseKey()" ${S.key.fragments<3||S.key.complete?'disabled':''}>Fundir a Grande Chave</button></div>`;
+    if(!S.unlocks.hasLantern){
+      return h + `<div class="box"><span class="red">Escuro demais. Volte com uma lanterna e coragem (a lanterna é mais importante).</span></div></div>`;
+    }
+    const speech = uiEphemeral.npcSpeech.beetle ||
+      '"Compacto volumes astronômicos em brilho. Dieta balanceada: 99% poeira."';
+    h += `<div class="scene-title">— Porão Obscuro — O Besouro Rola-Poeira —</div>`;
+    h += speechBubble(speech, 44);
+    h += `<pre class="ascii-art npc-idle">${esc(ART.beetle)}</pre>`;
+    h += `<div class="box"><span class="box-title">— TRANSMUTAÇÃO —</span><div class="muted">10.000 Poeiras -&gt; 1 Poeira Mágica</div>
+    <div class="actions"><button class="cmd" data-cost="10000" onclick="Game.transmute()" ${S.resources.dust<10000?'disabled':''}>Compactar (10.000 poeira -&gt; 1 mágica)</button></div></div>`;
+    h += `<div class="box"><span class="box-title">— GRANDE CHAVE DO PORTÃO —</span><div class="muted">Cada fragmento: 2 Mágicas + 5.000 poeiras — Precisa de 3.<br>Fragmentos atuais: <b>${S.key.fragments}/3</b></div>
+    <div class="actions">
+      <button class="cmd" data-cost="5000" data-magic-cost="2" data-req-ok="${S.key.fragments<3?1:0}" onclick="Game.craftFragment()" ${(S.resources.magicDust<2||S.resources.dust<5000||S.key.fragments>=3)?'disabled':''}>Forjar fragmento</button>
+      <button class="cmd" data-cost="0" data-req-ok="${(S.key.fragments>=3 && !S.key.complete)?1:0}" onclick="Game.fuseKey()" ${(S.key.fragments<3||S.key.complete)?'disabled':''}>Fundir a Grande Chave</button>
+    </div></div></div>`;
     return h;
   }
+
   if(sub==='puzzles'){
     ensurePuzzle();
-    h += `<div class="box"><b>PUZZLE DAS ALAVANCAS QUEBRADAS</b><br><span class="muted">Uma camara no escuro. 3 alavancas: | / \\ . Descubra a combinacao para acender as luzes.</span><br><br>`;
+    h += `<div class="scene-title">— Sala dos Puzzles —</div>`;
+    h += `<div class="box"><span class="box-title">— ALAVANCAS QUEBRADAS —</span><div class="muted">Uma câmara no escuro com 3 alavancas ( | / \\ ). Descubra a combinação para acender as luzes.</div><br><div class="row">`;
     S.puzzle.current.forEach((v,i)=>{
-      h += `<span>Alavanca ${i+1}: <b class="amber" style="font-size:20px">${LEVERS[v]}</b> <button class="cmd" onclick="Game.cycleLever(${i})">puxar</button> &nbsp;</span>`;
+      h += `<div>Alavanca ${i+1}<br><b class="amber" style="font-size:22px">${LEVERS[v]}</b><br><button class="cmd" onclick="Game.cycleLever(${i})">puxar</button></div>`;
     });
-    h += `<br><br><button class="cmd" onclick="Game.testLevers()">Testar combinacao</button> <span class="muted">erro: +10 poeira, -2 HP - tentativas: ${S.puzzle.attempts}</span>`;
-    h += S.unlocks.puzzleSolved ? `<br><span class="amber">OK Luzes acesas. A sala agora parece apenas moderadamente assustadora.</span>` : ``;
-    h += `</div>`;
+    h += `</div><div class="actions"><button class="cmd" onclick="Game.testLevers()">Testar combinação</button></div>`;
+    h += `<div class="muted">erro: +10 poeira, -2 HP — tentativas: ${S.puzzle.attempts}</div>`;
+    if(S.unlocks.puzzleSolved) h += `<div class="amber" style="margin-top:8px">Luzes acesas. A sala agora parece apenas moderadamente assustadora.</div>`;
+    h += `</div></div>`;
     return h;
   }
+
   if(sub==='candy'){
-    h += `<div class="box"><pre>+-------------------+
-|  [ CANDY BOX ]    |
-|                   |
-|  (Esta vazia...)  |
-+-------------------+</pre>
-    <div class="white">"Uma caixa de doces? Que coisa inutil... Faz sentido estar coberta de poeira."</div><br>
-    <button class="cmd" onclick="Game.searchCandy()" ${S.unlocks.candyLooted?'disabled':''}>Mexer no fundo da caixa</button></div>`;
+    h += `<div class="scene-title">— Sala Esquecida —</div>`;
+    h += `<pre class="ascii-art">${esc(ART.candy)}</pre>`;
+    h += `<div class="scene-text">"Uma caixa de doces? Que coisa inútil... Faz sentido estar coberta de poeira."</div>`;
+    h += `<div class="actions"><button class="cmd" onclick="Game.searchCandy()" ${S.unlocks.candyLooted?'disabled':''}>${S.unlocks.candyLooted?'Caixa já revirada':'Mexer no fundo da caixa'}</button></div></div>`;
     return h;
   }
+
   if(sub==='vento'){
-    h += `<div class="box"><b>SALA DO VENTO FORTE</b><br><span class="muted">Um ventilador industrial esquecido no maximo no fundo do corredor. Se entrar sem a <b>Pedra de Peso</b>, toda a poeira da mao volta a zero.</span><br><br>
-    <button class="cmd danger" onclick="Game.enterWind()">Entrar no corredor</button></div>`;
+    h += `<div class="scene-title">— Sala do Vento Forte —</div>`;
+    h += `<div class="box"><div class="scene-text">Um ventilador industrial esquecido no máximo no fundo do corredor.<br><span class="muted">Se entrar sem a <b>Pedra de Peso</b>, toda a poeira da mão voa para o nada.</span></div>
+    <div class="actions"><button class="cmd danger" onclick="Game.enterWind()">Entrar no corredor</button></div></div></div>`;
     return h;
   }
+
   if(sub==='portao'){
-    h += `<div class="box"><pre>   ____  ____  ____  _____  ____  ____
-  ||P ||||O ||||R ||||T ||||A ||||O ||
-  ||__||||__||||__||||__||||__||||__||
-  |/__\\||/__\\||/__\\||/__\\||/__\\||/__\\|</pre>
-    <b>O PORTAO PRINCIPAL</b><br><span class="muted">Atras dele: ar puro. Na frente dele: voce, questionando suas escolhas.</span><br><br>
-    ${S.key.complete
-      ? `<button class="cmd" onclick="Game.openGate()">Abrir o Portao com a Grande Chave</button>`
-      : `<span class="red">Trancado. Requer a Grande Chave do Portao (3 fragmentos de Poeira Magica Comprimida - ver Porao).</span><br><span class="muted">Fragmentos: ${S.key.fragments}/3</span>`}
-    </div>`;
+    h += `<div class="scene-title">— O Portão Principal —</div>`;
+    h += `<pre class="ascii-art">${esc(ART.gate)}</pre>`;
+    h += `<div class="box"><div class="muted">Atrás dele: ar puro. Na frente dele: você, questionando suas escolhas.</div><br>`;
+    if(S.key.complete){
+      h += `<div class="actions"><button class="cmd" onclick="Game.openGate()">Abrir o Portão com a Grande Chave</button></div>`;
+    } else {
+      h += `<div class="red">Trancado. Requer a Grande Chave do Portão (3 fragmentos — ver Porão).</div><div class="muted">Fragmentos: ${S.key.fragments}/3</div>`;
+    }
+    h += `</div></div>`;
     return h;
   }
-  return h + `<span class="muted">Sala desconhecida. Ate o mapa espirrou.</span>`;
+
+  return h + `<div class="muted">Sala desconhecida. Até o mapa espirrou.</div></div>`;
 }
 
 function viewAventura(){
   const c = S.combat;
-  let h = `<pre>O guerreiro @ anda para a direita. Os monstros vem da poeira.\nArma: <b>${WEAPONS[S.inventory.weapon]?WEAPONS[S.inventory.weapon].name:'(desarmado)'}</b> (ATK ${S.player.attack}) - Abates: ${c.kills} - Loop ${c.loop}</pre>`;
+  let h = `<div class="stage"><div class="scene-title">— Corredores de Batalha —</div>`;
+  h += `<div class="muted">Arma: <b>${WEAPONS[S.inventory.weapon]?WEAPONS[S.inventory.weapon].name:'(desarmado)'}</b> (ATK ${S.player.attack}) — Abates: ${c.kills} — Loop ${c.loop}</div>`;
+  h += `<div class="actions">`;
   if(!c.active && !c.monster){
-    h += `<button class="cmd" onclick="Game.startExpedition()">Iniciar Expedicao -></button> <span class="muted">automatico, como procrastinacao</span>`;
+    h += `<button class="cmd" onclick="Game.startExpedition()">Iniciar Expedição -&gt;</button>`;
   } else if(!c.active && c.monster){
-    h += `<button class="cmd" onclick="Game.startExpedition()">Retomar Expedicao -></button>`;
+    h += `<button class="cmd" onclick="Game.startExpedition()">Retomar Expedição -&gt;</button>`;
   } else {
-    h += `<button class="cmd" onclick="Game.stopExpedition()">Pausar Expedicao</button>`;
+    h += `<button class="cmd" onclick="Game.stopExpedition()">Pausar Expedição</button>`;
   }
-  h += ` <button class="cmd" onclick="Game.rest()">Curar (descansar)</button>`;
+  h += `<button class="cmd" onclick="Game.rest()">Curar (descansar)</button></div>`;
+
   if(c.monster){
     const mmax = c.mmax || c.monster.hp || 1;
     const pct = Math.max(0, Math.min(100, c.mhp/mmax*100));
     const steps = Math.floor(pct/10);
-    h += `<div class="box"><pre>${esc(c.monster.art||'')}   ${c.active?'<span class="blink">@-></span>':'@ (pausado)'}\n<b>${esc(c.monster.name)}</b> ${c.monster.boss?'<b class="red">[CHEFE]</b>':''} - HP ${Math.max(0,Math.ceil(c.mhp))}/${mmax}\n[${'#'.repeat(steps)}${'.'.repeat(10-steps)}]</pre>`;
-    h += `<div class="muted">${c.clog.map(l=>esc(l)).join('<br>')||'...'}</div></div>`;
+    h += `<div class="box">`;
+    h += `<pre class="ascii-art">${esc(c.monster.art||'')}</pre>`;
+    h += `<div><b>${esc(c.monster.name)}</b> ${c.monster.boss?'<b class="red">[CHEFE]</b>':''} — HP ${Math.max(0,Math.ceil(c.mhp))}/${mmax}</div>`;
+    h += `<pre style="margin:6px auto">${c.active?'<span class="blink">@-&gt;</span>':'@'}  [${'#'.repeat(steps)}${'.'.repeat(10-steps)}]</pre>`;
+    h += `<div class="combat-log">${c.clog.map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
   } else {
-    h += `<div class="box muted">Nenhum monstro a vista. Suspeito. A poeira esta tramando algo.</div>`;
+    h += `<div class="box muted">Nenhum monstro à vista. Suspeito. A poeira está tramando algo.</div>`;
   }
-  h += `<div class="muted">dica: deixe rodando. Farmar poeira aqui paga a forja do Cupim e a transmutacao do Besouro.</div>`;
+  h += `<div class="muted">dica: deixe rodando. Farmar poeira aqui paga a forja do Cupim e a transmutação do Besouro.</div></div>`;
   return h;
 }
 
 function viewVictory(){
-  return `<div class="box"><pre>   O PORTAO RANGE... E SE ABRE.\n
-   *** AR PURO ***\n
-  Voce respira fundo. Tosse por 40 segundos.\n  Valeu a pena.\n
-  Poeira total acumulada: ${fmt(Math.floor(S.resources.totalEarned))}\n  Abates: ${S.combat.kills} - Magicas: ${S.resources.magicDust}\n  Conquistas: ${S.achievements.length}</pre>
-  <b class="amber">FIM - O Castelo da Poeira Eterna sera lembrado (e varrido, talvez).</b><br>
-  <span class="muted">O Rato acena com o lenco. A Traca chora poeira. O Cupim ja vende souvenirs da sua vitoria.</span><br><br>
-  <button class="cmd" onclick="Game.reset()">Recomecar (virar poeira de novo)</button></div>`;
+  return `<div class="stage"><div class="scene-title">— Ar Puro —</div>
+  <pre class="ascii-art">${esc(ART.gate)}</pre>
+  <div class="box"><pre>O PORTÃO RANGE... E SE ABRE.
+
+*** AR PURO ***
+
+Você respira fundo. Tosse por 40 segundos.
+Valeu a pena.
+
+Poeira total acumulada: ${fmt(Math.floor(S.resources.totalEarned))}
+Abates: ${S.combat.kills} — Poeiras Mágicas: ${S.resources.magicDust}
+Conquistas: ${S.achievements.length}</pre><br>
+  <div class="amber">FIM DO ATO I — O Castelo da Poeira Eterna será lembrado (e varrido, talvez).</div>
+  <div class="muted" style="margin-top:6px">O Rato acena com o lenço. A Traça chora poeira. O Cupim já vende souvenirs da sua vitória.</div>
+  <div class="actions" style="margin-top:14px"><button class="cmd" onclick="Game.reset()">Recomeçar (virar poeira de novo)</button></div></div></div>`;
 }
 
-/* ---------- debug (uso livre pelo console ou pelo botao fixo) ---------- */
+/* ---------- debug (uso livre pelo console ou pelo botao Ctrl+Shift+D) ---------- */
 const Debug = {
-  addDust(){ S.resources.dust += 1000; log('[DEBUG] +1000 poeira.'); save(); render(); },
-  addMagic(){ S.resources.magicDust += 10; log('[DEBUG] +10 magica.'); save(); render(); },
+  addDust(){ S.resources.dust += 1000; notify('[DEBUG] +1000 poeira.'); save(); render(); },
+  addMagic(){ S.resources.magicDust += 10; notify('[DEBUG] +10 mágica.'); save(); render(); },
   toggleInf(){
     S.flags.dustInf = !S.flags.dustInf;
     if(!S.flags.dustInf){
-      // ao desligar, o bolso volta ao valor maximo real; sem rastro de 10M
       S.resources.dust = Math.min(S.resources.dust, S.resources.maxDust);
     }
-    log(S.flags.dustInf ? '[DEBUG] POEIRA/MAGICA INFINITAS ligadas. A economia chora.' : '[DEBUG] modo infinito desligado. Bolso cheio (max), sem residuo.');
+    notify(S.flags.dustInf ? '[DEBUG] Poeira/Mágica infinitas ligadas.' : '[DEBUG] Modo infinito desligado.');
     save(); render();
   },
   skipIntro(){
     S.intro = { cleans: 3, done: true };
-    log('[DEBUG] intro pulada. O rato chega aos 20 de poeira.');
+    notify('[DEBUG] Intro pulada.');
     save(); render();
   },
   openWorld(){
+    S.intro = { cleans: 3, done: true };
     S.unlocks.outOfRoom = true; S.unlocks.metMoth = true;
     S.unlocks.hasMap = true; S.unlocks.hasLantern = true;
     S.ui.tab = 'hall';
-    log('[DEBUG] porta, hall, porao e mapa abertos.');
+    notify('[DEBUG] Mundo aberto.');
     save(); render();
   },
   giveAll(){
@@ -894,7 +1231,7 @@ const Debug = {
     S.key.fragments = 3; S.key.complete = true;
     S.resources.magicDust += 50;
     recalc();
-    log('[DEBUG] TUDO entregue: Rodo, Mascara, Saco 25k, 3 itens, chave pronta, +50 magicas.');
+    notify('[DEBUG] Tudo entregue.');
     save(); render();
   }
 };
@@ -909,7 +1246,7 @@ function encodeSave(obj){
 }
 function decodeSave(str){
   const trimmed = str.trim();
-  if(!trimmed) throw new Error('Codigo vazio.');
+  if(!trimmed) throw new Error('Código vazio.');
   if(trimmed.startsWith('{')) return JSON.parse(trimmed);
   const bin = atob(trimmed);
   const bytes = new Uint8Array(bin.length);
@@ -927,14 +1264,14 @@ function openModal(mode){
   if(mode === 'export'){
     save();
     title.textContent = 'EXPORTAR SAVE';
-    desc.textContent = 'Copie o codigo abaixo para guardar ou transferir seu progresso:';
+    desc.textContent = 'Copie o código abaixo para guardar ou transferir seu progresso:';
     text.readOnly = true;
     text.value = encodeSave(S);
     btnConfirm.style.display = 'none';
     btnCopy.style.display = '';
   } else {
     title.textContent = 'IMPORTAR SAVE';
-    desc.textContent = 'Cole abaixo um codigo de save exportado (Base64 ou JSON):';
+    desc.textContent = 'Cole abaixo um código de save exportado (Base64 ou JSON):';
     text.readOnly = false;
     text.value = '';
     btnConfirm.style.display = '';
@@ -951,7 +1288,7 @@ function closeModal(){
 function copyModalSave(){
   const text = document.getElementById('modal-text');
   if(!text) return;
-  const done = ()=>{ sfx('buy'); log('Codigo de save copiado para a area de transferencia.', 'amber'); };
+  const done = ()=>{ sfx('buy'); notify('Código de save copiado para a área de transferência.', 'amber'); };
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text.value).then(done).catch(()=>{
       text.select(); document.execCommand('copy'); done();
@@ -966,7 +1303,7 @@ function confirmImportSave(){
   try {
     const parsed = decodeSave(text.value);
     if(!parsed || typeof parsed !== 'object' || !parsed.resources){
-      throw new Error('Estrutura de save invalida.');
+      throw new Error('Estrutura de save inválida.');
     }
     localStorage.setItem(SAVE_KEY, JSON.stringify(parsed));
     load();
@@ -975,43 +1312,39 @@ function confirmImportSave(){
     render();
     closeModal();
     sfx('unlock');
-    log('Save importado com sucesso! A poeira antiga voltou para casa.', 'amber');
+    showToast('Save importado! A poeira antiga voltou para casa.');
   } catch(e){
     sfx('error');
-    log('Falha ao importar save: codigo invalido ou corrompido.', 'red');
-    alert('Codigo de save invalido. Verifique se copiou tudo corretamente.');
+    notify('Falha ao importar save: código inválido ou corrompido.', 'red');
+    alert('Código de save inválido. Verifique se copiou tudo corretamente.');
   }
 }
 
 /* ---------- loop ---------- */
-let combatAcc = 0, saveAcc = 0, renderAcc = 0;
+let combatAcc = 0, saveAcc = 0, uiAcc = 0;
 function tick(dt){
-  // debug: modo folga infinita
   if(S.flags.dustInf){
     S.resources.dust = 9999999;
     if(S.resources.magicDust < 999) S.resources.magicDust = 999;
   } else {
-    // geracao passiva
     const gain = S.resources.dustPerSecond * dt;
     if(S.resources.dust + gain >= S.resources.maxDust){
       const room = S.resources.maxDust - S.resources.dust;
       if(room > 0){ S.resources.dust = S.resources.maxDust; S.resources.totalEarned += room; }
-      once('full', 'Seu recipiente esta CHEIO! A Aranha Alfaiate vende sacos maiores na Asa Oeste. Capitalismo aracnideo.');
+      once('full', 'Seu recipiente está cheio! A Aranha Alfaiate vende sacos maiores na Asa Oeste.');
     } else {
       S.resources.dust += gain;
       S.resources.totalEarned += gain;
     }
   }
-  // regen
   if(!S.combat.active && S.player.hp < S.player.maxHp){
     S.player.hp = Math.min(S.player.maxHp, S.player.hp + dt*1.0);
   }
-  // marcos ironicos
-  if(S.intro.done && S.resources.dust >= 20 && !S.flags.rat) once('rat2', 'Algo se mexe no canto... (olhe o Quarto)');
-  if(S.resources.totalEarned >= 100 && !S.unlocks.outOfRoom) once('dica', 'Dica: 100 poeiras lubrificam a porta do quarto. WD-40 de pobre.');
+  if(S.intro.done && S.resources.dust >= 20 && !S.flags.rat) once('rat2', 'Algo se mexe no Quarto...');
+  if(S.resources.totalEarned >= 100 && !S.unlocks.outOfRoom && S.intro.done) once('dica', 'Dica: 100 poeiras lubrificam a porta do quarto.');
   if(S.resources.totalEarned >= 1000) once('m1', '1.000 poeiras acumuladas! Sua alergia evoluiu para orgulho.');
-  if(S.resources.totalEarned >= 10000) once('m2', '10.000 poeiras! O Besouro no Porao adoraria compactar isso. Se voce tivesse lanterna...');
-  // combate
+  if(S.resources.totalEarned >= 10000) once('m2', '10.000 poeiras! O Besouro no Porão adoraria compactar isso.');
+
   if(S.combat.active){
     combatAcc += dt;
     if(combatAcc >= 0.8){ combatAcc = 0; combatRound(); render(); }
@@ -1025,8 +1358,8 @@ function startLoop(){
     const dt = 0.1;
     tick(dt);
     paintStats();
-    renderAcc += dt; saveAcc += dt;
-    if(renderAcc >= 1.0){ renderAcc = 0; render(); }
+    uiAcc += dt; saveAcc += dt;
+    if(uiAcc >= 0.2){ uiAcc = 0; refreshDynamic(); }
     if(saveAcc >= 5){ saveAcc = 0; save(); }
   }, 100);
 }
@@ -1043,17 +1376,11 @@ function boot(){
     if(away > 60){
       const g = Math.min(S.resources.dustPerSecond * away, Math.max(0, S.resources.maxDust - S.resources.dust));
       S.resources.dust += g; S.resources.totalEarned += g;
-      setTimeout(()=>log(`Enquanto voce fingia trabalhar por ${Math.floor(away/60)}min, acumularam ${fmt(Math.floor(g))} poeiras. O castelo sentiu sua falta (e sua falta de faxina).`), 300);
+      setTimeout(()=>showToast(`Enquanto você estava fora (${Math.floor(away/60)}min), acumularam ${fmt(Math.floor(g))} poeiras.`), 300);
     }
-    setTimeout(()=>log('Save carregado. A poeira esperou por voce. Ela sempre espera.', 'muted'), 100);
-  } else {
-    setTimeout(()=>{
-      log('Bem-vindo ao DUST BOX. Nao ha tutorial. Ha apenas poeira.', 'amber');
-      log('Dica: nao clique. Apenas exista. A poeira faz o resto.', 'muted');
-    }, 200);
   }
   const bind = (id, fn)=>{ const el = document.getElementById(id); if(el) el.onclick = fn; };
-  bind('btn-save', ()=>{ save(); sfx('click'); log('Jogo salvo. A poeira agora e canonica.'); });
+  bind('btn-save', ()=>{ save(); sfx('click'); notify('Jogo salvo. A poeira agora é canônica.'); });
   bind('btn-export', ()=>{ sfx('click'); openModal('export'); });
   bind('btn-import', ()=>{ sfx('click'); openModal('import'); });
   bind('btn-theme', cycleTheme);
@@ -1087,13 +1414,18 @@ function boot(){
     }
   });
 
-  // antes: beforeunload regravava o save durante o reload e ressuscitava o estado antigo.
-  // agora autosave a cada 5s cobre isso; save() tambem respeita o guard __dustboxSkipSave.
   render();
   startLoop();
 }
 
-window.Game = { buyAccel, lubricate, cleanBody, buyItem, transmute, craftFragment, fuseKey, openGate, cycleLever, testLevers, searchCandy, enterWind, startExpedition, stopExpedition, rest, go, reset(){ window.__dustboxSkipSave = true; localStorage.removeItem(SAVE_KEY); location.reload(); }, debug: Debug, get state(){ return S; } };
+window.Game = {
+  buyAccel, lubricate, cleanBody, buyItem, transmute, craftFragment, fuseKey, openGate,
+  cycleLever, testLevers, searchCandy, enterWind, startExpedition, stopExpedition, rest,
+  go, setMapHint,
+  reset(){ window.__dustboxSkipSave = true; localStorage.removeItem(SAVE_KEY); location.reload(); },
+  debug: Debug,
+  get state(){ return S; }
+};
 
 document.addEventListener('DOMContentLoaded', boot);
 })();

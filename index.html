@@ -3,26 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DUST BOX - Castelo da Poeira Eterna</title>
+<title>DUST BOX — Castelo da Poeira Eterna</title>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div id="toast" class="toast hidden" aria-live="polite"></div>
 <button class="dbgbtn" id="dbgbtn" onclick="if(window.Game)Game.debug.addDust()" title="debug: +1000 poeira (Ctrl+Shift+D para ocultar)">+1000</button>
 <div id="boot">
   <h1>DUST BOX<span class="blink">_</span></h1>
   <div id="stats">
     <span id="s-dust">POEIRA: <b id="stat-dust">0</b><span id="stat-max" class="muted"></span></span>
-    <span id="s-magic">MAGICA: <b id="stat-magic">0</b></span>
+    <span id="s-magic">MÁGICA: <b id="stat-magic">0</b></span>
     <span id="s-ps">P/s: <b id="stat-ps">1.00</b></span>
     <span id="s-hp">HP: <span class="hpbar"><span id="hp-fill" style="width:100%"></span></span> <b id="stat-hp">100/100</b></span>
     <span id="s-atk">ATK: <b id="stat-atk">2</b></span>
   </div>
   <nav id="tabs"></nav>
   <div id="content"><pre>carregando poeira...</pre></div>
-  <div id="log" aria-live="polite"></div>
+  <div id="feedback" class="feedback" aria-live="polite"></div>
 </div>
 <div id="footer">
-  <span class="footer-note">autosave no localStorage a cada 5s - deixe a aba aberta e va viver</span>
+  <span class="footer-note">autosave automático a cada 5s — deixe a aba aberta e vá viver</span>
   <span class="footer-actions">
     <button id="btn-save">salvar</button>
     <button id="btn-export">exportar</button>
@@ -37,7 +38,7 @@
 <div id="modal" class="modal hidden">
   <div class="modal-box">
     <div id="modal-title" class="modal-title">EXPORTAR SAVE</div>
-    <div id="modal-desc" class="modal-desc muted">Copie o codigo abaixo para guardar ou transferir seu progresso:</div>
+    <div id="modal-desc" class="modal-desc muted">Copie o código abaixo para guardar ou transferir seu progresso:</div>
     <textarea id="modal-text" spellcheck="false"></textarea>
     <div class="modal-actions">
       <button id="modal-btn-confirm" class="cmd">Importar</button>
