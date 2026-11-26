@@ -2500,6 +2500,10 @@ function viewEnding(){
   <div class="actions" style="margin-top:14px">
     <button class="cmd"${trAttr('end.continue')} onclick="Game.continueAfterEnding()">${esc(t('end.continue'))}</button>
     <button class="cmd"${trAttr('end.ngplus', { n: ngN })} onclick="if(confirm('${ngConf}')) Game.startNewGamePlus()">${esc(t('end.ngplus', { n: ngN }))}</button>
+  </div>
+  <div style="margin-top:16px;padding-top:12px;border-top:1px dotted var(--line)">
+    <div class="muted" style="margin-bottom:8px">${tx('end.star_cta')}</div>
+    <a class="cmd" href="https://github.com/Lucas-Baumann/dust-box" target="_blank" rel="noopener noreferrer"${trAttr('end.star_btn')} style="display:inline-block;text-decoration:none">${esc(t('end.star_btn'))}</a>
   </div></div></div>`;
 }
 

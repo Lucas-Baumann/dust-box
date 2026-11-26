@@ -314,6 +314,8 @@ global.DustI18n.register('en', {
   'end.throne.body': 'You switch off the Great Vacuum and take your seat on the THRONE OF DUST.\n\nThe clock strikes 12:00, yet nobody here is in a hurry.\nThe Rat opens a book at chapter 1. The Moth pours gray tea.\nThe Brazilian Caramel Stray Dog naps at the foot of the throne.\n\n"Nobody needs to be productive today."\nYou received the Crown of Dust (+50% D/s permanently this run)!',
   'end.continue': 'Keep exploring',
   'end.ngplus': 'Start New Game+ (NG+{n})',
+  'end.star_cta': 'Enjoyed Dust Box? Support this open-source project!',
+  'end.star_btn': '★ Star on GitHub',
 
   // Flash events
   'ev.caramelo_visit.text': 'A Brazilian Caramel Stray Dog trotted down the hall wagging its tail and dropped something shiny.',

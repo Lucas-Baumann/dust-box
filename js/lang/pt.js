@@ -314,6 +314,8 @@ global.DustI18n.register('pt', {
   'end.throne.body': 'Você desliga o Grande Aspirador e se senta no TRONO DA POEIRA.\n\nO relógio bate 12:00, mas aqui ninguém tem pressa.\nO Rato abre um livro no capítulo 1. A Traça serve chá cinzento.\nO Vira-Lata Caramelo dorme aos pés do trono.\n\n"Ninguém precisa ser produtivo hoje."\nVocê recebeu a Coroa de Poeira (+50% P/s permanente neste ciclo)!',
   'end.continue': 'Continuar explorando',
   'end.ngplus': 'Iniciar Novo Jogo+ (NG+{n})',
+  'end.star_cta': 'Gostou do Dust Box? Apoie o projeto open source!',
+  'end.star_btn': '★ Dar estrela no GitHub',
 
   // Eventos relâmpago
   'ev.caramelo_visit.text': 'Um Vira-Lata Caramelo entrou pelo corredor abanando o rabo e deixou algo brilhando no chão.',

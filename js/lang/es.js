@@ -314,6 +314,8 @@ global.DustI18n.register('es', {
   'end.throne.body': 'Apagas la Gran Aspiradora y te sientas en el TRONO DEL POLVO.\n\nEl reloj da las 12:00, pero aquí nadie tiene prisa.\nEl Ratón abre un libro en el capítulo 1. La Polilla sirve té gris.\nEl Perro Callejero Caramelo duerme al pie del trono.\n\n"Nadie necesita ser productivo hoy."\n¡Recibiste la Corona de Polvo (+50% P/s permanente en este ciclo)!',
   'end.continue': 'Seguir explorando',
   'end.ngplus': 'Iniciar Nuevo Juego+ (NG+{n})',
+  'end.star_cta': '¿Te gustó Dust Box? ¡Apoya este proyecto open source!',
+  'end.star_btn': '★ Dar estrella en GitHub',
 
   // Eventos relámpago
   'ev.caramelo_visit.text': 'Un Perro Callejero Caramelo entró moviendo la cola y dejó algo brillante en el suelo.',
