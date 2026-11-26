@@ -48,25 +48,22 @@ function ensureRadio(S){
 }
 
 function radioSignal(radio){
+  const t = (k) => global.DustI18n ? global.DustI18n.t(k) : k;
   const bandOk = radio.band === radio.targetBand;
   const diff = Math.abs(radio.freq - radio.targetFreq);
   if(bandOk && diff === 0){
-    return {
-      locked: true,
-      wave: '=== [ SINAL LIMPO — TRANSMISSÃO CAPTADA ] ===',
-      msg: '"...atenção, aqui é da rádio 1999: se você esqueceu a toalha molhada em cima da cama, ela acabou de virar poeira..."'
-    };
+    return { locked: true, waveKey: 'radio.locked.wave', msgKey: 'radio.locked.msg', wave: t('radio.locked.wave'), msg: t('radio.locked.msg') };
   }
   if(!bandOk){
-    return { locked: false, wave: '~~~ kshhh ... chiado pesado ... kshhh ~~~', msg: 'Banda errada — só estática.' };
+    return { locked: false, waveKey: 'radio.wrong_band.wave', msgKey: 'radio.wrong_band.msg', wave: t('radio.wrong_band.wave'), msg: t('radio.wrong_band.msg') };
   }
   if(diff <= 2){
-    return { locked: false, wave: '~=~ quase lá... uma voz distante... ~=~', msg: 'Sinal muito próximo!' };
+    return { locked: false, waveKey: 'radio.close.wave', msgKey: 'radio.close.msg', wave: t('radio.close.wave'), msg: t('radio.close.msg') };
   }
   if(diff <= 6){
-    return { locked: false, wave: '~~. chiado diminuindo aos poucos .~~', msg: 'Você está esquentando na sintonia.' };
+    return { locked: false, waveKey: 'radio.warm.wave', msgKey: 'radio.warm.msg', wave: t('radio.warm.wave'), msg: t('radio.warm.msg') };
   }
-  return { locked: false, wave: '~~~ kshhh ~~~~~~~ kshhh ~~~', msg: 'Longe da frequência.' };
+  return { locked: false, waveKey: 'radio.far.wave', msgKey: 'radio.far.msg', wave: t('radio.far.wave'), msg: t('radio.far.msg') };
 }
 
 function ensureMaze(S){
@@ -128,26 +125,26 @@ function turnClockDial(dial, idx){
 const FLASH_EVENTS = [
   {
     id: 'caramelo_visit',
-    text: 'Um Vira-Lata Caramelo entrou pelo corredor abanando o rabo e deixou algo brilhando no chão.',
+    textKey: 'ev.caramelo_visit.text',
     choices: [
-      { label: 'Fazer carinho', reward: 'dust', multSec: 90, msg: 'O Caramelo aprovou! Ele se sacode e deixa poeira dourada.' },
-      { label: 'Trocar por biscoito imaginário', reward: 'sockOrDust', msg: 'Ele entrega uma Meia Solitária (ou um punhado generoso de poeira)!' }
+      { labelKey: 'ev.caramelo_visit.c0', msgKey: 'ev.caramelo_visit.m0', reward: 'dust', multSec: 90 },
+      { labelKey: 'ev.caramelo_visit.c1', msgKey: 'ev.caramelo_visit.m1', reward: 'sockOrDust' }
     ]
   },
   {
     id: 'boleto_voador',
-    text: 'Um Boleto Voador de 2019 cruzou a sala fazendo barulho de vento!',
+    textKey: 'ev.boleto_voador.text',
     choices: [
-      { label: 'Fingir que não viu', reward: 'dust', multSec: 120, msg: 'Procrastinação pura convertida diretamente em poeira!' },
-      { label: 'Amassar no ar', reward: 'magic', msg: 'Você amassou o boleto com estilo e extraiu +1 Poeira Mágica!' }
+      { labelKey: 'ev.boleto_voador.c0', msgKey: 'ev.boleto_voador.m0', reward: 'dust', multSec: 120 },
+      { labelKey: 'ev.boleto_voador.c1', msgKey: 'ev.boleto_voador.m1', reward: 'magic' }
     ]
   },
   {
     id: 'panfleto_academia',
-    text: 'Um panfleto de "Promoção de Janeiro — Comece Hoje!" deslizou por baixo da porta.',
+    textKey: 'ev.panfleto_academia.text',
     choices: [
-      { label: 'Guardar para segunda', reward: 'dust', multSec: 100, msg: 'Empilhado junto com os outros 47 panfletos. +poeira!' },
-      { label: 'Fazer chá com a calma', reward: 'tea', msg: 'Você ganhou +1 Chá de Poeira de graça!' }
+      { labelKey: 'ev.panfleto_academia.c0', msgKey: 'ev.panfleto_academia.m0', reward: 'dust', multSec: 100 },
+      { labelKey: 'ev.panfleto_academia.c1', msgKey: 'ev.panfleto_academia.m1', reward: 'tea' }
     ]
   }
 ];

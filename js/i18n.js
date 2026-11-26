@@ -13,7 +13,7 @@ let hoverLang = 'off'; // 'off' | 'pt' | 'en' | 'es' | community code
 let bubbleEl = null;
 
 function register(code, dict){
-  packs[code] = dict || {};
+  packs[code] = Object.assign(packs[code] || {}, dict || {});
 }
 
 function interpolate(str, vars){
@@ -59,6 +59,20 @@ function tx(key, vars, fallback){
   const hv = th(key, vars);
   if(!hv) return escHtml(main);
   return `<span class="i18n-t" data-tr="${escAttr(hv)}">${escHtml(main)}</span>`;
+}
+
+function obj(prefix, id, field, fallback){
+  return t(`${prefix}.${id}.${field}`, null, fallback);
+}
+function objTx(prefix, id, field, fallback){
+  return tx(`${prefix}.${id}.${field}`, null, fallback);
+}
+function padNode(label, width){
+  const s = `[${label}]`;
+  if(s.length >= width) return s;
+  const left = Math.floor((width - s.length) / 2);
+  const right = width - s.length - left;
+  return ' '.repeat(left) + s + ' '.repeat(right);
 }
 
 function setLang(code){
@@ -178,7 +192,7 @@ function initHoverBubble(){
 
 global.DustI18n = {
   VANILLA_LANGS,
-  register, t, th, tx, trAttr,
+  register, t, th, tx, trAttr, obj, objTx, padNode,
   setLang, getLang,
   setHoverLang, getHoverLang, getHoverOptions, getHoverLabel,
   loadCommunityIndex, applyStatic, initHoverBubble,

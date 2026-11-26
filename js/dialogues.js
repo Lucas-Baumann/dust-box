@@ -1,106 +1,64 @@
-/* DUST BOX — Diálogos vivos e escolhas dos NPCs */
+/* DUST BOX — Diálogos vivos e escolhas dos NPCs (100% i18n) */
 (function(global){
 "use strict";
 
 function getPool(npcId, S){
+  const t = (k, v) => global.DustI18n ? global.DustI18n.t(k, v) : k;
+
   if(npcId === 'rat'){
     const list = [];
     if((S.ngPlus || 0) >= 1){
-      list.push({
-        text: `"Espera... você já sabia onde ficava a porta antes mesmo de eu abrir a boca. Quantas vezes você já girou aquele relógio? (NG+${S.ngPlus})"`
-      });
-      list.push({
-        text: '"Apesar de tudo, ainda é você... só que com muito mais poeira nos sapatos."'
-      });
+      list.push({ key: 'dlg.rat.ng0', vars: { n: S.ngPlus }, text: t('dlg.rat.ng0', { n: S.ngPlus }) });
+      list.push({ key: 'dlg.rat.ng1', text: t('dlg.rat.ng1') });
     }
     list.push(
-      {
-        text: '"Você já percebeu que quanto mais a gente evita uma tarefa, mais ela ganha personalidade própria?"'
-      },
+      { key: 'dlg.rat.0', text: t('dlg.rat.0') },
       {
         id: 'rat_filosofia',
-        text: '"Vou te contar um segredo: eu não sou formado em filosofia. Caí aqui junto com um livro do Nietzsche que ninguém passou do capítulo 2. E você, termina os livros que compra?"',
+        key: 'dlg.rat.filo',
+        text: t('dlg.rat.filo'),
         choices: [
-          {
-            label: 'Claro que termino todos',
-            reply: '"Aha! O cheiro de mentira fresca é mais forte que o mofo. Toma um pouco de poeira pela coragem."',
-            rewardDust: 50
-          },
-          {
-            label: 'Nem o prefácio, sendo sincero',
-            reply: '"Honestidade rara neste castelo. Você tem futuro aqui no Dust Box — toma essa poeira de respeito."',
-            rewardDust: 120
-          }
+          { labelKey: 'dlg.rat.filo.c0', replyKey: 'dlg.rat.filo.r0', label: t('dlg.rat.filo.c0'), reply: t('dlg.rat.filo.r0'), rewardDust: 50 },
+          { labelKey: 'dlg.rat.filo.c1', replyKey: 'dlg.rat.filo.r1', label: t('dlg.rat.filo.c1'), reply: t('dlg.rat.filo.r1'), rewardDust: 120 }
         ]
       }
     );
     if(S.unlocks.outOfRoom){
       list.push({
         id: 'rat_portao',
-        text: '"Dizem que além do Portão Principal não existe só ar puro... existe o Desvão do Mundo: fundos de sofá, gavetas de cabos e uma torre onde o relógio parou."',
+        key: 'dlg.rat.portao',
+        text: t('dlg.rat.portao'),
         choices: [
-          {
-            label: 'Um relógio parado?',
-            reply: '"É. Quando as pessoas param de terminar o que começam, o tempo para lá em cima e vira poeira aqui embaixo."'
-          },
-          {
-            label: 'Prefiro continuar no quarto',
-            reply: '"Sábia escolha de quem já abraçou o sedentarismo cósmico."'
-          }
+          { labelKey: 'dlg.rat.portao.c0', replyKey: 'dlg.rat.portao.r0', label: t('dlg.rat.portao.c0'), reply: t('dlg.rat.portao.r0') },
+          { labelKey: 'dlg.rat.portao.c1', replyKey: 'dlg.rat.portao.r1', label: t('dlg.rat.portao.c1'), reply: t('dlg.rat.portao.r1') }
         ]
       });
     }
-    if(S.unlocks.hasCompendium){
-      list.push({ text: '"Achou o Compêndio na estante? Aquele livro estava esperando alguém curioso desde 1998."' });
-    }
-    if(S.achievements.includes('mofo')){
-      list.push({ text: '"Você derrubou o REI MOFO! O castelo inteiro espirrou em homenagem a você."' });
-    }
-    if((S.accelerators.cat || 0) >= 3 && !S.secrets.includes('caramelo')){
-      list.push({ text: '"Com tantos gatos aqui, ouvi um latido lá fora... se me cutucar mais de perto eu te mostro."' });
-    }
+    if(S.unlocks.hasCompendium) list.push({ key: 'dlg.rat.comp', text: t('dlg.rat.comp') });
+    if(S.achievements.includes('mofo')) list.push({ key: 'dlg.rat.mofo', text: t('dlg.rat.mofo') });
+    if((S.accelerators.cat || 0) >= 3 && !S.secrets.includes('caramelo')) list.push({ key: 'dlg.rat.cat', text: t('dlg.rat.cat') });
     return list;
   }
 
   if(npcId === 'moth'){
     const list = [];
-    if((S.ngPlus || 0) >= 1){
-      list.push({
-        text: `"Ué... tenho um déjà vu estranho de já ter te vendido essa Vassoura Quebrada em outra linha do tempo. Você anda mexendo no relógio da Torre, né?"`
-      });
-    }
+    if((S.ngPlus || 0) >= 1) list.push({ key: 'dlg.moth.ng0', text: t('dlg.moth.ng0') });
     list.push(
       {
         id: 'moth_gosto',
-        text: '"Todo mundo pergunta por que eu como poeira. Tem gosto de domingo às 18h, boleto esquecido e café esfriando na mesa."',
+        key: 'dlg.moth.gosto',
+        text: t('dlg.moth.gosto'),
         choices: [
-          {
-            label: 'Parece meio triste...',
-            reply: '"Triste é pagar caro em boleto! Aqui pelo menos é crocante."'
-          },
-          {
-            label: 'Me vê uma pitada aí',
-            reply: '"Haha, gostei da ousadia! Toma um punhado por conta da casa."',
-            rewardDust: 150
-          }
+          { labelKey: 'dlg.moth.gosto.c0', replyKey: 'dlg.moth.gosto.r0', label: t('dlg.moth.gosto.c0'), reply: t('dlg.moth.gosto.r0') },
+          { labelKey: 'dlg.moth.gosto.c1', replyKey: 'dlg.moth.gosto.r1', label: t('dlg.moth.gosto.c1'), reply: t('dlg.moth.gosto.r1'), rewardDust: 150 }
         ]
       },
-      {
-        text: '"Ninguém construiu este castelo. Ele foi se montando sozinho com cada tarefa adiada para segunda-feira."'
-      },
-      {
-        text: '"Já comi um trabalho salvo como trabalho_final_v3_AGORA_VAI.doc e um boleto de academia só visitada em janeiro. Uma iguaria."'
-      }
+      { key: 'dlg.moth.0', text: t('dlg.moth.0') },
+      { key: 'dlg.moth.1', text: t('dlg.moth.1') }
     );
-    if(S.unlocks.hasMap){
-      list.push({ text: '"Gostou do mapa? Desenhei de memória enquanto comia uma cortina antiga."' });
-    }
-    if(S.inventory.armor === 'mascara_antipoeira'){
-      list.push({ text: '"Essa Máscara Anti-Poeira ficou chique em você. Quase não parece que acordou no chão."' });
-    }
-    if(S.achievements.includes('baratao')){
-      list.push({ text: '"Você enfrentou o BARATÃO BLINDADO?! Eu teria voado pro teto na hora!"' });
-    }
+    if(S.unlocks.hasMap) list.push({ key: 'dlg.moth.map', text: t('dlg.moth.map') });
+    if(S.inventory.armor === 'mascara_antipoeira') list.push({ key: 'dlg.moth.mask', text: t('dlg.moth.mask') });
+    if(S.achievements.includes('baratao')) list.push({ key: 'dlg.moth.boss', text: t('dlg.moth.boss') });
     return list;
   }
 
@@ -108,30 +66,17 @@ function getPool(npcId, S){
     const list = [
       {
         id: 'termite_moveis',
-        text: '"Cada arma minha nasce de um móvel esquecido que caiu no Dust Box. Adivinha de onde veio a madeira mais resistente?"',
+        key: 'dlg.termite.mov',
+        text: t('dlg.termite.mov'),
         choices: [
-          {
-            label: 'Guarda-roupa da casa da avó',
-            reply: '"Acertou na mosca! Madeira maciça de 1972 não quebra nem com martelo. Toma uma sobra de poeira fina."',
-            rewardDust: 250
-          },
-          {
-            label: 'Cadeira de escritório rangente',
-            reply: '"Essa aí só serve pra fazer barulho às 3 da manhã! Mas gostei do palpite — leva esse troco de serragem."',
-            rewardDust: 150
-          }
+          { labelKey: 'dlg.termite.mov.c0', replyKey: 'dlg.termite.mov.r0', label: t('dlg.termite.mov.c0'), reply: t('dlg.termite.mov.r0'), rewardDust: 250 },
+          { labelKey: 'dlg.termite.mov.c1', replyKey: 'dlg.termite.mov.r1', label: t('dlg.termite.mov.c1'), reply: t('dlg.termite.mov.r1'), rewardDust: 150 }
         ]
       },
-      {
-        text: '"Martelar poeira com serragem é arte. Se alguém chamar de gambiarra, eu chamo de design brasileiro."'
-      }
+      { key: 'dlg.termite.0', text: t('dlg.termite.0') }
     ];
-    if(S.inventory.weapon === 'rodo_combate'){
-      list.push({ text: '"O Rodo de Combate! Com esse peso, até o chão pensa duas vezes antes de sujar."' });
-    }
-    if(S.inventory.weapon === 'cabo_hdmi' || S.inventory.weapon === 'aspirador_entupido'){
-      list.push({ text: '"Você está empunhando tecnologia ancestral de gaveta. O castelo inteiro está tremendo."' });
-    }
+    if(S.inventory.weapon === 'rodo_combate') list.push({ key: 'dlg.termite.rodo', text: t('dlg.termite.rodo') });
+    if(['cabo_hdmi','aspirador_entupido','vassoura_eletrica','ponteiro_12h'].includes(S.inventory.weapon)) list.push({ key: 'dlg.termite.high', text: t('dlg.termite.high') });
     return list;
   }
 
@@ -139,26 +84,16 @@ function getPool(npcId, S){
     const list = [
       {
         id: 'spider_moda',
-        text: '"Muita gente estranha minha coleção Outono/Inverno 1987. Mas diga com sinceridade: o que acha do meu estilo?"',
+        key: 'dlg.spider.moda',
+        text: t('dlg.spider.moda'),
         choices: [
-          {
-            label: 'A moda sempre volta, tá incrível',
-            reply: '"Finalmente alguém com bom gosto neste castelo! Toma uns fios de poeira nobre de brinde."',
-            rewardDust: 300
-          },
-          {
-            label: 'Meio mofado, mas quentinho',
-            reply: '"Mofo é apenas o perfume natural do tempo! Você ainda vai me agradecer nos corredores."'
-          }
+          { labelKey: 'dlg.spider.moda.c0', replyKey: 'dlg.spider.moda.r0', label: t('dlg.spider.moda.c0'), reply: t('dlg.spider.moda.r0'), rewardDust: 300 },
+          { labelKey: 'dlg.spider.moda.c1', replyKey: 'dlg.spider.moda.r1', label: t('dlg.spider.moda.c1'), reply: t('dlg.spider.moda.r1') }
         ]
       },
-      {
-        text: '"Oito patas e ainda assim falta braço quando alguém resolve encomendar saco gigante de última hora."'
-      }
+      { key: 'dlg.spider.0', text: t('dlg.spider.0') }
     ];
-    if(S.inventory.bag === 'mala_sotao' || S.inventory.bag === 'bau_sem_fundo'){
-      list.push({ text: '"Com esse recipiente enorme, você já pode sumir por 12 horas sem desperdiçar um único grão."' });
-    }
+    if(S.inventory.bag === 'mala_sotao' || S.inventory.bag === 'bau_sem_fundo') list.push({ key: 'dlg.spider.bag', text: t('dlg.spider.bag') });
     return list;
   }
 
@@ -166,30 +101,17 @@ function getPool(npcId, S){
     const list = [
       {
         id: 'beetle_alquimia',
-        text: '"Todo visitante faz a mesma cara quando vê 10.000 poeiras virarem 1 Poeira Mágica. Quer saber como funciona o processo?"',
+        key: 'dlg.beetle.alq',
+        text: t('dlg.beetle.alq'),
         choices: [
-          {
-            label: 'Sim, me explique a alquimia',
-            reply: '"Pressão, paciência... e um pouco de digestão estratégica. Toma 400 poeiras pela curiosidade científica."',
-            rewardDust: 400
-          },
-          {
-            label: 'Melhor não saber mesmo',
-            reply: '"Decisão extremamente madura. Alguns mistérios brilham mais no escuro. Toma 400 poeiras pelo bom senso."',
-            rewardDust: 400
-          }
+          { labelKey: 'dlg.beetle.alq.c0', replyKey: 'dlg.beetle.alq.r0', label: t('dlg.beetle.alq.c0'), reply: t('dlg.beetle.alq.r0'), rewardDust: 400 },
+          { labelKey: 'dlg.beetle.alq.c1', replyKey: 'dlg.beetle.alq.r1', label: t('dlg.beetle.alq.c1'), reply: t('dlg.beetle.alq.r1'), rewardDust: 400 }
         ]
       },
-      {
-        text: '"Rolo bolas de poeira há séculos. Sísifo teria inveja da minha constância."'
-      }
+      { key: 'dlg.beetle.0', text: t('dlg.beetle.0') }
     ];
-    if(S.key.fragments > 0 && !S.key.complete){
-      list.push({ text: `"Já estamos com ${S.key.fragments}/3 fragmentos. Quando os três se juntarem, o Portão finalmente vai ceder."` });
-    }
-    if(S.key.complete){
-      list.push({ text: '"A Grande Chave está pronta nas suas mãos. Quando abrir aquele Portão, não esqueça de quem rolou poeira com você."' });
-    }
+    if(S.key.fragments > 0 && !S.key.complete) list.push({ key: 'dlg.beetle.frags', vars: { n: S.key.fragments }, text: t('dlg.beetle.frags', { n: S.key.fragments }) });
+    if(S.key.complete) list.push({ key: 'dlg.beetle.done', text: t('dlg.beetle.done') });
     return list;
   }
 
@@ -197,26 +119,15 @@ function getPool(npcId, S){
     return [
       {
         id: 'remote_pilha',
-        text: '"Fui jogado aqui em 2017 porque minha tampa de pilha sumiu. Você já tentou bater na lateral de um controle pra ver se ele volta a funcionar?"',
+        key: 'dlg.remote.pilha',
+        text: t('dlg.remote.pilha'),
         choices: [
-          {
-            label: 'Sempre funciona!',
-            reply: '"Engenharia de impacto brasileira! Toma 1 Meia Solitária que achei aqui entre as almofadas."',
-            rewardSocks: 1
-          },
-          {
-            label: 'Eu troco a pilha direito',
-            reply: '"Que mentira elegante. Mas respeito a postura — leva essa Meia Solitária mesmo assim."',
-            rewardSocks: 1
-          }
+          { labelKey: 'dlg.remote.pilha.c0', replyKey: 'dlg.remote.pilha.r0', label: t('dlg.remote.pilha.c0'), reply: t('dlg.remote.pilha.r0'), rewardSocks: 1 },
+          { labelKey: 'dlg.remote.pilha.c1', replyKey: 'dlg.remote.pilha.r1', label: t('dlg.remote.pilha.c1'), reply: t('dlg.remote.pilha.r1'), rewardSocks: 1 }
         ]
       },
-      {
-        text: '"Tudo que escorrega entre as almofadas do sofá termina aqui. Já vi 43 moedas, 12 tampas de caneta e uma fatia seca de pizza."'
-      },
-      {
-        text: '"Outro dia caiu aqui um perfil inteiro do Orkut cheio de depoimentos \'não aceita\', um CD do Nero e uma conta do MSN com status Ocupado desde 2011."'
-      }
+      { key: 'dlg.remote.0', text: t('dlg.remote.0') },
+      { key: 'dlg.remote.1', text: t('dlg.remote.1') }
     ];
   }
 
@@ -224,26 +135,15 @@ function getPool(npcId, S){
     return [
       {
         id: 'guitar_corda',
-        text: '"Me compraram em janeiro com a promessa de aprender Legião Urbana até o Carnaval. A corda Mi estourou no dia 4 e nunca mais me tocaram."',
+        key: 'dlg.guitar.corda',
+        text: t('dlg.guitar.corda'),
         choices: [
-          {
-            label: 'Eu também tenho um violão assim',
-            reply: '"Somos todos sobreviventes de janeiro! Toma 1 Meia Solitária pela solidariedade musical."',
-            rewardSocks: 1
-          },
-          {
-            label: 'Pelo menos você virou decoração',
-            reply: '"Decoração empoeirada de alto valor emocional! Toma 1 Meia Solitária por me fazer rir."',
-            rewardSocks: 1
-          }
+          { labelKey: 'dlg.guitar.corda.c0', replyKey: 'dlg.guitar.corda.r0', label: t('dlg.guitar.corda.c0'), reply: t('dlg.guitar.corda.r0'), rewardSocks: 1 },
+          { labelKey: 'dlg.guitar.corda.c1', replyKey: 'dlg.guitar.corda.r1', label: t('dlg.guitar.corda.c1'), reply: t('dlg.guitar.corda.r1'), rewardSocks: 1 }
         ]
       },
-      {
-        text: '"Lá no fundo deste sótão vive a Promessa de Segunda-Feira. Se você derrotar ela nos Corredores, dizem que ela guarda uma engrenagem da Torre."'
-      },
-      {
-        text: '"Na prateleira do fundo tem um pé-de-cabra enferrujado, uma arma de portais sem bateria e uma caixa de doces — todos esperando o número 3 que nunca chegou."'
-      }
+      { key: 'dlg.guitar.0', text: t('dlg.guitar.0') },
+      { key: 'dlg.guitar.1', text: t('dlg.guitar.1') }
     ];
   }
 
