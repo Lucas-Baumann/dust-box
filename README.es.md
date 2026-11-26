@@ -72,7 +72,7 @@ Luego simplemente abre `index.html` en tu navegador favorito.
    ]
    ```
 
-Más detalles en [`TRANSLATING.md`](./TRANSLATING.md). En cuanto se apruebe el PR en `main`, GitHub Pages publicará tu traducción automáticamente.
+Más detalles en [`TRANSLATING.es.md`](./TRANSLATING.es.md). En cuanto se apruebe el PR en `main`, GitHub Pages publicará tu traducción automáticamente.
 
 ---
 

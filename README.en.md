@@ -72,7 +72,7 @@ Want to add your language to the **`hover trans`** bubble (without ever breaking
    ]
    ```
 
-See [`TRANSLATING.md`](./TRANSLATING.md) for details. Once your PR is merged into `main`, GitHub Pages publishes it automatically!
+See [`TRANSLATING.en.md`](./TRANSLATING.en.md) for details. Once your PR is merged into `main`, GitHub Pages publishes it automatically!
 
 ---
 
