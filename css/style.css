@@ -494,6 +494,30 @@ button.cmd.subtle:hover:not(:disabled) { border-color: var(--ink); color: var(--
   color: #fff;
 }
 
+/* Balao flutuante de traducao no hover (estilo Candy Box 2) */
+.tr-bubble {
+  position: fixed;
+  z-index: 1100;
+  max-width: min(440px, 90vw);
+  padding: 8px 12px;
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  pointer-events: none;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.9);
+  text-align: left;
+}
+.tr-bubble.hidden { display: none; }
+body.hover-tr-on [data-tr] {
+  border-bottom: 1px dotted var(--faint);
+}
+body.hover-tr-on button[data-tr] {
+  border-bottom-style: solid;
+}
+
 .hpbar {
   display: inline-block;
   width: 140px;

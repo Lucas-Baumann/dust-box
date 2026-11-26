@@ -8,30 +8,33 @@
 </head>
 <body>
 <div id="toast" class="toast hidden" aria-live="polite"></div>
+<div id="tr-bubble" class="tr-bubble hidden" role="tooltip"></div>
 <button class="dbgbtn" id="dbgbtn" onclick="if(window.Game)Game.debug.addDust()" title="debug: +1000 poeira (Ctrl+Shift+D para ocultar)">+1000</button>
 <div id="boot">
   <h1>DUST BOX<span id="title-cursor" class="blink" style="cursor:pointer">_</span></h1>
   <div id="stats">
-    <span id="s-dust">POEIRA: <b id="stat-dust">0</b><span id="stat-max" class="muted"></span></span>
-    <span id="s-magic">MÁGICA: <b id="stat-magic">0</b></span>
-    <span id="s-socks">MEIAS: <b id="stat-socks">0</b></span>
-    <span id="s-ps">P/s: <b id="stat-ps">1.00</b></span>
-    <span id="s-hp">HP: <span class="hpbar"><span id="hp-fill" style="width:100%"></span></span> <b id="stat-hp">100/100</b></span>
-    <span id="s-atk">ATK: <b id="stat-atk">2</b></span>
+    <span id="s-dust"><span data-i18n="hud.dust">POEIRA:</span> <b id="stat-dust">0</b><span id="stat-max" class="muted"></span></span>
+    <span id="s-magic"><span data-i18n="hud.magic">MÁGICA:</span> <b id="stat-magic">0</b></span>
+    <span id="s-socks"><span data-i18n="hud.socks">MEIAS:</span> <b id="stat-socks">0</b></span>
+    <span id="s-ps"><span data-i18n="hud.ps">P/s:</span> <b id="stat-ps">1.00</b></span>
+    <span id="s-hp"><span data-i18n="hud.hp">HP:</span> <span class="hpbar"><span id="hp-fill" style="width:100%"></span></span> <b id="stat-hp">100/100</b></span>
+    <span id="s-atk"><span data-i18n="hud.atk">ATK:</span> <b id="stat-atk">2</b></span>
   </div>
   <nav id="tabs"></nav>
   <div id="content"><pre>carregando poeira...</pre></div>
   <div id="feedback" class="feedback" aria-live="polite"></div>
 </div>
 <div id="footer">
-  <span class="footer-note">autosave automático a cada 5s — deixe a aba aberta e vá viver</span>
+  <span class="footer-note" data-i18n="footer.note">autosave automático a cada 5s — deixe a aba aberta e vá viver</span>
   <span class="footer-actions">
-    <button id="btn-save">salvar</button>
-    <button id="btn-export">exportar</button>
-    <button id="btn-import">importar</button>
+    <button id="btn-save" data-i18n="footer.save">salvar</button>
+    <button id="btn-export" data-i18n="footer.export">exportar</button>
+    <button id="btn-import" data-i18n="footer.import">importar</button>
+    <button id="btn-lang" title="Alternar idioma principal do jogo">idioma: pt</button>
+    <button id="btn-hover-lang" title="Mostra a tradução em um balão acima do texto ao passar o mouse">trad. hover: off</button>
     <button id="btn-theme">tema: mono</button>
     <button id="btn-sound">som: off</button>
-    <button id="btn-reset">resetar</button>
+    <button id="btn-reset" data-i18n="footer.reset">resetar</button>
   </span>
 </div>
 
@@ -48,6 +51,10 @@
     </div>
   </div>
 </div>
+<script src="js/i18n.js"></script>
+<script src="js/lang/pt.js"></script>
+<script src="js/lang/en.js"></script>
+<script src="js/lang/es.js"></script>
 <script src="js/data.js"></script>
 <script src="js/art.js"></script>
 <script src="js/dialogues.js"></script>

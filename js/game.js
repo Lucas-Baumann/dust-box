@@ -13,6 +13,10 @@ const {
 const ART = window.DustArt;
 const DIALOGUES = window.DustDialogues;
 const PUZZLES = window.DustPuzzles;
+const I18n = window.DustI18n;
+const t = (k, v, fb) => I18n ? I18n.t(k, v, fb) : (fb || k);
+const tx = (k, v, fb) => I18n ? I18n.tx(k, v, fb) : esc(fb || k);
+const trAttr = (k, v) => I18n ? I18n.trAttr(k, v) : '';
 
 function defaultState(){
   return {
@@ -141,8 +145,8 @@ function hasSkillUnlocked(id){
   return !!(sk && (!sk.reqWeapon || hasWeaponTier(sk.reqWeapon)));
 }
 
-/* ---------- preferencias, tema e som ---------- */
-let prefs = { theme: 0, sound: false };
+/* ---------- preferencias, idioma, tema e som ---------- */
+let prefs = { theme: 0, sound: false, lang: 'pt', hoverLang: 'off' };
 let audioCtx = null;
 
 function loadPrefs(){
@@ -152,18 +156,61 @@ function loadPrefs(){
       const p = JSON.parse(raw);
       if(typeof p.theme === 'number' && p.theme >= 0 && p.theme < THEMES.length) prefs.theme = p.theme;
       prefs.sound = !!p.sound;
+      if(typeof p.lang === 'string' && I18n && I18n.VANILLA_LANGS.includes(p.lang)) prefs.lang = p.lang;
+      if(typeof p.hoverLang === 'string') prefs.hoverLang = p.hoverLang;
     }
   } catch(e){}
+  if(I18n){
+    I18n.setLang(prefs.lang);
+    I18n.setHoverLang(prefs.hoverLang);
+  }
 }
 function savePrefs(){
   try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)); } catch(e){}
 }
+function applyLangUI(){
+  if(I18n){
+    I18n.setLang(prefs.lang);
+    I18n.applyStatic();
+  }
+  document.body.classList.toggle('hover-tr-on', prefs.hoverLang !== 'off');
+  const bLang = document.getElementById('btn-lang');
+  if(bLang) bLang.textContent = t('footer.lang', { v: prefs.lang });
+  const bHover = document.getElementById('btn-hover-lang');
+  if(bHover) bHover.textContent = t('footer.hover', { v: I18n ? I18n.getHoverLabel() : prefs.hoverLang });
+  applyTheme();
+  applySoundLabel();
+}
+function cycleLang(){
+  if(!I18n) return;
+  const list = I18n.VANILLA_LANGS;
+  const idx = (list.indexOf(prefs.lang) + 1) % list.length;
+  prefs.lang = list[idx];
+  I18n.setLang(prefs.lang);
+  savePrefs();
+  applyLangUI();
+  render();
+  sfx('click');
+}
+function cycleHoverLang(){
+  if(!I18n) return;
+  const opts = I18n.getHoverOptions();
+  const curIdx = opts.findIndex(o => o.code === prefs.hoverLang);
+  const next = opts[(curIdx + 1) % opts.length];
+  prefs.hoverLang = next.code;
+  savePrefs();
+  I18n.setHoverLang(prefs.hoverLang, () => {
+    applyLangUI();
+    render();
+  });
+  sfx('click');
+}
 function applyTheme(){
-  const t = THEMES[prefs.theme] || THEMES[0];
+  const tObj = THEMES[prefs.theme] || THEMES[0];
   document.body.classList.remove('theme-green', 'theme-amber', 'crt');
-  t.classes.forEach(cls => document.body.classList.add(cls));
+  tObj.classes.forEach(cls => document.body.classList.add(cls));
   const btn = document.getElementById('btn-theme');
-  if(btn) btn.textContent = `tema: ${t.label}`;
+  if(btn) btn.textContent = t('footer.theme', { v: tObj.label });
 }
 function cycleTheme(){
   prefs.theme = (prefs.theme + 1) % THEMES.length;
@@ -173,7 +220,7 @@ function cycleTheme(){
 }
 function applySoundLabel(){
   const btn = document.getElementById('btn-sound');
-  if(btn) btn.textContent = `som: ${prefs.sound ? 'on' : 'off'}`;
+  if(btn) btn.textContent = t('footer.sound', { v: prefs.sound ? 'on' : 'off' });
 }
 function toggleSound(){
   prefs.sound = !prefs.sound;
@@ -384,7 +431,7 @@ function renderNpcTalkControls(npcId){
       h += `<button class="cmd" onclick="Game.chooseDialogue('${npcId}',${idx})">${esc(ch.label)}</button>`;
     });
   } else {
-    h += `<button class="cmd subtle" onclick="Game.talkNpc('${npcId}')">Conversar</button>`;
+    h += `<button class="cmd subtle"${trAttr('btn.talk')} onclick="Game.talkNpc('${npcId}')">${esc(t('btn.talk'))}</button>`;
   }
   h += `</div>`;
   return h;
@@ -412,7 +459,7 @@ function wrapLines(text, maxWidth){
   return out;
 }
 
-function speechBubble(text, maxWidth, secretWord, secretFn){
+function speechBubble(text, maxWidth, secretWord, secretFn, trKey){
   const lines = wrapLines(text, maxWidth || 44);
   const w = Math.max(12, ...lines.map(l => l.length));
   const top = ' .' + '-'.repeat(w + 2) + '.';
@@ -426,7 +473,8 @@ function speechBubble(text, maxWidth, secretWord, secretFn){
     const re = new RegExp(esc(secretWord));
     html = html.replace(re, `<span class="secret-word" onclick="${secretFn}">${esc(secretWord)}</span>`);
   }
-  return `<pre class="speech-bubble">${html}</pre>`;
+  const attr = trKey ? trAttr(trKey) : '';
+  return `<pre class="speech-bubble"${attr}>${html}</pre>`;
 }
 
 function fmt(n){
@@ -1558,15 +1606,15 @@ function setMapHint(text){
 
 /* ---------- render ---------- */
 function tabs(){
-  const t = [];
-  t.push({id:'quarto', label:'[ Quarto ]'});
-  if(S.unlocks.outOfRoom) t.push({id:'hall', label:'[ Hall ]'});
-  if(S.unlocks.outOfRoom) t.push({id:'inventario', label:'[ Inventário ]'});
-  if(S.unlocks.hasMap) t.push({id:'mapa', label:'[ Mapa ]'});
-  if(S.unlocks.act2) t.push({id:'desvao', label:'[ Desvão ]'});
-  if(S.unlocks.outOfRoom) t.push({id:'aventura', label:'[ Aventura ]'});
-  if(S.unlocks.hasCompendium) t.push({id:'compendio', label:'[ Compêndio ]'});
-  return t;
+  const list = [];
+  list.push({id:'quarto', key:'tab.quarto', label: t('tab.quarto')});
+  if(S.unlocks.outOfRoom) list.push({id:'hall', key:'tab.hall', label: t('tab.hall')});
+  if(S.unlocks.outOfRoom) list.push({id:'inventario', key:'tab.inventario', label: t('tab.inventario')});
+  if(S.unlocks.hasMap) list.push({id:'mapa', key:'tab.mapa', label: t('tab.mapa')});
+  if(S.unlocks.act2) list.push({id:'desvao', key:'tab.desvao', label: t('tab.desvao')});
+  if(S.unlocks.outOfRoom) list.push({id:'aventura', key:'tab.aventura', label: t('tab.aventura')});
+  if(S.unlocks.hasCompendium) list.push({id:'compendio', key:'tab.compendio', label: t('tab.compendio')});
+  return list;
 }
 
 function paintStats(){
@@ -1602,6 +1650,8 @@ function render(){
   tabs().forEach((tb, idx)=>{
     const b = document.createElement('button');
     b.innerHTML = `${esc(tb.label)}<span class="tab-key">${idx+1}</span>`;
+    const hv = I18n ? I18n.th(tb.key) : null;
+    if(hv && b.setAttribute) b.setAttribute('data-tr', hv);
     if(S.ui.tab === tb.id) b.className = 'active';
     b.onclick = ()=>{ sfx('click'); go(tb.id); };
     nav.appendChild(b);
@@ -1687,35 +1737,12 @@ function renderIntro(){
   const n = S.intro.cleans;
   uiEphemeral.lastIntroReady = d >= 20;
 
-  const T = {
-    0: [
-      'Você acorda no escuro, sem cama e sem lar,',
-      'num quarto esquecido que ninguém quis limpar.',
-      'Só cai poeira do teto, num lento bailar:',
-      'um grão por segundo... e você põe-se a contar.'
-    ],
-    1: [
-      'Você bate na roupa e sacode a poeira,',
-      'mas ela retorna de forma certeira.',
-      'Grão sobre grão, num compasso profundo —',
-      'agora você vê o seu ritmo no mundo.'
-    ],
-    2: [
-      'Mais uma faxina, e o ciclo insiste:',
-      'quanto mais você limpa, mais sujeira existe.',
-      'Seu pulso desperta, o corpo responde —',
-      'há vida na tela... mas o perigo se esconde.'
-    ]
-  };
-  const BT = {
-    0: 'Limpar a poeira da roupa',
-    1: 'Jogar a poeira no chão',
-    2: 'Sacudir os ombros uma última vez'
-  };
   if(n >= 3){ S.intro.done = true; render(); return; }
-  let h = `<div class="stage intro-text"><pre>${esc(T[n].join('\n'))}</pre>`;
+  const stanzaKey = `intro.${n}`;
+  const btnKey = `intro.btn.${n}`;
+  let h = `<div class="stage intro-text"><pre${trAttr(stanzaKey)}>${esc(t(stanzaKey))}</pre>`;
   h += d >= 20
-    ? `<div class="actions"><button class="cmd" onclick="Game.cleanBody()">${BT[n]}</button></div>`
+    ? `<div class="actions"><button class="cmd"${trAttr(btnKey)} onclick="Game.cleanBody()">${esc(t(btnKey))}</button></div>`
     : `<pre id="intro-counter" class="muted">\n[${d}/20]</pre>`;
   h += `</div>`;
   c.innerHTML = h;
@@ -1740,33 +1767,33 @@ function cleanBody(){
 function viewQuarto(){
   const seenRat = S.intro.done && (S.resources.dust >= 20 || S.flags.rat);
   uiEphemeral.lastRatVisible = seenRat;
-  let h = `<div class="stage"><div class="scene-title">— O Quarto Inicial —</div>`;
+  let h = `<div class="stage"><div class="scene-title">${tx('scene.quarto')}</div>`;
   if(!seenRat){
-    h += `<div class="scene-text">A barra no alto pisca números sozinha.<br>O quarto continua escuro, mas agora você sabe:<br><br><b>. . . P O E I R A . . .</b><br><br>Ela cai. Você conta. É assim que funciona aqui.</div>`;
-    h += `<div class="muted">o silêncio pesa na penumbra...</div>`;
+    h += `<div class="scene-text"><pre style="white-space:pre-wrap"${trAttr('scene.quarto.dark')}>${esc(t('scene.quarto.dark'))}</pre></div>`;
+    h += `<div class="muted">${tx('scene.quarto.silence')}</div>`;
   } else {
     if(!S.flags.rat){
       S.flags.rat = true;
       showToast('Um Rato Filósofo surgiu da penumbra!');
     }
-    const speech = uiEphemeral.npcSpeech.rat ||
-      '"O tempo passa, a poeira acumula.\nVocê está estático... mas a sujeira jamais para."';
-    h += speechBubble(speech, 42);
+    const hasCustom = !!uiEphemeral.npcSpeech.rat;
+    const speech = uiEphemeral.npcSpeech.rat || t('scene.rat.default');
+    h += speechBubble(speech, 42, null, null, hasCustom ? null : 'scene.rat.default');
     h += `<pre class="ascii-art npc-idle" style="cursor:pointer" onclick="Game.pokeRat()">${esc(ART.rat)}</pre>`;
-    h += `<div class="muted">Rato Filósofo — provavelmente formado em algo inútil</div>`;
+    h += `<div class="muted">${tx('scene.rat.title')}</div>`;
     h += renderNpcTalkControls('rat');
     h += `<div class="box">`;
     if(!S.unlocks.outOfRoom){
-      h += `<div class="scene-text">A porta range. As dobradiças pedem <b>100 Poeiras</b> de lubrificante.</div>
+      h += `<div class="scene-text">${tx('scene.quarto.door')}</div>
       <div class="actions">
-        <button class="cmd" data-cost="100" onclick="Game.lubricate()" ${S.resources.dust<100?'disabled':''}>Lubrificar dobradiças (100 poeira)</button>
+        <button class="cmd"${trAttr('scene.quarto.lubricate')} data-cost="100" onclick="Game.lubricate()" ${S.resources.dust<100?'disabled':''}>${esc(t('scene.quarto.lubricate'))}</button>
       </div>
-      <div class="muted">você tem <span id="dyn-dust">${fmt(Math.floor(S.resources.dust))}</span> poeira</div>`;
+      <div class="muted"><span id="dyn-dust">${fmt(Math.floor(S.resources.dust))}</span> / 100</div>`;
     } else {
-      h += `<div class="muted">A porta está aberta. Lá fora: responsabilidade e um castelo.</div>
+      h += `<div class="muted">${tx('scene.quarto.open')}</div>
       <div class="actions">
-        <button class="cmd" onclick="Game.go('hall')">Ir ao Hall Principal -&gt;</button>
-        <button class="cmd" onclick="Game.rest()" ${S.combat.active?'disabled':''}>Deitar no chão (curar HP)</button>
+        <button class="cmd"${trAttr('scene.quarto.go_hall')} onclick="Game.go('hall')">${esc(t('scene.quarto.go_hall'))}</button>
+        <button class="cmd"${trAttr('scene.quarto.lie_down')} onclick="Game.rest()" ${S.combat.active?'disabled':''}>${esc(t('scene.quarto.lie_down'))}</button>
       </div>
       <div class="muted">HP: <span id="dyn-hp">${Math.ceil(S.player.hp)}/${S.player.maxHp}</span></div>`;
     }
@@ -1777,14 +1804,14 @@ function viewQuarto(){
 }
 
 function viewHall(){
-  const speech = uiEphemeral.npcSpeech.moth ||
-    '"Nham... poeira de excelente qualidade! Tudo no mundo real que fica parado acaba caindo aqui dentro do Castelo da Poeira Eterna."';
-  let h = `<div class="stage"><div class="scene-title">— Hall Principal — A Traça Gigante —</div>`;
-  h += speechBubble(speech, 46);
+  const hasCustom = !!uiEphemeral.npcSpeech.moth;
+  const speech = uiEphemeral.npcSpeech.moth || t('scene.moth.default');
+  let h = `<div class="stage"><div class="scene-title">${tx('scene.hall')}</div>`;
+  h += speechBubble(speech, 46, null, null, hasCustom ? null : 'scene.moth.default');
   h += `<pre class="ascii-art npc-idle">${esc(ART.moth)}</pre>`;
   h += renderNpcTalkControls('moth');
 
-  h += `<div class="box"><span class="box-title">— LOJA DA TRAÇA —</span>`;
+  h += `<div class="box"><span class="box-title">${tx('scene.hall.shop')}</span>`;
   const has = (x)=> S.inventory.items.includes(x) || (x in WEAPONS && hasWeaponTier(x)) || hasTool(x);
   const item = (id, name, price, desc)=>{
     const owned = has(id);
@@ -1801,17 +1828,17 @@ function viewHall(){
   h += `<div class="shop-item"><b>${cha.name}</b> <span class="muted">(você tem x${chaQty})</span> — <b>${cha.price} poeira</b><br><span class="muted">${cha.effect}. ${cha.desc}</span><br><button class="cmd" data-cost="${cha.price}" onclick="Game.buyPotion('cha_poeira',1)" ${S.resources.dust<cha.price?'disabled':''}>Comprar x1</button><button class="cmd" data-cost="${cha.price*5}" onclick="Game.buyPotion('cha_poeira',5)" ${S.resources.dust<cha.price*5?'disabled':''}>+5 (${fmt(cha.price*5)})</button></div>`;
   h += `</div>`;
 
-  h += `<div class="box"><span class="box-title">— MELHORIAS DO CASTELO —</span><div class="muted">compre sujeira para atrair mais sujeira. Economia circular.</div>`;
+  h += `<div class="box"><span class="box-title">${tx('scene.hall.upgrades')}</span><div class="muted">${tx('scene.hall.upgrades_sub')}</div>`;
   for(const k in ACCELS){
     const a = ACCELS[k], owned = S.accelerators[k]||0, cost = accelCost(k);
-    h += `<div class="shop-item"><b>${a.name}</b> x${owned}<br><span class="muted">${a.desc} (+${a.bonus} P/s cada)</span><br>
-    <button class="cmd" data-cost="${cost}" onclick="Game.buyAccel('${k}')" ${S.resources.dust<cost?'disabled':''}>Comprar (${fmt(cost)} poeira)</button></div>`;
+    h += `<div class="shop-item"><b>${a.name}</b> x${owned}<br><span class="muted">${a.desc} (+${a.bonus} P/s)</span><br>
+    <button class="cmd"${trAttr('btn.buy')} data-cost="${cost}" onclick="Game.buyAccel('${k}')" ${S.resources.dust<cost?'disabled':''}>${esc(t('btn.buy'))} (${fmt(cost)})</button></div>`;
   }
   h += `</div>`;
 
   h += `<div class="actions">`;
-  if(S.unlocks.hasMap) h += `<button class="cmd" onclick="Game.go('mapa')">Abrir Mapa do Castelo -&gt;</button>`;
-  h += `<button class="cmd" onclick="Game.go('aventura')">Corredores de Batalha -&gt;</button></div></div>`;
+  if(S.unlocks.hasMap) h += `<button class="cmd"${trAttr('scene.hall.open_map')} onclick="Game.go('mapa')">${esc(t('scene.hall.open_map'))}</button>`;
+  h += `<button class="cmd"${trAttr('scene.hall.go_battle')} onclick="Game.go('aventura')">${esc(t('scene.hall.go_battle'))}</button></div></div>`;
   return h;
 }
 
@@ -1824,9 +1851,9 @@ function viewInventario(){
   const totalAch = Object.keys(ACHIEVEMENT_INFO).length;
   const gearCount = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
 
-  let h = `<div class="stage"><div class="scene-title">— Inventário —</div><div class="inv-grid">`;
+  let h = `<div class="stage"><div class="scene-title">${tx('inv.title')}</div><div class="inv-grid">`;
 
-  h += `<div class="inv-card"><div class="inv-card-title">Equipamento</div>
+  h += `<div class="inv-card"><div class="inv-card-title">${tx('inv.equip')}</div>
     <div class="inv-row"><span>Arma</span><b>${w?w.name:'(desarmado)'}</b></div>
     <div class="muted" style="font-size:12px;margin-bottom:6px">${w ? `+${w.atk} ATK · ${w.passive}` : '+0 ATK'}</div>
     <div class="inv-row"><span>Armadura</span><b>${a?a.name:'—'}</b></div>
@@ -1900,15 +1927,17 @@ function mapBtn(label, sub, hint, locked){
 }
 
 function viewMapa(){
-  const bHall    = mapBtn('[Hall]',       'hall',    'Hall Principal — Traça Gigante');
-  const bOeste   = mapBtn('[Oeste]',      'oeste',   'Asa Oeste — Aranha Alfaiate');
-  const bLeste   = mapBtn('[Leste]',      'leste',   'Asa Leste — Cupim Marceneiro');
-  const bGaleria = mapBtn('[Galeria]',    'galeria', 'Galeria dos Esquecidos — portas e câmaras ocultas');
-  const bAvent   = `<button class="map-node" onclick="Game.go('aventura')" onmouseenter="Game.setMapHint('Corredores — expedições de combate')" onfocus="Game.setMapHint('Corredores — expedições de combate')">[Corredores]</button>`;
-  const bQuarto  = `<button class="map-node" onclick="Game.go('quarto')" onmouseenter="Game.setMapHint('O Quarto Inicial — Rato Filósofo')" onfocus="Game.setMapHint('O Quarto Inicial — Rato Filósofo')">[Quarto]</button>`;
-  const bPortao  = mapBtn('[Portão]',     'portao',  S.key.complete ? 'O Portão Principal — você tem a Grande Chave!' : 'O Portão Principal — trancado');
+  const bHall    = mapBtn('[Hall]',       'hall',    t('map.hall'));
+  const bOeste   = mapBtn('[Oeste]',      'oeste',   t('map.oeste'));
+  const bLeste   = mapBtn('[Leste]',      'leste',   t('map.leste'));
+  const bGaleria = mapBtn('[Galeria]',    'galeria', t('map.galeria'));
+  const hCor     = esc(t('map.corredores')).replace(/'/g, '&#39;');
+  const hQua     = esc(t('map.quarto')).replace(/'/g, '&#39;');
+  const bAvent   = `<button class="map-node" onclick="Game.go('aventura')" onmouseenter="Game.setMapHint('${hCor}')" onfocus="Game.setMapHint('${hCor}')">[Corredores]</button>`;
+  const bQuarto  = `<button class="map-node" onclick="Game.go('quarto')" onmouseenter="Game.setMapHint('${hQua}')" onfocus="Game.setMapHint('${hQua}')">[Quarto]</button>`;
+  const bPortao  = mapBtn('[Portão]',     'portao',  S.key.complete ? t('map.portao_open') : t('map.portao_lock'));
   const bPorao   = mapBtn(S.unlocks.hasLantern ? '[Porão]' : '[Porão?]', 'porao',
-    S.unlocks.hasLantern ? 'Porão Obscuro — Besouro Rola-Poeira' : 'Porão Obscuro — escuro demais para enxergar',
+    S.unlocks.hasLantern ? t('map.porao_open') : t('map.porao_lock'),
     !S.unlocks.hasLantern);
 
   const castle = [
@@ -1936,9 +1965,9 @@ function viewMapa(){
     `                 ' ~ . .. . ~ '`
   ].join('\n');
 
-  let h = `<div class="stage"><div class="scene-title">— Castelo da Poeira Eterna —</div>`;
+  let h = `<div class="stage"><div class="scene-title">${tx('scene.mapa')}</div>`;
   h += `<pre class="map-ascii">${castle}</pre>`;
-  h += `<div id="map-hint" class="map-hint">passe o mouse sobre o castelo para explorar</div>`;
+  h += `<div id="map-hint" class="map-hint">${tx('scene.mapa.hint')}</div>`;
   h += `</div>`;
   return h;
 }
@@ -2138,13 +2167,14 @@ function desvaoBtn(label, sub, hint){
 }
 
 function viewDesvao(){
-  const bTorre   = desvaoBtn('[Torre]',     'torre',     'Torre do Relógio Parado — onde o tempo vira poeira');
-  const bSofa    = desvaoBtn('[Sofá]',      'sofa',      'O Fundo do Sofá — almofadas, meias e relíquias');
-  const bSotao   = desvaoBtn('[Sótão]',     'sotao',     'Sótão das Promessas de Janeiro — metas esquecidas');
-  const bGaveta  = desvaoBtn('[Gaveta]',    'gaveta',    'Gaveta dos Cabos Emaranhados — e o Cemitério de Eletrônicos');
-  const bRadio   = desvaoBtn('[Rádio]',     'radio',     'Rádio Velho — capta sinais de outra década');
-  const bLab     = desvaoBtn('[Labirinto]', 'labirinto', 'Labirinto da Meia Perdida — exploração no escuro');
-  const bCastelo = `<button class="map-node" onclick="Game.go('mapa')" onmouseenter="Game.setMapHint('Voltar ao Castelo da Poeira Eterna')" onfocus="Game.setMapHint('Voltar ao Castelo da Poeira Eterna')">[Castelo]</button>`;
+  const bTorre   = desvaoBtn('[Torre]',     'torre',     t('map.torre'));
+  const bSofa    = desvaoBtn('[Sofá]',      'sofa',      t('map.sofa'));
+  const bSotao   = desvaoBtn('[Sótão]',     'sotao',     t('map.sotao'));
+  const bGaveta  = desvaoBtn('[Gaveta]',    'gaveta',    t('map.gaveta'));
+  const bRadio   = desvaoBtn('[Rádio]',     'radio',     t('map.radio'));
+  const bLab     = desvaoBtn('[Labirinto]', 'labirinto', t('map.labirinto'));
+  const hCast    = esc(t('map.castelo')).replace(/'/g, '&#39;');
+  const bCastelo = `<button class="map-node" onclick="Game.go('mapa')" onmouseenter="Game.setMapHint('${hCast}')" onfocus="Game.setMapHint('${hCast}')">[Castelo]</button>`;
 
   const world = [
     `                          /\\`,
@@ -2164,10 +2194,10 @@ function viewDesvao(){
   ].join('\n');
 
   const gearCount = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
-  let h = `<div class="stage"><div class="scene-title">— Ato II: O Desvão do Mundo —</div>`;
+  let h = `<div class="stage"><div class="scene-title">${tx('scene.desvao')}</div>`;
   h += `<pre class="map-ascii">${world}</pre>`;
-  h += `<div id="map-hint" class="map-hint">tudo que o mundo real esqueceu acabou vindo parar aqui</div>`;
-  h += `<div class="muted" style="margin-top:6px">Engrenagens do Relógio: <b>${gearCount}/2</b></div></div>`;
+  h += `<div id="map-hint" class="map-hint">${tx('scene.desvao.hint')}</div>`;
+  h += `<div class="muted" style="margin-top:6px">Engrenagens: <b>${gearCount}/2</b></div></div>`;
   return h;
 }
 
@@ -2367,18 +2397,17 @@ function viewDesvaoSub(sub){
 function viewEnding(){
   const isAsp = S.unlocks.ending === 'aspirador';
   const art = isAsp ? ART.vacuumEnding : ART.throneEnding;
-  const title = isAsp ? 'FINAL A — FAXINA CÓSMICA' : 'FINAL B — MONARCA DO ÓCIO';
-  const body = isAsp
-    ? `Você aperta o botão do GRANDE ASPIRADOR.\n\nO zumbido ecoa pelo Castelo e pelo Desvão.\nO Rato acena com seu lenço. A Traça deixa cair uma última pitada de brilho.\nO Cupim, a Aranha, o Besouro, o Controle e o Violão viram luz cinzenta.\n\nVocê pisca — e está de volta na cadeira, diante do computador.\nO relógio marca 12:00.\n\nNo canto do monitor, repousa um único grão de poeira... e um bilhete:\n"Quando você deixar algo para segunda-feira, a gente se vê de novo." — Rato`
-    : `Você desliga o Grande Aspirador e se senta no TRONO DA POEIRA.\n\nO relógio bate 12:00, mas aqui ninguém tem pressa.\nO Rato abre um livro no capítulo 1. A Traça serve chá cinzento.\nO Vira-Lata Caramelo dorme aos pés do trono.\n\n"Ninguém precisa ser produtivo hoje."\nVocê recebeu a Coroa de Poeira (+50% P/s permanente neste ciclo)!`;
+  const titleKey = isAsp ? 'end.vac.title' : 'end.throne.title';
+  const bodyKey = isAsp ? 'end.vac.body' : 'end.throne.body';
+  const ngN = (S.ngPlus || 0) + 1;
 
-  return `<div class="stage"><div class="scene-title">— ${title} —</div>
+  return `<div class="stage"><div class="scene-title">— ${tx(titleKey)} —</div>
   <pre class="ascii-art">${esc(art)}</pre>
-  <div class="box"><pre style="white-space:pre-wrap;text-align:center">${esc(body)}</pre><br>
-  <div class="muted">Poeira total: ${fmt(Math.floor(S.resources.totalEarned))} · Abates: ${S.combat.kills} · Conquistas: ${S.achievements.length}/${Object.keys(ACHIEVEMENT_INFO).length} · Segredos: ${S.secrets.length}/${Object.keys(SECRETS).length}</div>
+  <div class="box"><pre style="white-space:pre-wrap;text-align:center"${trAttr(bodyKey)}>${esc(t(bodyKey))}</pre><br>
+  <div class="muted">${fmt(Math.floor(S.resources.totalEarned))} · ${S.combat.kills} · ${S.achievements.length}/${Object.keys(ACHIEVEMENT_INFO).length} · ${S.secrets.length}/${Object.keys(SECRETS).length}</div>
   <div class="actions" style="margin-top:14px">
-    <button class="cmd" onclick="Game.continueAfterEnding()">Continuar explorando</button>
-    <button class="cmd" onclick="if(confirm('Iniciar Novo Jogo+? Você mantém Conquistas, Segredos e Compêndio e ganha +100% P/s e +30% ATK permanentes!')) Game.startNewGamePlus()">Iniciar Novo Jogo+ (NG+${(S.ngPlus||0)+1})</button>
+    <button class="cmd"${trAttr('end.continue')} onclick="Game.continueAfterEnding()">${esc(t('end.continue'))}</button>
+    <button class="cmd"${trAttr('end.ngplus', { n: ngN })} onclick="if(confirm('Iniciar Novo Jogo+?')) Game.startNewGamePlus()">${esc(t('end.ngplus', { n: ngN }))}</button>
   </div></div></div>`;
 }
 
@@ -2392,8 +2421,8 @@ function viewAventura(){
   let h = `<div class="stage"><div class="scene-title">— ${esc(zone.name)} —</div>`;
   if(S.unlocks.act2){
     h += `<div class="zone-tabs">
-      <button class="zone-btn${realm==='castelo'?' active':''}" onclick="Game.selectRealm('castelo')" ${c.active?'disabled':''}>Castelo (1–3)</button>
-      <button class="zone-btn${realm==='desvao'?' active':''}" onclick="Game.selectRealm('desvao')" ${c.active?'disabled':''}>Desvão (4–7)</button>
+      <button class="zone-btn${realm==='castelo'?' active':''}"${trAttr('adv.castle')} onclick="Game.selectRealm('castelo')" ${c.active?'disabled':''}>${esc(t('adv.castle'))}</button>
+      <button class="zone-btn${realm==='desvao'?' active':''}"${trAttr('adv.desvao')} onclick="Game.selectRealm('desvao')" ${c.active?'disabled':''}>${esc(t('adv.desvao'))}</button>
     </div>`;
   }
   h += `<div class="zone-tabs">`;
@@ -2408,14 +2437,14 @@ function viewAventura(){
   h += `<div class="muted">Arma: <b>${w?w.name:'(desarmado)'}</b> (ATK ${S.player.attack}) — Abates: ${c.kills} — Loop ${loop}</div>`;
   h += `<div class="actions">`;
   if(!c.active){
-    h += `<button class="cmd" onclick="Game.startExpedition()">Iniciar Expedição -&gt;</button>`;
-    h += `<button class="cmd" onclick="Game.rest()">Curar (descansar)</button>`;
+    h += `<button class="cmd"${trAttr('btn.start_exp')} onclick="Game.startExpedition()">${esc(t('btn.start_exp'))}</button>`;
+    h += `<button class="cmd"${trAttr('btn.rest')} onclick="Game.rest()">${esc(t('btn.rest'))}</button>`;
   } else {
-    h += `<button class="cmd danger" onclick="Game.retreatExpedition()">Recuar (reinicia a fase)</button>`;
+    h += `<button class="cmd danger"${trAttr('btn.retreat')} onclick="Game.retreatExpedition()">${esc(t('btn.retreat'))}</button>`;
   }
   const hasCha = ((S.inventory.potions && S.inventory.potions.cha_poeira) || 0) > 0 || S.combat.autoTea;
   if(hasCha){
-    h += `<button class="cmd subtle" onclick="Game.toggleAutoTea()" title="Usa Chá de Poeira automaticamente abaixo de 35% HP">Auto-Chá: ${S.combat.autoTea?'ON':'OFF'}</button>`;
+    h += `<button class="cmd subtle"${trAttr('btn.auto_tea', { v: S.combat.autoTea?'ON':'OFF' })} onclick="Game.toggleAutoTea()" title="Usa Chá de Poeira automaticamente abaixo de 35% HP">${esc(t('btn.auto_tea', { v: S.combat.autoTea?'ON':'OFF' }))}</button>`;
   }
   h += `</div>`;
 
@@ -2461,11 +2490,11 @@ function viewAventura(){
 
 function viewCompendio(){
   const ct = S.ui.compTab || 'equip';
-  let h = `<div class="stage"><div class="scene-title">— Compêndio da Poeira —</div>`;
+  let h = `<div class="stage"><div class="scene-title">${tx('comp.title')}</div>`;
   h += `<div class="comp-tabs">
-    <button class="zone-btn${ct==='equip'?' active':''}" onclick="Game.setCompTab('equip')">Equipamentos</button>
-    <button class="zone-btn${ct==='bestiario'?' active':''}" onclick="Game.setCompTab('bestiario')">Bestiário</button>
-    <button class="zone-btn${ct==='segredos'?' active':''}" onclick="Game.setCompTab('segredos')">Segredos (${S.secrets.length}/${Object.keys(SECRETS).length})</button>
+    <button class="zone-btn${ct==='equip'?' active':''}"${trAttr('comp.equip')} onclick="Game.setCompTab('equip')">${esc(t('comp.equip'))}</button>
+    <button class="zone-btn${ct==='bestiario'?' active':''}"${trAttr('comp.bestiary')} onclick="Game.setCompTab('bestiario')">${esc(t('comp.bestiary'))}</button>
+    <button class="zone-btn${ct==='segredos'?' active':''}"${trAttr('comp.secrets', { cur: S.secrets.length, tot: Object.keys(SECRETS).length })} onclick="Game.setCompTab('segredos')">${esc(t('comp.secrets', { cur: S.secrets.length, tot: Object.keys(SECRETS).length }))}</button>
   </div>`;
 
   if(ct === 'equip'){
@@ -2757,8 +2786,11 @@ function startLoop(){
 /* ---------- boot ---------- */
 function boot(){
   loadPrefs();
-  applyTheme();
-  applySoundLabel();
+  applyLangUI();
+  if(I18n){
+    I18n.initHoverBubble();
+    I18n.loadCommunityIndex(() => { applyLangUI(); });
+  }
   const had = load();
   recalc();
   if(had){
@@ -2773,6 +2805,8 @@ function boot(){
   bind('btn-save', ()=>{ save(); sfx('click'); notify('Jogo salvo. A poeira agora é canônica.'); });
   bind('btn-export', ()=>{ sfx('click'); openModal('export'); });
   bind('btn-import', ()=>{ sfx('click'); openModal('import'); });
+  bind('btn-lang', cycleLang);
+  bind('btn-hover-lang', cycleHoverLang);
   bind('btn-theme', cycleTheme);
   bind('btn-sound', toggleSound);
   bind('btn-reset', ()=>{ if(confirm('Resetar todo o progresso e voltar ao escuro?')) Game.reset(); });

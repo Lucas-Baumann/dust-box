@@ -1,0 +1,146 @@
+/* DUST BOX — English Translation (en) */
+(function(global){
+"use strict";
+
+global.DustI18n.register('en', {
+  // HUD & Footer
+  'hud.dust': 'DUST:',
+  'hud.magic': 'MAGIC:',
+  'hud.socks': 'SOCKS:',
+  'hud.ps': 'D/s:',
+  'hud.hp': 'HP:',
+  'hud.atk': 'ATK:',
+  'footer.note': 'autosaves every 5s — leave the tab open and go live your life',
+  'footer.save': 'save',
+  'footer.export': 'export',
+  'footer.import': 'import',
+  'footer.reset': 'reset',
+  'footer.lang': 'lang: {v}',
+  'footer.hover': 'hover trans: {v}',
+  'footer.theme': 'theme: {v}',
+  'footer.sound': 'sound: {v}',
+
+  // Tabs
+  'tab.quarto': '[ Room ]',
+  'tab.hall': '[ Hall ]',
+  'tab.inventario': '[ Inventory ]',
+  'tab.mapa': '[ Map ]',
+  'tab.desvao': '[ Attic World ]',
+  'tab.aventura': '[ Adventure ]',
+  'tab.compendio': '[ Compendium ]',
+
+  // Common buttons
+  'btn.buy': 'Buy',
+  'btn.forge': 'Forge',
+  'btn.acquire': 'Acquire',
+  'btn.prepare': 'Brew',
+  'btn.trade': 'Trade',
+  'btn.talk': 'Talk',
+  'btn.back_castle': '<- Back to Castle',
+  'btn.back_gallery': '<- Back to Gallery',
+  'btn.back_desvao': '<- Back to Attic World',
+  'btn.rest': 'Heal (rest)',
+  'btn.start_exp': 'Start Expedition ->',
+  'btn.retreat': 'Retreat (resets stage)',
+  'btn.auto_tea': 'Auto-Tea: {v}',
+  'btn.owned': '[owned]',
+  'btn.equipped': '[equipped]',
+  'btn.requires': 'requires {name}',
+
+  // Intro (real rhymes in English!)
+  'intro.0': 'You wake in the dark, no bed and no floor,\nin a forgotten room behind a shut door.\nJust dust drifting down in a quiet refrain:\none speck every second... you start counting each grain.',
+  'intro.1': 'You brush off your shirt and shake out the gray,\nyet dust from the floorboards keeps finding its way.\nGrain after grain in a rhythm profound —\nthe bar at the top shows your pace on the ground.',
+  'intro.2': 'You dust off again, and the cycle stays true:\nthe more that you clean, the more settles on you.\nYour pulse starts to beat, your body awakes —\na health bar appears... for whatever it takes.',
+  'intro.btn.0': 'Brush the dust off your clothes',
+  'intro.btn.1': 'Shake the dust onto the floor',
+  'intro.btn.2': 'Shrug your shoulders one last time',
+
+  // Main scenes
+  'scene.quarto': '— The Starting Room —',
+  'scene.quarto.dark': 'The bar at the top blinks numbers by itself.\nThe room is still dark, yet now you know:\n\n. . . D U S T . . .\n\nIt falls. You count. That is how things work here.',
+  'scene.quarto.silence': 'silence weighs heavy in the dim light...',
+  'scene.quarto.door': 'The door creaks. The hinges demand 100 Dust as lubricant.',
+  'scene.quarto.lubricate': 'Lubricate hinges (100 dust)',
+  'scene.quarto.open': 'The door is open. Outside: responsibility and a castle.',
+  'scene.quarto.go_hall': 'Go to Main Hall ->',
+  'scene.quarto.lie_down': 'Lie on the floor (heal HP)',
+  'scene.rat.title': 'Philosopher Rat — probably holds a useless degree',
+  'scene.rat.default': '"Time passes, dust gathers.\nYou remain still... yet the grime never stops."',
+
+  'scene.hall': '— Main Hall — The Giant Moth —',
+  'scene.moth.default': '"Nom... finest quality dust! Everything in the real world left sitting still ends up falling into the Castle of Eternal Dust."',
+  'scene.hall.shop': '— MOTH SHOP —',
+  'scene.hall.upgrades': '— CASTLE UPGRADES —',
+  'scene.hall.upgrades_sub': 'buy dirt to attract more dirt. Circular economy.',
+  'scene.hall.open_map': 'Open Castle Map ->',
+  'scene.hall.go_battle': 'Battle Corridors ->',
+
+  'scene.mapa': '— Castle of Eternal Dust —',
+  'scene.mapa.hint': 'hover over the castle to explore',
+  'scene.galeria': '— Gallery of the Forgotten —',
+  'scene.galeria.hint': 'pick a door in the gallery',
+  'scene.desvao': '— Act II: The Backspace of the World —',
+  'scene.desvao.hint': 'everything the real world forgot eventually landed here',
+
+  'scene.leste': '— East Wing — The Carpenter Termite —',
+  'scene.termite.default': '"I gather old furniture scraps and bind them with dust. Sustainable, artisanal, and creaky."',
+  'scene.oeste': '— West Wing — The Tailor Spider —',
+  'scene.spider.default': '"I weave garments from web and compacted dust. Autumn/Winter 1987 Collection."',
+  'scene.porao': '— Dark Cellar — The Dust-Rolling Beetle —',
+  'scene.beetle.default': '"I compress astronomical volumes into shimmer. Balanced diet: 99% dust."',
+  'scene.sofa': '— Under the Couch — Battery-less Remote —',
+  'scene.remote.default': '"Welcome Under the Couch! If you lost a sock or a coin since 2014, it is probably down here."',
+  'scene.sotao': '— Attic of January Promises — Stringless Guitar —',
+  'scene.guitar.default': '"Welcome to the Attic of January Promises! Here rest all the goals that were supposed to start next Monday."',
+  'scene.torre': '— Act III: The Stopped Clock Tower —',
+  'scene.torre.stopped': 'The hands froze at 11:59. This is where all the world\'s dust falls from.',
+  'scene.torre.choice': '— THE FINAL CHOICE (12:00) —',
+  'scene.torre.choice_sub': 'The clock ticks again. Before you, two buttons decide the fate of Dust Box:',
+  'scene.torre.btn_vac': 'Turn On the Great Vacuum (Escape)',
+  'scene.torre.btn_throne': 'Claim the Throne of Dust (+50% D/s)',
+
+  // Map hints
+  'map.hall': 'Main Hall — Giant Moth',
+  'map.oeste': 'West Wing — Tailor Spider',
+  'map.leste': 'East Wing — Carpenter Termite',
+  'map.galeria': 'Gallery of the Forgotten — hidden doors & chambers',
+  'map.corredores': 'Corridors — combat expeditions',
+  'map.quarto': 'Starting Room — Philosopher Rat',
+  'map.portao_open': 'Main Gate — you hold the Great Key!',
+  'map.portao_lock': 'Main Gate — locked',
+  'map.porao_open': 'Dark Cellar — Dust-Rolling Beetle',
+  'map.porao_lock': 'Dark Cellar — too dark to see inside',
+  'map.torre': 'Stopped Clock Tower — where time turns to dust',
+  'map.sofa': 'Under the Couch — cushions, socks & relics',
+  'map.sotao': 'Attic of January Promises — abandoned goals',
+  'map.gaveta': 'Tangled Cable Drawer — & 2005 Electronics Graveyard',
+  'map.radio': 'Old Radio — tunes into another decade',
+  'map.labirinto': 'Lost Sock Maze — dark exploration',
+  'map.castelo': 'Return to the Castle of Eternal Dust',
+
+  // Inventory & Compendium
+  'inv.title': '— Inventory —',
+  'inv.equip': 'Equipment',
+  'inv.prod': 'Production & Stats',
+  'inv.tools': 'Tools & Relics',
+  'inv.items': 'Items & Potions',
+  'inv.ach': '— ACHIEVEMENTS ({cur}/{tot}) —',
+  'comp.title': '— Dust Compendium —',
+  'comp.equip': 'Equipment',
+  'comp.bestiary': 'Bestiary',
+  'comp.secrets': 'Secrets ({cur}/{tot})',
+
+  // Adventure
+  'adv.castle': 'Castle (1–3)',
+  'adv.desvao': 'Attic World (4–7)',
+  'adv.no_pause': 'Enter prepared — there is no pausing halfway.',
+
+  // Endings
+  'end.vac.title': 'ENDING A — COSMIC CLEANUP',
+  'end.vac.body': 'You press the button on the GREAT VACUUM.\n\nA deep hum echoes through the Castle and the Attic World.\nThe Rat waves a tiny handkerchief. The Moth drops one last pinch of shimmer.\nThe Termite, Spider, Beetle, Remote and Guitar dissolve into gray light.\n\nYou blink — and you are back in your chair, facing the computer.\nThe clock reads 12:00.\n\nIn the corner of your monitor rests a single speck of dust... and a note:\n"Next time you put something off until Monday, we will meet again." — Rat',
+  'end.throne.title': 'ENDING B — MONARCH OF IDLENESS',
+  'end.throne.body': 'You switch off the Great Vacuum and take your seat on the THRONE OF DUST.\n\nThe clock strikes 12:00, yet nobody here is in a hurry.\nThe Rat opens a book at chapter 1. The Moth pours gray tea.\nThe Brazilian Caramel Stray Dog naps at the foot of the throne.\n\n"Nobody needs to be productive today."\nYou received the Crown of Dust (+50% D/s permanently this run)!',
+  'end.continue': 'Keep exploring',
+  'end.ngplus': 'Start New Game+ (NG+{n})'
+});
+})(window);

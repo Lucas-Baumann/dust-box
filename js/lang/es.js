@@ -1,0 +1,146 @@
+/* DUST BOX — Traducción al Español (es) */
+(function(global){
+"use strict";
+
+global.DustI18n.register('es', {
+  // HUD & Pie de página
+  'hud.dust': 'POLVO:',
+  'hud.magic': 'MÁGICO:',
+  'hud.socks': 'MEDIAS:',
+  'hud.ps': 'P/s:',
+  'hud.hp': 'HP:',
+  'hud.atk': 'ATK:',
+  'footer.note': 'autoguardado cada 5s — deja la pestaña abierta y ve a vivir',
+  'footer.save': 'guardar',
+  'footer.export': 'exportar',
+  'footer.import': 'importar',
+  'footer.reset': 'reiniciar',
+  'footer.lang': 'idioma: {v}',
+  'footer.hover': 'trad. hover: {v}',
+  'footer.theme': 'tema: {v}',
+  'footer.sound': 'sonido: {v}',
+
+  // Pestañas
+  'tab.quarto': '[ Cuarto ]',
+  'tab.hall': '[ Salón ]',
+  'tab.inventario': '[ Inventario ]',
+  'tab.mapa': '[ Mapa ]',
+  'tab.desvao': '[ Desván ]',
+  'tab.aventura': '[ Aventura ]',
+  'tab.compendio': '[ Compendio ]',
+
+  // Botones comunes
+  'btn.buy': 'Comprar',
+  'btn.forge': 'Forjar',
+  'btn.acquire': 'Adquirir',
+  'btn.prepare': 'Preparar',
+  'btn.trade': 'Cambiar',
+  'btn.talk': 'Hablar',
+  'btn.back_castle': '<- Volver al Castillo',
+  'btn.back_gallery': '<- Volver a la Galería',
+  'btn.back_desvao': '<- Volver al Desván',
+  'btn.rest': 'Curar (descansar)',
+  'btn.start_exp': 'Iniciar Expedición ->',
+  'btn.retreat': 'Retirarse (reinicia la fase)',
+  'btn.auto_tea': 'Auto-Té: {v}',
+  'btn.owned': '[adquirido]',
+  'btn.equipped': '[equipado]',
+  'btn.requires': 'requiere {name}',
+
+  // Intro (con rimas reales en español!)
+  'intro.0': 'Despiertas a oscuras, sin cama ni hogar,\nen un cuarto olvidado sin ganas de limpiar.\nSolo cae el polvo en un lento compás:\nun grano por segundo... y te pones a contar.',
+  'intro.1': 'Sacudes tu ropa, te limpias la piel,\nmas el polvo del suelo regresa muy fiel.\nGrano tras grano, en un ritmo profundo —\nla barra ya muestra tu paso en el mundo.',
+  'intro.2': 'Limpia otra vez, y el ciclo persiste:\ncuanto más barres, más polvo existe.\nTu pulso despierta, tu cuerpo responde —\nhay vida en pantalla... y el peligro se esconde.',
+  'intro.btn.0': 'Limpiar el polvo de la ropa',
+  'intro.btn.1': 'Tirar el polvo al suelo',
+  'intro.btn.2': 'Sacudir los hombros una última vez',
+
+  // Escenas principales
+  'scene.quarto': '— El Cuarto Inicial —',
+  'scene.quarto.dark': 'La barra superior parpadea números sola.\nEl cuarto sigue oscuro, pero ahora sabes:\n\n. . . P O L V O . . .\n\nCae. Tú cuentas. Así funciona aquí.',
+  'scene.quarto.silence': 'el silencio pesa en la penumbra...',
+  'scene.quarto.door': 'La puerta chirría. Las bisagras piden 100 de Polvo como lubricante.',
+  'scene.quarto.lubricate': 'Lubricar bisagras (100 polvo)',
+  'scene.quarto.open': 'La puerta está abierta. Afuera: responsabilidad y un castillo.',
+  'scene.quarto.go_hall': 'Ir al Salón Principal ->',
+  'scene.quarto.lie_down': 'Acostarse en el suelo (curar HP)',
+  'scene.rat.title': 'Ratón Filósofo — probablemente graduado en algo inútil',
+  'scene.rat.default': '"El tiempo pasa, el polvo se acumula.\nTú estás quieto... pero la suciedad jamás para."',
+
+  'scene.hall': '— Salón Principal — La Polilla Gigante —',
+  'scene.moth.default': '"Ñam... ¡polvo de excelente calidad! Todo lo que queda quieto en el mundo real termina cayendo en el Castillo del Polvo Eterno."',
+  'scene.hall.shop': '— TIENDA DE LA POLILLA —',
+  'scene.hall.upgrades': '— MEJORAS DEL CASTILLO —',
+  'scene.hall.upgrades_sub': 'compra suciedad para atraer más suciedad. Economía circular.',
+  'scene.hall.open_map': 'Abrir Mapa del Castillo ->',
+  'scene.hall.go_battle': 'Corredores de Batalla ->',
+
+  'scene.mapa': '— Castillo del Polvo Eterno —',
+  'scene.mapa.hint': 'pasa el cursor sobre el castillo para explorar',
+  'scene.galeria': '— Galería de los Olvidados —',
+  'scene.galeria.hint': 'elige una puerta de la galería',
+  'scene.desvao': '— Acto II: El Desván del Mundo —',
+  'scene.desvao.hint': 'todo lo que el mundo real olvidó terminó aquí',
+
+  'scene.leste': '— Ala Este — La Termita Carpintera —',
+  'scene.termite.default': '"Traigo restos de muebles viejos y los uno con polvo. Sostenible, artesanal y chirriante."',
+  'scene.oeste': '— Ala Oeste — La Araña Sastra —',
+  'scene.spider.default': '"Tejo prendas con telaraña y polvo compactado. Colección Otoño/Invierno 1987."',
+  'scene.porao': '— Sótano Oscuro — El Escarabajo Alquimista —',
+  'scene.beetle.default': '"Compacto volúmenes astronómicos en brillo. Dieta balanceada: 99% polvo."',
+  'scene.sofa': '— El Fondo del Sofá — Control Sin Pilas —',
+  'scene.remote.default': '"¡Bienvenido al Fondo del Sofá! Si perdiste una media o monedas desde 2014, seguro están aquí."',
+  'scene.sotao': '— Ático de las Promesas de Enero — Guitarra Sin Cuerdas —',
+  'scene.guitar.default': '"¡Bienvenido al Ático de las Promesas! Aquí descansan todas las metas que empezarían el próximo lunes."',
+  'scene.torre': '— Acto III: La Torre del Reloj Detenido —',
+  'scene.torre.stopped': 'Las agujas se trabaron en las 11:59. De aquí cae todo el polvo del mundo.',
+  'scene.torre.choice': '— LA ELECCIÓN FINAL (12:00) —',
+  'scene.torre.choice_sub': 'El reloj volvió a latir. Ante ti, dos botones deciden el destino de Dust Box:',
+  'scene.torre.btn_vac': 'Encender la Gran Aspiradora (Escapar)',
+  'scene.torre.btn_throne': 'Asumir el Trono del Polvo (+50% P/s)',
+
+  // Mapa hints
+  'map.hall': 'Salón Principal — Polilla Gigante',
+  'map.oeste': 'Ala Oeste — Araña Sastra',
+  'map.leste': 'Ala Este — Termita Carpintera',
+  'map.galeria': 'Galería de los Olvidados — puertas y cámaras ocultas',
+  'map.corredores': 'Corredores — expediciones de combate',
+  'map.quarto': 'Cuarto Inicial — Ratón Filósofo',
+  'map.portao_open': 'Portón Principal — ¡tienes la Gran Llave!',
+  'map.portao_lock': 'Portón Principal — cerrado',
+  'map.porao_open': 'Sótano Oscuro — Escarabajo Alquimista',
+  'map.porao_lock': 'Sótano Oscuro — demasiado oscuro para ver',
+  'map.torre': 'Torre del Reloj Detenido — donde el tiempo se vuelve polvo',
+  'map.sofa': 'Fondo del Sofá — cojines, medias y reliquias',
+  'map.sotao': 'Ático de las Promesas — metas olvidadas',
+  'map.gaveta': 'Cajón de Cables Enredados — y Cementerio Electrónico 2005',
+  'map.radio': 'Radio Vieja — capta señales de otra década',
+  'map.labirinto': 'Laberinto de la Media Perdida — exploración a oscuras',
+  'map.castelo': 'Volver al Castillo del Polvo Eterno',
+
+  // Inventario & Compendio
+  'inv.title': '— Inventario —',
+  'inv.equip': 'Equipamiento',
+  'inv.prod': 'Producción y Estadísticas',
+  'inv.tools': 'Herramientas y Reliquias',
+  'inv.items': 'Objetos y Pociones',
+  'inv.ach': '— LOGROS ({cur}/{tot}) —',
+  'comp.title': '— Compendio del Polvo —',
+  'comp.equip': 'Equipamiento',
+  'comp.bestiary': 'Bestiario',
+  'comp.secrets': 'Secretos ({cur}/{tot})',
+
+  // Aventura
+  'adv.castle': 'Castillo (1–3)',
+  'adv.desvao': 'Desván (4–7)',
+  'adv.no_pause': 'Entra preparado — no hay pausa a mitad de camino.',
+
+  // Finales
+  'end.vac.title': 'FINAL A — LIMPIEZA CÓSMICA',
+  'end.vac.body': 'Presionas el botón de la GRAN ASPIRADORA.\n\nUn zumbido resuena por el Castillo y el Desván.\nEl Ratón agita su pañuelo. La Polilla suelta una última pizca de brillo.\nLa Termita, la Araña, el Escarabajo, el Control y la Guitarra se vuelven luz gris.\n\nParpadeas — y estás de vuelta en tu silla, frente a la computadora.\nEl reloj marca las 12:00.\n\nEn la esquina del monitor descansa un solo grano de polvo... y una nota:\n"Cuando dejes algo para el lunes, nos volveremos a ver." — Ratón',
+  'end.throne.title': 'FINAL B — MONARCA DEL OCIO',
+  'end.throne.body': 'Apagas la Gran Aspiradora y te sientas en el TRONO DEL POLVO.\n\nEl reloj da las 12:00, pero aquí nadie tiene prisa.\nEl Ratón abre un libro en el capítulo 1. La Polilla sirve té gris.\nEl Perro Callejero Caramelo duerme al pie del trono.\n\n"Nadie necesita ser productivo hoy."\n¡Recibiste la Corona de Polvo (+50% P/s permanente en este ciclo)!',
+  'end.continue': 'Seguir explorando',
+  'end.ngplus': 'Iniciar Nuevo Juego+ (NG+{n})'
+});
+})(window);

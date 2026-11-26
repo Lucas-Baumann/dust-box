@@ -1,0 +1,146 @@
+/* DUST BOX — Idioma Base: Português (pt-BR) */
+(function(global){
+"use strict";
+
+global.DustI18n.register('pt', {
+  // HUD & Rodapé
+  'hud.dust': 'POEIRA:',
+  'hud.magic': 'MÁGICA:',
+  'hud.socks': 'MEIAS:',
+  'hud.ps': 'P/s:',
+  'hud.hp': 'HP:',
+  'hud.atk': 'ATK:',
+  'footer.note': 'autosave automático a cada 5s — deixe a aba aberta e vá viver',
+  'footer.save': 'salvar',
+  'footer.export': 'exportar',
+  'footer.import': 'importar',
+  'footer.reset': 'resetar',
+  'footer.lang': 'idioma: {v}',
+  'footer.hover': 'trad. hover: {v}',
+  'footer.theme': 'tema: {v}',
+  'footer.sound': 'som: {v}',
+
+  // Abas
+  'tab.quarto': '[ Quarto ]',
+  'tab.hall': '[ Hall ]',
+  'tab.inventario': '[ Inventário ]',
+  'tab.mapa': '[ Mapa ]',
+  'tab.desvao': '[ Desvão ]',
+  'tab.aventura': '[ Aventura ]',
+  'tab.compendio': '[ Compêndio ]',
+
+  // Botões comuns
+  'btn.buy': 'Comprar',
+  'btn.forge': 'Forjar',
+  'btn.acquire': 'Adquirir',
+  'btn.prepare': 'Preparar',
+  'btn.trade': 'Trocar',
+  'btn.talk': 'Conversar',
+  'btn.back_castle': '<- Voltar ao Castelo',
+  'btn.back_gallery': '<- Voltar à Galeria',
+  'btn.back_desvao': '<- Voltar ao Desvão',
+  'btn.rest': 'Curar (descansar)',
+  'btn.start_exp': 'Iniciar Expedição ->',
+  'btn.retreat': 'Recuar (reinicia a fase)',
+  'btn.auto_tea': 'Auto-Chá: {v}',
+  'btn.owned': '[adquirido]',
+  'btn.equipped': '[equipado]',
+  'btn.requires': 'requer {name}',
+
+  // Intro (Proposta 1 com rimas em pt-BR)
+  'intro.0': 'Você acorda no escuro, sem cama e sem lar,\nnum quarto esquecido que ninguém quis limpar.\nSó cai poeira do teto, num lento bailar:\num grão por segundo... e você põe-se a contar.',
+  'intro.1': 'Você bate na roupa e sacode a poeira,\nmas ela retorna de forma certeira.\nGrão sobre grão, num compasso profundo —\nagora você vê o seu ritmo no mundo.',
+  'intro.2': 'Mais uma faxina, e o ciclo insiste:\nquanto mais você limpa, mais sujeira existe.\nSeu pulso desperta, o corpo responde —\nhá vida na tela... mas o perigo se esconde.',
+  'intro.btn.0': 'Limpar a poeira da roupa',
+  'intro.btn.1': 'Jogar a poeira no chão',
+  'intro.btn.2': 'Sacudir os ombros uma última vez',
+
+  // Cenas principais
+  'scene.quarto': '— O Quarto Inicial —',
+  'scene.quarto.dark': 'A barra no alto pisca números sozinha.\nO quarto continua escuro, mas agora você sabe:\n\n. . . P O E I R A . . .\n\nEla cai. Você conta. É assim que funciona aqui.',
+  'scene.quarto.silence': 'o silêncio pesa na penumbra...',
+  'scene.quarto.door': 'A porta range. As dobradiças pedem 100 Poeiras de lubrificante.',
+  'scene.quarto.lubricate': 'Lubrificar dobradiças (100 poeira)',
+  'scene.quarto.open': 'A porta está aberta. Lá fora: responsabilidade e um castelo.',
+  'scene.quarto.go_hall': 'Ir ao Hall Principal ->',
+  'scene.quarto.lie_down': 'Deitar no chão (curar HP)',
+  'scene.rat.title': 'Rato Filósofo — provavelmente formado em algo inútil',
+  'scene.rat.default': '"O tempo passa, a poeira acumula.\nVocê está estático... mas a sujeira jamais para."',
+
+  'scene.hall': '— Hall Principal — A Traça Gigante —',
+  'scene.moth.default': '"Nham... poeira de excelente qualidade! Tudo no mundo real que fica parado acaba caindo aqui dentro do Castelo da Poeira Eterna."',
+  'scene.hall.shop': '— LOJA DA TRAÇA —',
+  'scene.hall.upgrades': '— MELHORIAS DO CASTELO —',
+  'scene.hall.upgrades_sub': 'compre sujeira para atrair mais sujeira. Economia circular.',
+  'scene.hall.open_map': 'Abrir Mapa do Castelo ->',
+  'scene.hall.go_battle': 'Corredores de Batalha ->',
+
+  'scene.mapa': '— Castelo da Poeira Eterna —',
+  'scene.mapa.hint': 'passe o mouse sobre o castelo para explorar',
+  'scene.galeria': '— Galeria dos Esquecidos —',
+  'scene.galeria.hint': 'escolha uma porta da galeria',
+  'scene.desvao': '— Ato II: O Desvão do Mundo —',
+  'scene.desvao.hint': 'tudo que o mundo real esqueceu acabou vindo parar aqui',
+
+  'scene.leste': '— Asa Leste — O Cupim Marceneiro —',
+  'scene.termite.default': '"Trago restos de móveis velhos e uno com poeira. Sustentável, artesanal e rangente."',
+  'scene.oeste': '— Asa Oeste — A Aranha Alfaiate —',
+  'scene.spider.default': '"Teço vestimentas com teia e poeira compactada. Coleção Outono/Inverno 1987."',
+  'scene.porao': '— Porão Obscuro — O Besouro Rola-Poeira —',
+  'scene.beetle.default': '"Compacto volumes astronômicos em brilho. Dieta balanceada: 99% poeira."',
+  'scene.sofa': '— O Fundo do Sofá — Controle Remoto Sem Pilha —',
+  'scene.remote.default': '"Bem-vindo ao Fundo do Sofá! Se você perdeu uma meia ou 50 centavos desde 2014, provavelmente está aqui."',
+  'scene.sotao': '— Sótão das Promessas — Violão Sem Corda —',
+  'scene.guitar.default': '"Bem-vindo ao Sótão das Promessas de Janeiro! Aqui descansam todas as metas que começariam na próxima segunda."',
+  'scene.torre': '— Ato III: A Torre do Relógio Parado —',
+  'scene.torre.stopped': 'Os ponteiros travaram em 11:59. É daqui que cai toda a poeira do mundo.',
+  'scene.torre.choice': '— A ESCOLHA FINAL (12:00) —',
+  'scene.torre.choice_sub': 'O relógio voltou a bater. Diante de você, dois botões decidem o destino do Dust Box:',
+  'scene.torre.btn_vac': 'Ligar o Grande Aspirador (Escapar)',
+  'scene.torre.btn_throne': 'Assumir o Trono da Poeira (+50% P/s)',
+
+  // Mapa hints
+  'map.hall': 'Hall Principal — Traça Gigante',
+  'map.oeste': 'Asa Oeste — Aranha Alfaiate',
+  'map.leste': 'Asa Leste — Cupim Marceneiro',
+  'map.galeria': 'Galeria dos Esquecidos — portas e câmaras ocultas',
+  'map.corredores': 'Corredores — expedições de combate',
+  'map.quarto': 'O Quarto Inicial — Rato Filósofo',
+  'map.portao_open': 'O Portão Principal — você tem a Grande Chave!',
+  'map.portao_lock': 'O Portão Principal — trancado',
+  'map.porao_open': 'Porão Obscuro — Besouro Rola-Poeira',
+  'map.porao_lock': 'Porão Obscuro — escuro demais para enxergar',
+  'map.torre': 'Torre do Relógio Parado — onde o tempo vira poeira',
+  'map.sofa': 'O Fundo do Sofá — almofadas, meias e relíquias',
+  'map.sotao': 'Sótão das Promessas de Janeiro — metas esquecidas',
+  'map.gaveta': 'Gaveta dos Cabos Emaranhados — e o Cemitério de Eletrônicos',
+  'map.radio': 'Rádio Velho — capta sinais de outra década',
+  'map.labirinto': 'Labirinto da Meia Perdida — exploração no escuro',
+  'map.castelo': 'Voltar ao Castelo da Poeira Eterna',
+
+  // Inventário & Compêndio
+  'inv.title': '— Inventário —',
+  'inv.equip': 'Equipamento',
+  'inv.prod': 'Produção & Estatísticas',
+  'inv.tools': 'Ferramentas & Relíquias',
+  'inv.items': 'Itens & Poções',
+  'inv.ach': '— CONQUISTAS ({cur}/{tot}) —',
+  'comp.title': '— Compêndio da Poeira —',
+  'comp.equip': 'Equipamentos',
+  'comp.bestiary': 'Bestiário',
+  'comp.secrets': 'Segredos ({cur}/{tot})',
+
+  // Aventura
+  'adv.castle': 'Castelo (1–3)',
+  'adv.desvao': 'Desvão (4–7)',
+  'adv.no_pause': 'Entre preparado — não há pausa no meio do caminho.',
+
+  // Finais
+  'end.vac.title': 'FINAL A — FAXINA CÓSMICA',
+  'end.vac.body': 'Você aperta o botão do GRANDE ASPIRADOR.\n\nO zumbido ecoa pelo Castelo e pelo Desvão.\nO Rato acena com seu lenço. A Traça deixa cair uma última pitada de brilho.\nO Cupim, a Aranha, o Besouro, o Controle e o Violão viram luz cinzenta.\n\nVocê pisca — e está de volta na cadeira, diante do computador.\nO relógio marca 12:00.\n\nNo canto do monitor, repousa um único grão de poeira... e um bilhete:\n"Quando você deixar algo para segunda-feira, a gente se vê de novo." — Rato',
+  'end.throne.title': 'FINAL B — MONARCA DO ÓCIO',
+  'end.throne.body': 'Você desliga o Grande Aspirador e se senta no TRONO DA POEIRA.\n\nO relógio bate 12:00, mas aqui ninguém tem pressa.\nO Rato abre um livro no capítulo 1. A Traça serve chá cinzento.\nO Vira-Lata Caramelo dorme aos pés do trono.\n\n"Ninguém precisa ser produtivo hoje."\nVocê recebeu a Coroa de Poeira (+50% P/s permanente neste ciclo)!',
+  'end.continue': 'Continuar explorando',
+  'end.ngplus': 'Iniciar Novo Jogo+ (NG+{n})'
+});
+})(window);
