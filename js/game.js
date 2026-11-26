@@ -6,7 +6,7 @@ const PREFS_KEY = 'dustbox_prefs_v1';
 
 const {
   THEMES, WEAPON_ORDER, ARMOR_ORDER, BAG_ORDER,
-  ACCELS, WEAPONS, ARMORS, BAGS, TOOLS, POTIONS, SKILLS,
+  ACCELS, ACCELS_ACT2, RELICS, WEAPONS, ARMORS, BAGS, TOOLS, POTIONS, SKILLS,
   ITEM_LABELS, SECRETS, ACHIEVEMENT_INFO,
   COMBAT_ZONES, ALL_MONSTERS, LEVERS
 } = window.DustData;
@@ -15,18 +15,20 @@ const DIALOGUES = window.DustDialogues;
 
 function defaultState(){
   return {
-    version: "1.4.0",
-    resources: { dust: 0, magicDust: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
-    unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, victory:false },
-    accelerators: { window:0, cat:0, carpet:0, fan:0 },
-    inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], potions:{ cha_poeira:0, tonico_cafeina:0 }, items:[] },
+    version: "1.5.0",
+    resources: { dust: 0, magicDust: 0, socks: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
+    unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, act2:false, cablesSolved:false, clockUnlocked:false, victory:false },
+    accelerators: { window:0, cat:0, carpet:0, fan:0, pillow:0, box16:0, dvds:0 },
+    inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], relics:[], potions:{ cha_poeira:0, tonico_cafeina:0 }, items:[] },
     player: { hp:100, maxHp:100, attack:2 },
     puzzle: { solution:null, current:[0,0,0], attempts:0 },
+    cables: { order:['P2','VGA','USB','HDMI'] },
+    gears: { cable:false, boss:false },
     key: { fragments:0, complete:false },
     achievements: [],
     secrets: [],
     discoveredMonsters: {},
-    combat: { active:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
+    combat: { active:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
     flags: {},
     ui: { tab:'quarto', subview:null, compTab:'equip' },
     intro: { cleans: 0, done: false },
@@ -49,6 +51,7 @@ const uiEphemeral = {
   idleSeconds: 0,
   moteTimer: 45,
   moteEl: null,
+  sofaCd: 0,
   track: { ppos: 2, mpos: 28, fx: '' },
   skillCd: { sweep: 0, cloud: 0, sneeze: 0 },
   buffs: { cloudTurns: 0, stunTurns: 0, tonicSec: 0 }
@@ -71,15 +74,24 @@ function load(){
     S.accelerators = Object.assign(def.accelerators, d.accelerators||{});
     S.inventory = Object.assign(def.inventory, d.inventory||{});
     if(!Array.isArray(S.inventory.tools)) S.inventory.tools = [];
+    if(!Array.isArray(S.inventory.relics)) S.inventory.relics = [];
     if(!Array.isArray(S.inventory.items)) S.inventory.items = [];
     S.inventory.potions = Object.assign({ cha_poeira:0, tonico_cafeina:0 }, S.inventory.potions||{});
     S.player = Object.assign(def.player, d.player||{});
     S.puzzle = Object.assign(def.puzzle, d.puzzle||{});
+    S.cables = Object.assign(def.cables, d.cables||{});
+    if(!Array.isArray(S.cables.order) || S.cables.order.length !== 4) S.cables.order = ['P2','VGA','USB','HDMI'];
+    S.gears = Object.assign(def.gears, d.gears||{});
     S.key = Object.assign(def.key, d.key||{});
     S.combat = Object.assign(def.combat, d.combat||{});
-    if(!Array.isArray(S.combat.zoneLoops) || S.combat.zoneLoops.length < 3) S.combat.zoneLoops = [S.combat.loop||1, 1, 1];
+    if(!Array.isArray(S.combat.zoneLoops) || S.combat.zoneLoops.length < 4){
+      const old = Array.isArray(S.combat.zoneLoops) ? S.combat.zoneLoops : [S.combat.loop||1];
+      S.combat.zoneLoops = [old[0]||1, old[1]||1, old[2]||1, old[3]||1];
+    }
     if(typeof S.combat.zone !== 'number' || S.combat.zone < 0 || S.combat.zone >= COMBAT_ZONES.length) S.combat.zone = 0;
     if(typeof S.combat.unlockedZones !== 'number' || S.combat.unlockedZones < 1) S.combat.unlockedZones = 1;
+    // migracao suave: quem ja tinha aberto o Portao no Ato I entra direto no Ato II
+    if(S.unlocks.victory){ S.unlocks.act2 = true; S.unlocks.victory = false; }
     S.combat.active = false;
     S.combat.monster = null;
     S.combat.idx = 0;
@@ -102,6 +114,7 @@ function hasWeaponTier(id){ return tierRank(WEAPON_ORDER, S.inventory.weapon) >=
 function hasArmorTier(id){  return tierRank(ARMOR_ORDER, S.inventory.armor)   >= tierRank(ARMOR_ORDER, id); }
 function hasBagTier(id){    return tierRank(BAG_ORDER, S.inventory.bag)       >= tierRank(BAG_ORDER, id); }
 function hasTool(id){       return S.inventory.tools.includes(id); }
+function hasRelic(id){      return S.inventory.relics.includes(id); }
 function hasSecret(id){     return S.secrets.includes(id); }
 function hasSkillUnlocked(id){
   const sk = SKILLS[id];
@@ -179,9 +192,13 @@ function sfx(type){
   } catch(e){}
 }
 
+function accelTable(k){
+  return ACCELS[k] || ACCELS_ACT2[k];
+}
 function accelCost(k){
+  const a = accelTable(k);
   const owned = S.accelerators[k]||0;
-  return Math.floor(ACCELS[k].base * Math.pow(1.75, owned));
+  return Math.floor(a.base * Math.pow(1.75, owned));
 }
 function secretDpsMult(){
   let bonus = 0;
@@ -190,16 +207,31 @@ function secretDpsMult(){
   });
   return 1 + bonus;
 }
+function relicDpsMult(){
+  let bonus = 0;
+  (S.inventory.relics||[]).forEach(id => {
+    if(RELICS[id] && RELICS[id].dpsBonus) bonus += RELICS[id].dpsBonus;
+  });
+  return 1 + bonus;
+}
+function relicAtkMult(){
+  let bonus = 0;
+  (S.inventory.relics||[]).forEach(id => {
+    if(RELICS[id] && RELICS[id].atkBonus) bonus += RELICS[id].atkBonus;
+  });
+  return 1 + bonus;
+}
 function baseDps(){
   let dps = 1;
   for(const k in ACCELS) dps += ACCELS[k].bonus * (S.accelerators[k]||0);
+  for(const k in ACCELS_ACT2) dps += ACCELS_ACT2[k].bonus * (S.accelerators[k]||0);
   return dps;
 }
 function recalc(){
-  const dps = baseDps() * secretDpsMult();
+  const dps = baseDps() * secretDpsMult() * relicDpsMult();
   S.resources.dustPerSecond = Math.round(dps*100)/100;
   const w = WEAPONS[S.inventory.weapon];
-  S.player.attack = 2 + (w ? w.atk : 0);
+  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult());
   const a = ARMORS[S.inventory.armor];
   if(a){
     S.player.maxHp = a.maxHp;
@@ -284,15 +316,22 @@ function chooseDialogue(npcId, choiceIdx){
   const flagKey = 'dlg_' + active.id;
 
   let rewardMsg = '';
-  if(ch.rewardDust && !S.flags[flagKey]){
+  if(!S.flags[flagKey]){
+    if(ch.rewardDust){
+      const gain = Math.min(ch.rewardDust, Math.max(0, S.resources.maxDust - S.resources.dust));
+      S.resources.dust += gain;
+      S.resources.totalEarned += gain;
+      rewardMsg = ` (+${fmt(gain)} poeira)`;
+      sfx('buy');
+    } else if(ch.rewardSocks){
+      S.resources.socks = (S.resources.socks || 0) + ch.rewardSocks;
+      rewardMsg = ` (+${ch.rewardSocks} Meia Solitária)`;
+      sfx('unlock');
+    } else {
+      sfx('click');
+    }
     S.flags[flagKey] = true;
-    const gain = Math.min(ch.rewardDust, Math.max(0, S.resources.maxDust - S.resources.dust));
-    S.resources.dust += gain;
-    S.resources.totalEarned += gain;
-    rewardMsg = ` (+${fmt(gain)} poeira)`;
-    sfx('buy');
   } else {
-    S.flags[flagKey] = true;
     sfx('click');
   }
 
@@ -364,19 +403,22 @@ function fmt(n){
 
 /* ---------- acoes ---------- */
 function buyAccel(k){
+  const a = accelTable(k);
+  if(!a) return;
+  const npcId = ACCELS_ACT2[k] ? 'remote' : 'moth';
   const c = accelCost(k);
   if(S.resources.dust < c){
     sfx('error');
-    npcSay('moth', '"Poeira insuficiente. A pobreza também acumula, mas não paga a conta."');
+    npcSay(npcId, '"Poeira insuficiente. A pobreza também acumula, mas não paga a conta."');
     notify('Poeira insuficiente.');
     render();
     return;
   }
   S.resources.dust -= c;
-  S.accelerators[k]++;
+  S.accelerators[k] = (S.accelerators[k] || 0) + 1;
   sfx('buy');
-  npcSay('moth', `"${ACCELS[k].name} instalado! (+${ACCELS[k].bonus} P/s). Seu quarto está objetivamente pior."`);
-  notify(`${ACCELS[k].name} adquirido (+${ACCELS[k].bonus} P/s).`, 'amber');
+  npcSay(npcId, `"${a.name} instalado! (+${a.bonus} P/s)."`);
+  notify(`${a.name} adquirido (+${a.bonus} P/s).`, 'amber');
   recalc(); save(); render();
 }
 
@@ -449,10 +491,11 @@ function buyItem(id){
     case 'espanador_pena':
     case 'rodo_combate':
     case 'cabo_hdmi':
-    case 'aspirador_entupido': {
+    case 'aspirador_entupido':
+    case 'vassoura_eletrica': {
       const w = WEAPONS[id];
       if(hasWeaponTier(id) || (w.req && !hasWeaponTier(w.req))) return;
-      const npcId = S.ui.subview==='leste' ? 'termite' : 'moth';
+      const npcId = id==='vassoura_eletrica' ? 'guitar' : (S.ui.subview==='leste' ? 'termite' : 'moth');
       if(!need(w.price, npcId)) return;
       S.inventory.weapon = id;
       sfx('buy');
@@ -468,13 +511,17 @@ function buyItem(id){
     case 'casaco_pano_mofado':
     case 'mascara_antipoeira':
     case 'capa_teia':
-    case 'armadura_papelao': {
+    case 'armadura_papelao':
+    case 'cobertor_pesado': {
       const a = ARMORS[id];
       if(hasArmorTier(id) || (a.req && !hasArmorTier(a.req))) return;
-      if(!need(a.price, 'spider')) return;
+      const npcId = id==='cobertor_pesado' ? 'guitar' : 'spider';
+      if(!need(a.price, npcId)) return;
+      const prevMax = S.player.maxHp;
       S.inventory.armor = id;
+      S.player.hp = Math.min(a.maxHp, S.player.hp + Math.max(0, a.maxHp - prevMax));
       sfx('buy');
-      npcSay('spider', `"${a.name} vestida! Caimento impecável de sótão."`);
+      npcSay(npcId, `"${a.name} vestida! Conforto máximo."`);
       notify(`${a.name} equipada (HP máx ${a.maxHp}).`, 'amber'); break;
     }
     case 'saco_teia':
@@ -543,9 +590,85 @@ function openGate(){
     notify('O Portão nem range. Ele sabe que você não tem a chave.', 'red');
     return;
   }
-  S.unlocks.victory = true;
+  S.unlocks.act2 = true;
+  S.ui.tab = 'desvao';
+  S.ui.subview = null;
   sfx('victory');
   achievement('fuga', 'Ar Puro (alegadamente)', 'Abriu o Portão Principal');
+  achievement('desvao', 'Além do Portão', 'Entrou no Desvão do Mundo');
+  showToast('ATO II DESBLOQUEADO — O Portão se abre para O Desvão do Mundo!');
+  save(); render();
+}
+
+/* ---------- Ato II: O Desvao do Mundo ---------- */
+function rummageSofa(){
+  if(uiEphemeral.sofaCd > 0) return;
+  uiEphemeral.sofaCd = 10;
+  S.resources.socks = (S.resources.socks || 0) + 1;
+  const bonusDust = Math.max(500, Math.floor(S.resources.dustPerSecond * 30));
+  S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + bonusDust);
+  S.resources.totalEarned += bonusDust;
+  sfx('unlock');
+  npcSay('remote', `"Achou +1 Meia Solitária e ${fmt(bonusDust)} poeiras entre as almofadas!"`);
+  notify(`+1 Meia Solitária e +${fmt(bonusDust)} poeiras encontradas!`, 'amber');
+  save(); render();
+}
+
+function buyRelic(id){
+  const r = RELICS[id];
+  if(!r || hasRelic(id)) return;
+  if((S.resources.socks || 0) < r.costSocks){
+    sfx('error');
+    npcSay('remote', `"Faltam Meias Solitárias (precisa de ${r.costSocks}). Vasculhe mais almofadas!"`);
+    notify('Meias Solitárias insuficientes.');
+    render();
+    return;
+  }
+  S.resources.socks -= r.costSocks;
+  S.inventory.relics.push(id);
+  recalc();
+  sfx('victory');
+  npcSay('remote', `"${r.name} é sua! (${r.effect})."`);
+  showToast(`Relíquia adquirida: ${r.name} (${r.effect})`);
+  save(); render();
+}
+
+function swapCable(i){
+  const ord = S.cables.order;
+  if(i < 0 || i >= ord.length - 1) return;
+  const tmp = ord[i];
+  ord[i] = ord[i+1];
+  ord[i+1] = tmp;
+  sfx('click');
+  const solved = ord[0]==='USB' && ord[1]==='HDMI' && ord[2]==='P2' && ord[3]==='VGA';
+  if(solved){
+    if(!S.unlocks.cablesSolved){
+      S.unlocks.cablesSolved = true;
+      S.gears.cable = true;
+      S.resources.socks = (S.resources.socks || 0) + 3;
+      S.resources.magicDust += 2;
+      sfx('victory');
+      achievement('cabos', 'Desembaraçador Profissional', 'Organizou a Gaveta dos Cabos Emaranhados');
+      showToast('Engrenagem do Relógio (Gaveta) encontrada! +3 Meias e +2 Poeiras Mágicas!');
+    } else {
+      const gain = Math.min(5000, Math.max(0, S.resources.maxDust - S.resources.dust));
+      S.resources.dust += gain;
+      S.resources.totalEarned += gain;
+      notify(`Cabos organizados novamente! +${fmt(gain)} poeira.`);
+    }
+  }
+  save(); render();
+}
+
+function unlockClockTower(){
+  if(!S.gears.cable || !S.gears.boss){
+    sfx('error');
+    notify('Faltam Engrenagens do Relógio (encontre na Gaveta e no Sótão das Promessas).');
+    return;
+  }
+  S.unlocks.clockUnlocked = true;
+  sfx('victory');
+  showToast('As engrenagens se encaixam... A Torre do Relógio Parado desperta! (Ato III em breve)');
   save(); render();
 }
 
@@ -847,8 +970,9 @@ function handleMonsterDefeated(){
   S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + rw);
   S.resources.totalEarned += rw;
   let extra = '';
-  if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra = ` +${c.monster.magic} MÁGICA`; }
-  else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra = ' +1 MÁGICA'; }
+  if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra += ` +${c.monster.magic} MÁGICA`; }
+  else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra += ' +1 MÁGICA'; }
+  if(c.monster.socks){ S.resources.socks = (S.resources.socks || 0) + c.monster.socks; extra += ` +${c.monster.socks} MEIAS`; }
   c.clog.unshift(`${c.monster.name} virou poeira! +${rw} poeiras${extra}.`);
   c.kills++;
   S.discoveredMonsters[c.monster.id] = (S.discoveredMonsters[c.monster.id] || 0) + 1;
@@ -857,9 +981,17 @@ function handleMonsterDefeated(){
     if(c.monster.id === 'rei_mofo') achievement('mofo', 'Assassino de Mofo Real', 'Derrotou o REI MOFO');
     if(c.monster.id === 'baratao') achievement('baratao', 'Pânico da Cozinha', 'Derrotou o BARATÃO BLINDADO');
     if(c.monster.id === 'lorde_acaro') achievement('ancestral', 'Senhor da Alergia', 'Derrotou o LORDE ÁCARO ANCESTRAL');
+    if(c.monster.id === 'promessa_seg'){
+      achievement('promessa', 'Segunda-Feira Chegou', 'Derrotou a PROMESSA DE SEGUNDA-FEIRA');
+      if(!S.gears.boss){
+        S.gears.boss = true;
+        showToast('Engrenagem do Relógio (Sótão) obtida! Leve-a à Torre do Relógio Parado.');
+      }
+    }
 
     c.zoneLoops[c.zone] = loop + 1;
-    if(c.zone + 1 >= c.unlockedZones && c.zone + 1 < COMBAT_ZONES.length){
+    // Fases 1->2->3 desbloqueiam por vitoria; Fase 4 desbloqueia ao visitar o Sotao das Promessas no Ato II
+    if(c.zone < 2 && c.zone + 1 >= c.unlockedZones){
       c.unlockedZones = c.zone + 2;
       showToast(`Nova fase desbloqueada: ${COMBAT_ZONES[c.zone + 1].name}!`);
     }
@@ -938,6 +1070,10 @@ function combatRound(){
   if(S.inventory.weapon === 'cabo_hdmi' && Math.random() < 0.25){
     dmg = Math.round(dmg * 1.5);
     note = ' [CHICOTE DUPLO!]';
+  }
+  if(S.inventory.weapon === 'vassoura_eletrica' && Math.random() < 0.30){
+    dmg = Math.round(dmg * 1.8);
+    note = ' [RAIO ESTÁTICO!]';
   }
   if(c.monster.insect && hasSecret('chinelo_havaiana')){
     dmg = Math.round(dmg * 1.15);
@@ -1055,6 +1191,7 @@ function tabs(){
   if(S.unlocks.outOfRoom) t.push({id:'hall', label:'[ Hall ]'});
   if(S.unlocks.outOfRoom) t.push({id:'inventario', label:'[ Inventário ]'});
   if(S.unlocks.hasMap) t.push({id:'mapa', label:'[ Mapa ]'});
+  if(S.unlocks.act2) t.push({id:'desvao', label:'[ Desvão ]'});
   if(S.unlocks.outOfRoom) t.push({id:'aventura', label:'[ Aventura ]'});
   if(S.unlocks.hasCompendium) t.push({id:'compendio', label:'[ Compêndio ]'});
   return t;
@@ -1064,6 +1201,8 @@ function paintStats(){
   document.getElementById('stat-dust').textContent = fmt(Math.floor(S.resources.dust));
   document.getElementById('stat-max').textContent = S.intro.done ? `/${fmt(S.resources.maxDust)}` : '';
   document.getElementById('stat-magic').textContent = S.resources.magicDust;
+  const sockEl = document.getElementById('stat-socks');
+  if(sockEl) sockEl.textContent = S.resources.socks || 0;
   document.getElementById('stat-ps').textContent = S.resources.dustPerSecond.toFixed(2);
   document.getElementById('stat-hp').textContent = `${Math.max(0,Math.ceil(S.player.hp))}/${S.player.maxHp}`;
   document.getElementById('hp-fill').style.width = Math.max(0, (S.player.hp/S.player.maxHp*100)) + '%';
@@ -1072,6 +1211,7 @@ function paintStats(){
   const show = (id, v)=>{ const el = document.getElementById(id); if(el) el.style.display = v ? '' : 'none'; };
   const step = S.intro.done ? 3 : (S.intro.cleans || 0);
   show('s-magic', S.resources.magicDust > 0 || S.unlocks.candyLooted || S.unlocks.puzzleSolved || S.unlocks.windLooted);
+  show('s-socks', S.unlocks.act2 || (S.resources.socks || 0) > 0);
   show('s-ps', step >= 1);
   show('s-hp', step >= 2);
   show('s-atk', step >= 2 && S.inventory.weapon !== 'none');
@@ -1094,11 +1234,11 @@ function render(){
   });
 
   const c = document.getElementById('content');
-  if(S.unlocks.victory) { c.innerHTML = viewVictory(); return; }
   if(S.ui.tab==='quarto') c.innerHTML = viewQuarto();
   else if(S.ui.tab==='hall') c.innerHTML = S.ui.subview ? viewSub(S.ui.subview) : viewHall();
   else if(S.ui.tab==='inventario') c.innerHTML = viewInventario();
   else if(S.ui.tab==='mapa') c.innerHTML = S.ui.subview ? viewSub(S.ui.subview) : viewMapa();
+  else if(S.ui.tab==='desvao') c.innerHTML = S.ui.subview ? viewDesvaoSub(S.ui.subview) : viewDesvao();
   else if(S.ui.tab==='aventura') c.innerHTML = viewAventura();
   else if(S.ui.tab==='compendio') c.innerHTML = viewCompendio();
 }
@@ -1148,6 +1288,12 @@ function refreshDynamic(){
       btn.disabled = cd > 0;
       btn.textContent = cd > 0 ? `[${sk.key}] ${sk.name} (${Math.ceil(cd)}s)` : `[${sk.key}] ${sk.name}`;
     });
+  }
+  const sofaBtn = document.getElementById('btn-sofa');
+  if(sofaBtn){
+    const cd = uiEphemeral.sofaCd || 0;
+    sofaBtn.disabled = cd > 0;
+    sofaBtn.textContent = cd > 0 ? `Vasculhar almofadas (${Math.ceil(cd)}s)` : 'Vasculhar almofadas';
   }
 }
 
@@ -1560,8 +1706,10 @@ function viewSub(sub){
   if(sub==='portao'){
     h += `<div class="scene-title">— O Portão Principal —</div>`;
     h += `<pre class="ascii-art">${esc(ART.gate)}</pre>`;
-    h += `<div class="box"><div class="muted">Atrás dele: ar puro. Na frente dele: você, questionando suas escolhas.</div><br>`;
-    if(S.key.complete){
+    h += `<div class="box"><div class="muted">Atrás dele: o desconhecido. Na frente dele: você, questionando suas escolhas.</div><br>`;
+    if(S.unlocks.act2){
+      h += `<div class="actions"><button class="cmd" onclick="Game.go('desvao')">Atravessar para O Desvão do Mundo -&gt;</button></div>`;
+    } else if(S.key.complete){
       h += `<div class="actions"><button class="cmd" onclick="Game.openGate()">Abrir o Portão com a Grande Chave</button></div>`;
     } else {
       h += `<div class="red">Trancado. Requer a Grande Chave do Portão.</div><div class="muted">Fragmentos: ${S.key.fragments}/3</div>`;
@@ -1571,6 +1719,139 @@ function viewSub(sub){
   }
 
   return h + `<div class="muted">Sala desconhecida. Até o mapa espirrou.</div></div>`;
+}
+
+function desvaoBtn(label, sub, hint){
+  const safeHint = esc(hint).replace(/'/g, '&#39;');
+  return `<button class="map-node" onclick="Game.go('desvao','${sub}')" onmouseenter="Game.setMapHint('${safeHint}')" onfocus="Game.setMapHint('${safeHint}')">${label}</button>`;
+}
+
+function viewDesvao(){
+  const bTorre   = desvaoBtn('[Torre]',   'torre',  'Torre do Relógio Parado — onde o tempo vira poeira');
+  const bSofa    = desvaoBtn('[Sofá]',    'sofa',   'O Fundo do Sofá — almofadas, meias e relíquias');
+  const bSotao   = desvaoBtn('[Sótão]',   'sotao',  'Sótão das Promessas de Janeiro — metas esquecidas');
+  const bGaveta  = desvaoBtn('[Gaveta]',  'gaveta', 'Gaveta dos Cabos Emaranhados — um nó ancestral');
+  const bCastelo = `<button class="map-node" onclick="Game.go('mapa')" onmouseenter="Game.setMapHint('Voltar ao Castelo da Poeira Eterna')" onfocus="Game.setMapHint('Voltar ao Castelo da Poeira Eterna')">[Castelo]</button>`;
+
+  const world = [
+    `                       /\\`,
+    `                      /  \\`,
+    `                     | () |`,
+    `                    |${bTorre}|`,
+    `                      \\  /`,
+    `                       ||`,
+    `        .~~~~~~.       ||       .--------.`,
+    `       ( ${bSofa} )======++======( ${bSotao} )`,
+    `        '~~~~~~'       ||       '--------'`,
+    `                       ||`,
+    `                .------''------.`,
+    `               (    ${bGaveta}    )`,
+    `                '------..------'`,
+    `                       ||`,
+    `                   ${bCastelo}`
+  ].join('\n');
+
+  const gearCount = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
+  let h = `<div class="stage"><div class="scene-title">— Ato II: O Desvão do Mundo —</div>`;
+  h += `<pre class="map-ascii">${world}</pre>`;
+  h += `<div id="map-hint" class="map-hint">tudo que o mundo real esqueceu acabou vindo parar aqui</div>`;
+  h += `<div class="muted" style="margin-top:6px">Engrenagens do Relógio: <b>${gearCount}/2</b></div></div>`;
+  return h;
+}
+
+function viewDesvaoSub(sub){
+  let h = `<div class="stage"><div class="actions"><button class="cmd subtle" onclick="Game.go('desvao')">&lt;- Voltar ao Desvão</button></div>`;
+
+  if(sub === 'sofa'){
+    const speech = uiEphemeral.npcSpeech.remote ||
+      '"Bem-vindo ao Fundo do Sofá! Se você perdeu uma meia ou 50 centavos desde 2014, provavelmente está aqui."';
+    h += `<div class="scene-title">— O Fundo do Sofá — Controle Remoto Sem Pilha —</div>`;
+    h += speechBubble(speech, 46);
+    h += `<pre class="ascii-art npc-idle">${esc(ART.remote)}</pre>`;
+    h += renderNpcTalkControls('remote');
+
+    const cd = uiEphemeral.sofaCd || 0;
+    h += `<div class="box"><span class="box-title">— ALMOFADAS PROFUNDAS —</span>
+      <div class="actions"><button id="btn-sofa" class="cmd" onclick="Game.rummageSofa()" ${cd>0?'disabled':''}>${cd>0?`Vasculhar almofadas (${Math.ceil(cd)}s)`:'Vasculhar almofadas'}</button></div></div>`;
+
+    h += `<div class="box"><span class="box-title">— ACUMULADORES DO DESVÃO —</span>`;
+    for(const k in ACCELS_ACT2){
+      const a = ACCELS_ACT2[k], owned = S.accelerators[k]||0, cost = accelCost(k);
+      h += `<div class="shop-item"><b>${a.name}</b> x${owned}<br><span class="muted">${a.desc} (+${a.bonus} P/s cada)</span><br>
+      <button class="cmd" data-cost="${cost}" onclick="Game.buyAccel('${k}')" ${S.resources.dust<cost?'disabled':''}>Adquirir (${fmt(cost)} poeira)</button></div>`;
+    }
+    h += `</div>`;
+
+    h += `<div class="box"><span class="box-title">— RELÍQUIAS (MEIAS SOLITÁRIAS) —</span>`;
+    for(const id in RELICS){
+      const r = RELICS[id], owned = hasRelic(id);
+      h += `<div class="shop-item"><b>${r.name}</b> ${owned?'<span class="muted">[adquirida]</span>':`— <b>${r.costSocks} Meias</b>`}<br><span class="muted">${r.effect}. ${r.desc}</span><br>
+      ${owned?'':`<button class="cmd" onclick="Game.buyRelic('${id}')" ${(S.resources.socks||0)<r.costSocks?'disabled':''}>Trocar</button>`}</div>`;
+    }
+    h += `</div></div>`;
+    return h;
+  }
+
+  if(sub === 'gaveta'){
+    const ord = S.cables.order;
+    h += `<div class="scene-title">— Gaveta dos Cabos Emaranhados —</div>`;
+    h += `<div class="box"><div class="scene-text">Quatro cabos jurássicos embolados. Troque cabos vizinhos até alinhar na ordem: <b>USB -&gt; HDMI -&gt; P2 -&gt; VGA</b>.</div>`;
+    h += `<pre class="ascii-art">[ ${ord[0]} ] ~~~ [ ${ord[1]} ] ~~~ [ ${ord[2]} ] ~~~ [ ${ord[3]} ]</pre>`;
+    h += `<div class="actions">
+      <button class="cmd" onclick="Game.swapCable(0)">Trocar 1 &lt;-&gt; 2</button>
+      <button class="cmd" onclick="Game.swapCable(1)">Trocar 2 &lt;-&gt; 3</button>
+      <button class="cmd" onclick="Game.swapCable(2)">Trocar 3 &lt;-&gt; 4</button>
+    </div>`;
+    if(S.unlocks.cablesSolved) h += `<div class="amber" style="margin-top:8px">Cabos desembaraçados! Engrenagem do Relógio recolhida.</div>`;
+    h += `</div></div>`;
+    return h;
+  }
+
+  if(sub === 'sotao'){
+    if(S.combat.unlockedZones < 4){
+      S.combat.unlockedZones = 4;
+      showToast('Fase 4: Sótão das Promessas liberada em [ Aventura ]!');
+      save();
+    }
+    const speech = uiEphemeral.npcSpeech.guitar ||
+      '"Bem-vindo ao Sótão das Promessas de Janeiro! Aqui descansam todas as metas que começariam na próxima segunda."';
+    h += `<div class="scene-title">— Sótão das Promessas — Violão Sem Corda —</div>`;
+    h += speechBubble(speech, 46);
+    h += `<pre class="ascii-art npc-idle">${esc(ART.guitar)}</pre>`;
+    h += renderNpcTalkControls('guitar');
+
+    const w = WEAPONS.vassoura_eletrica;
+    const wOwned = hasWeaponTier('vassoura_eletrica');
+    const wReqOk = hasWeaponTier(w.req);
+    const a = ARMORS.cobertor_pesado;
+    const aOwned = hasArmorTier('cobertor_pesado');
+    const aReqOk = hasArmorTier(a.req);
+
+    h += `<div class="box"><span class="box-title">— ACHADOS DO SÓTÃO —</span>
+      <div class="shop-item"><b>${w.name}</b> ${wOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(w.price)} poeira</b>`}<br><span class="muted">${w.desc} · ${w.passive}</span><br>${!wOwned?`<button class="cmd" data-cost="${w.price}" data-req-ok="${wReqOk?1:0}" onclick="Game.buyItem('vassoura_eletrica')" ${(S.resources.dust<w.price||!wReqOk)?'disabled':''}>Adquirir</button>${!wReqOk?`<div class="muted">requer ${WEAPONS[w.req].name}</div>`:''}`:''}</div>
+      <div class="shop-item"><b>${a.name}</b> ${aOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(a.price)} poeira</b>`}<br><span class="muted">${a.desc}</span><br>${!aOwned?`<button class="cmd" data-cost="${a.price}" data-req-ok="${aReqOk?1:0}" onclick="Game.buyItem('cobertor_pesado')" ${(S.resources.dust<a.price||!aReqOk)?'disabled':''}>Adquirir</button>${!aReqOk?`<div class="muted">requer ${ARMORS[a.req].name}</div>`:''}`:''}</div>
+    </div>`;
+    h += `<div class="actions"><button class="cmd" onclick="Game.selectZone(3);Game.go('aventura')">Enfrentar Fase 4: Sótão das Promessas -&gt;</button></div></div>`;
+    return h;
+  }
+
+  if(sub === 'torre'){
+    const gears = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
+    h += `<div class="scene-title">— A Torre do Relógio Parado —</div>`;
+    h += `<pre class="ascii-art">${esc(ART.clockTower)}</pre>`;
+    h += `<div class="box"><div class="scene-text">Os ponteiros travaram em <b>11:59</b>. É daqui que cai toda a poeira do mundo.</div>`;
+    if(S.unlocks.clockUnlocked){
+      h += `<div class="amber">As engrenagens giram! As portas da Torre estão abertas...</div><div class="muted" style="margin-top:6px">Ato III — O Chefe Final e a Escolha do Destino chegam na próxima atualização.</div>`;
+    } else if(gears >= 2){
+      h += `<div class="actions"><button class="cmd" onclick="Game.unlockClockTower()">Encaixar as 2 Engrenagens no Portão da Torre</button></div>`;
+    } else {
+      h += `<div class="red">Engrenagens do Relógio: ${gears}/2</div><div class="muted">Explore a Gaveta dos Cabos e o Sótão das Promessas.</div>`;
+    }
+    h += `</div></div>`;
+    return h;
+  }
+
+  return h + `<div class="muted">Lugar perdido no Desvão.</div></div>`;
 }
 
 function viewAventura(){
@@ -1877,6 +2158,8 @@ function tick(dt){
     S.player.hp = Math.min(S.player.maxHp, S.player.hp + dt * regenRate);
   }
 
+  if(uiEphemeral.sofaCd > 0) uiEphemeral.sofaCd = Math.max(0, uiEphemeral.sofaCd - dt);
+
   if(S.intro.done && !hasSecret('estatua_viva')){
     uiEphemeral.idleSeconds += dt;
     if(uiEphemeral.idleSeconds >= 60){
@@ -1990,6 +2273,7 @@ function boot(){
 
 window.Game = {
   buyAccel, lubricate, cleanBody, buyItem, buyPotion, usePotion, transmute, craftFragment, fuseKey, openGate,
+  rummageSofa, buyRelic, swapCable, unlockClockTower,
   cycleLever, testLevers, searchCandy, enterWind, pullBook,
   selectZone, startExpedition, retreatExpedition, useSkill, rest,
   talkNpc, chooseDialogue,

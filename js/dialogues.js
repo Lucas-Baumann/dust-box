@@ -175,6 +175,54 @@ function getPool(npcId, S){
     return list;
   }
 
+  if(npcId === 'remote'){
+    return [
+      {
+        id: 'remote_pilha',
+        text: '"Fui jogado aqui em 2017 porque minha tampa de pilha sumiu. Você já tentou bater na lateral de um controle pra ver se ele volta a funcionar?"',
+        choices: [
+          {
+            label: 'Sempre funciona!',
+            reply: '"Engenharia de impacto brasileira! Toma 1 Meia Solitária que achei aqui entre as almofadas."',
+            rewardSocks: 1
+          },
+          {
+            label: 'Eu troco a pilha direito',
+            reply: '"Que mentira elegante. Mas respeito a postura — leva essa Meia Solitária mesmo assim."',
+            rewardSocks: 1
+          }
+        ]
+      },
+      {
+        text: '"Tudo que escorrega entre as almofadas do sofá termina aqui. Já vi 43 moedas, 12 tampas de caneta e uma fatia seca de pizza."'
+      }
+    ];
+  }
+
+  if(npcId === 'guitar'){
+    return [
+      {
+        id: 'guitar_corda',
+        text: '"Me compraram em janeiro com a promessa de aprender Legião Urbana até o Carnaval. A corda Mi estourou no dia 4 e nunca mais me tocaram."',
+        choices: [
+          {
+            label: 'Eu também tenho um violão assim',
+            reply: '"Somos todos sobreviventes de janeiro! Toma 1 Meia Solitária pela solidariedade musical."',
+            rewardSocks: 1
+          },
+          {
+            label: 'Pelo menos você virou decoração',
+            reply: '"Decoração empoeirada de alto valor emocional! Toma 1 Meia Solitária por me fazer rir."',
+            rewardSocks: 1
+          }
+        ]
+      },
+      {
+        text: '"Lá no fundo deste sótão vive a Promessa de Segunda-Feira. Se você derrotar ela nos Corredores, dizem que ela guarda uma engrenagem da Torre."'
+      }
+    ];
+  }
+
   return [{ text: '"..."' }];
 }
 

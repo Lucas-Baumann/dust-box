@@ -10,8 +10,8 @@ const THEMES = [
   { id: 'amber-crt', label: 'crt âmbar', classes: ['theme-amber', 'crt'] }
 ];
 
-const WEAPON_ORDER = ['none', 'vassoura_quebrada', 'espanador_pena', 'rodo_combate', 'cabo_hdmi', 'aspirador_entupido'];
-const ARMOR_ORDER  = ['roupa_mofada', 'casaco_pano_mofado', 'mascara_antipoeira', 'capa_teia', 'armadura_papelao'];
+const WEAPON_ORDER = ['none', 'vassoura_quebrada', 'espanador_pena', 'rodo_combate', 'cabo_hdmi', 'aspirador_entupido', 'vassoura_eletrica'];
+const ARMOR_ORDER  = ['roupa_mofada', 'casaco_pano_mofado', 'mascara_antipoeira', 'capa_teia', 'armadura_papelao', 'cobertor_pesado'];
 const BAG_ORDER    = ['bolso_furado', 'saco_teia', 'saco_compactado', 'mala_sotao', 'bau_sem_fundo'];
 
 const ACCELS = {
@@ -21,12 +21,25 @@ const ACCELS = {
   fan:    { name: 'Ventilador Troncho', desc: 'Gira devagar e espalha a poeira pelo recinto.', base: 14000, bonus: 55.0 }
 };
 
+const ACCELS_ACT2 = {
+  pillow: { name: 'Almofada Esquecida', desc: 'Guarda migalhas de 2019 e moedas de 5 centavos.', base: 45000, bonus: 180 },
+  box16:  { name: 'Caixa de Mudança 2016', desc: 'Nunca foi aberta desde a última mudança.', base: 220000, bonus: 900 },
+  dvds:   { name: 'Estante de DVDs Piratas', desc: 'Coletânea 3 em 1 coberta de nostalgia cinzenta.', base: 1100000, bonus: 4200 }
+};
+
+const RELICS = {
+  meia_sorte:     { name: 'Meia da Sorte', costSocks: 3, dpsBonus: 0.35, effect: '+35% P/s global', desc: 'Nunca encontrou o par, mas traz fortuna empoeirada.' },
+  controle_univ:  { name: 'Controle Universal', costSocks: 5, atkBonus: 0.25, effect: '+25% ATK global', desc: 'Não liga a TV, mas aumenta sua força moral em combate.' },
+  moeda_1998:     { name: 'Moeda de 1 Real (1998)', costSocks: 8, dpsBonus: 0.60, effect: '+60% P/s global', desc: 'Achada no fundo mais profundo do sofá.' }
+};
+
 const WEAPONS = {
   vassoura_quebrada:  { name: 'Vassoura Quebrada', atk: 2, price: 100, passive: 'Nenhuma', desc: '+2 ATK. Quebra mais do que varre.', hint: 'Vendida onde alguém come poeira no centro do castelo.' },
   espanador_pena:     { name: 'Espanador de Pena', atk: 8, price: 800, req: 'vassoura_quebrada', passive: '15% Crítico (1.5x dano)', desc: '+8 ATK. Pena de pombo ancestral.', hint: 'Forjado onde a madeira range a leste.' },
   rodo_combate:       { name: 'Rodo de Combate', atk: 25, price: 3000, req: 'espanador_pena', passive: '20% Empurrão (anula contra-ataque)', desc: '+25 ATK. A arma clássica do zelador.', hint: 'Forjado na Asa Leste após o Espanador.' },
   cabo_hdmi:          { name: 'Cabo HDMI de 5 Metros', atk: 55, price: 12000, req: 'rodo_combate', passive: '25% Chicote Duplo (+50% dano)', desc: '+55 ATK. Enrolado desde 2014, letal ao desenrolar.', hint: 'Uma relíquia de cabos forjada na Asa Leste.' },
-  aspirador_entupido: { name: 'Aspirador Portátil Entupido', atk: 110, price: 38000, req: 'cabo_hdmi', passive: 'Drena 10% do dano como HP', desc: '+110 ATK. Faz mais barulho do que suga, mas impõe respeito.', hint: 'O ápice da forja da Asa Leste.' }
+  aspirador_entupido: { name: 'Aspirador Portátil Entupido', atk: 110, price: 38000, req: 'cabo_hdmi', passive: 'Drena 10% do dano como HP', desc: '+110 ATK. Faz mais barulho do que suga, mas impõe respeito.', hint: 'O ápice da forja da Asa Leste.' },
+  vassoura_eletrica:  { name: 'Vassoura Elétrica Sem Fio', atk: 220, price: 180000, req: 'aspirador_entupido', passive: '30% Raio Estático (+80% dano)', desc: '+220 ATK. Bateria dura 4 minutos, mas eletriza tudo.', hint: 'Vendida além do Portão Principal, entre promessas antigas.' }
 };
 
 const ARMORS = {
@@ -34,7 +47,8 @@ const ARMORS = {
   casaco_pano_mofado: { name: 'Casaco de Pano Mofado', maxHp: 130, price: 600, desc: '+30 HP máx. Quentinho e questionável.', hint: 'Costurado em fios finos a oeste.' },
   mascara_antipoeira: { name: 'Máscara Anti-Poeira', maxHp: 160, price: 1200, req: 'casaco_pano_mofado', desc: '+60 HP máx. Respire com estilo.', hint: 'Encontrada no ateliê da Asa Oeste.' },
   capa_teia:          { name: 'Capa de Teia Reforçada', maxHp: 260, price: 9500, req: 'mascara_antipoeira', desc: '260 HP máx. Leve como seda, grudenta como culpa.', hint: 'Alta costura aracnídea avançada.' },
-  armadura_papelao:   { name: 'Armadura de Papelão 1994', maxHp: 400, price: 28000, req: 'capa_teia', desc: '400 HP máx. Caixa de TV de tubo reforçada com fita.', hint: 'A defesa definitiva da Asa Oeste.' }
+  armadura_papelao:   { name: 'Armadura de Papelão 1994', maxHp: 400, price: 28000, req: 'capa_teia', desc: '400 HP máx. Caixa de TV de tubo reforçada com fita.', hint: 'A defesa definitiva da Asa Oeste.' },
+  cobertor_pesado:    { name: 'Cobertor de Microfibra Pesado', maxHp: 650, price: 140000, req: 'armadura_papelao', desc: '650 HP máx. Impossível sair de baixo dele num domingo.', hint: 'Encontrado além do Portão Principal.' }
 };
 
 const BAGS = {
@@ -91,7 +105,10 @@ const ACHIEVEMENT_INFO = {
   ancestral:    { name: 'Senhor da Alergia', desc: 'Derrotou o LORDE ÁCARO ANCESTRAL.' },
   exterminador: { name: 'Exterminador de Sujeira', desc: '10 abates nas expedições.' },
   bibliotecario:{ name: 'Leitor de Poeira', desc: 'Encontrou o Compêndio na Estante Antiga.' },
-  tagarela:     { name: 'Tagarela do Castelo', desc: 'Conversou com todos os 5 habitantes do Castelo.' }
+  tagarela:     { name: 'Tagarela do Castelo', desc: 'Conversou com todos os 5 habitantes do Castelo.' },
+  desvao:       { name: 'Além do Portão', desc: 'Entrou no Desvão do Mundo.' },
+  cabos:        { name: 'Desembaraçador Profissional', desc: 'Organizou a Gaveta dos Cabos Emaranhados.' },
+  promessa:     { name: 'Segunda-Feira Chegou', desc: 'Derrotou a PROMESSA DE SEGUNDA-FEIRA.' }
 };
 
 const COMBAT_ZONES = [
@@ -157,6 +174,27 @@ const COMBAT_ZONES = [
         desc:'O patriarca invisível de todo colchão esquecido.',
         art:'     \\   |   /\n    .-\\(O_O)/-.\n  _/ [#######] \\_\n / |  \\#####/  | \\\n   /  / / \\ \\  \\\n  "  " "   " "  "' }
     ]
+  },
+  {
+    id: 3,
+    name: 'Fase 4: Sótão das Promessas',
+    short: 'Fase 4',
+    desc: 'Metas de janeiro que viraram cabide.',
+    act2: true,
+    monsters: [
+      { id:'halter_2kg', name:'Halter de 2kg Enferrujado', hp:1100, atk:14, reward:14000,
+        desc:'Comprado com empolgação, usado como peso de porta.',
+        art:'   .___.     .___.\n  |#####|===|#####|\n   \'---\'     \'---\'' },
+      { id:'livro_auto', name:'Livro de Autoajuda Lacrado', hp:1600, atk:17, reward:22000, magicChance:0.30,
+        desc:'"Acorde às 5h da Manhã" — ainda no plástico original.',
+        art:'   .---------.\n  /  5AM!   /|\n +---------+ |\n |  LACRE  |/\n \'---------\'' },
+      { id:'bike_cabide', name:'Bicicleta Ergométrica Cabide', hp:2300, atk:21, reward:35000,
+        desc:'Sustenta 4 casacos e 2 mochilas com equilíbrio heroico.',
+        art:'     _o/  [casaco]\n    / |___\n   (O)----(O)' },
+      { id:'promessa_seg', name:'PROMESSA DE SEGUNDA-FEIRA', hp:3800, atk:26, reward:85000, magic:4, socks:3, boss:true,
+        desc:'A entidade suprema de tudo que você disse que começaria na segunda.',
+        art:'     .===SEG===.\n    /  (O) (O)  \\\n   |   .-----.   |\n   |  / AMANHÃ\\  |\n   \'._\\_______/._\'\n     ~ ~ ~ ~ ~ ~' }
+    ]
   }
 ];
 
@@ -165,7 +203,7 @@ const LEVERS = ['|','/','\\'];
 
 global.DustData = {
   THEMES, WEAPON_ORDER, ARMOR_ORDER, BAG_ORDER,
-  ACCELS, WEAPONS, ARMORS, BAGS, TOOLS, POTIONS, SKILLS,
+  ACCELS, ACCELS_ACT2, RELICS, WEAPONS, ARMORS, BAGS, TOOLS, POTIONS, SKILLS,
   ITEM_LABELS, SECRETS, ACHIEVEMENT_INFO,
   COMBAT_ZONES, ALL_MONSTERS, LEVERS
 };
