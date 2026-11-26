@@ -10,8 +10,8 @@ const THEMES = [
   { id: 'amber-crt', label: 'crt âmbar', classes: ['theme-amber', 'crt'] }
 ];
 
-const WEAPON_ORDER = ['none', 'vassoura_quebrada', 'espanador_pena', 'rodo_combate', 'cabo_hdmi', 'aspirador_entupido', 'vassoura_eletrica'];
-const ARMOR_ORDER  = ['roupa_mofada', 'casaco_pano_mofado', 'mascara_antipoeira', 'capa_teia', 'armadura_papelao', 'cobertor_pesado'];
+const WEAPON_ORDER = ['none', 'vassoura_quebrada', 'espanador_pena', 'rodo_combate', 'cabo_hdmi', 'aspirador_entupido', 'vassoura_eletrica', 'ponteiro_12h'];
+const ARMOR_ORDER  = ['roupa_mofada', 'casaco_pano_mofado', 'mascara_antipoeira', 'capa_teia', 'armadura_papelao', 'cobertor_pesado', 'manto_tempo'];
 const BAG_ORDER    = ['bolso_furado', 'saco_teia', 'saco_compactado', 'mala_sotao', 'bau_sem_fundo'];
 
 const ACCELS = {
@@ -39,7 +39,8 @@ const WEAPONS = {
   rodo_combate:       { name: 'Rodo de Combate', atk: 25, price: 3000, req: 'espanador_pena', passive: '20% Empurrão (anula contra-ataque)', desc: '+25 ATK. A arma clássica do zelador.', hint: 'Forjado na Asa Leste após o Espanador.' },
   cabo_hdmi:          { name: 'Cabo HDMI de 5 Metros', atk: 55, price: 12000, req: 'rodo_combate', passive: '25% Chicote Duplo (+50% dano)', desc: '+55 ATK. Enrolado desde 2014, letal ao desenrolar.', hint: 'Uma relíquia de cabos forjada na Asa Leste.' },
   aspirador_entupido: { name: 'Aspirador Portátil Entupido', atk: 110, price: 38000, req: 'cabo_hdmi', passive: 'Drena 10% do dano como HP', desc: '+110 ATK. Faz mais barulho do que suga, mas impõe respeito.', hint: 'O ápice da forja da Asa Leste.' },
-  vassoura_eletrica:  { name: 'Vassoura Elétrica Sem Fio', atk: 220, price: 180000, req: 'aspirador_entupido', passive: '30% Raio Estático (+80% dano)', desc: '+220 ATK. Bateria dura 4 minutos, mas eletriza tudo.', hint: 'Vendida além do Portão Principal, entre promessas antigas.' }
+  vassoura_eletrica:  { name: 'Vassoura Elétrica Sem Fio', atk: 220, price: 180000, req: 'aspirador_entupido', passive: '30% Raio Estático (+80% dano)', desc: '+220 ATK. Bateria dura 4 minutos, mas eletriza tudo.', hint: 'Vendida além do Portão Principal, entre promessas antigas.' },
+  ponteiro_12h:       { name: 'Ponteiro das 12h', atk: 360, price: 450000, req: 'vassoura_eletrica', passive: '35% Meio-Dia (2x dano + drena 5% HP)', desc: '+360 ATK. A lâmina dourada que faz o relógio voltar a andar.', hint: 'Forjado dentro da Torre do Relógio Parado.' }
 };
 
 const ARMORS = {
@@ -48,7 +49,8 @@ const ARMORS = {
   mascara_antipoeira: { name: 'Máscara Anti-Poeira', maxHp: 160, price: 1200, req: 'casaco_pano_mofado', desc: '+60 HP máx. Respire com estilo.', hint: 'Encontrada no ateliê da Asa Oeste.' },
   capa_teia:          { name: 'Capa de Teia Reforçada', maxHp: 260, price: 9500, req: 'mascara_antipoeira', desc: '260 HP máx. Leve como seda, grudenta como culpa.', hint: 'Alta costura aracnídea avançada.' },
   armadura_papelao:   { name: 'Armadura de Papelão 1994', maxHp: 400, price: 28000, req: 'capa_teia', desc: '400 HP máx. Caixa de TV de tubo reforçada com fita.', hint: 'A defesa definitiva da Asa Oeste.' },
-  cobertor_pesado:    { name: 'Cobertor de Microfibra Pesado', maxHp: 650, price: 140000, req: 'armadura_papelao', desc: '650 HP máx. Impossível sair de baixo dele num domingo.', hint: 'Encontrado além do Portão Principal.' }
+  cobertor_pesado:    { name: 'Cobertor de Microfibra Pesado', maxHp: 650, price: 140000, req: 'armadura_papelao', desc: '650 HP máx. Impossível sair de baixo dele num domingo.', hint: 'Encontrado além do Portão Principal.' },
+  manto_tempo:        { name: 'Manto do Tempo Parado', maxHp: 950, price: 380000, req: 'cobertor_pesado', desc: '950 HP máx. Tecido com minutos esquecidos da Torre.', hint: 'Encontrado dentro da Torre do Relógio Parado.' }
 };
 
 const BAGS = {
@@ -111,8 +113,11 @@ const ACHIEVEMENT_INFO = {
   tagarela:     { name: 'Tagarela do Castelo', desc: 'Conversou com todos os 5 habitantes do Castelo.' },
   desvao:       { name: 'Além do Portão', desc: 'Entrou no Desvão do Mundo.' },
   cabos:        { name: 'Desembaraçador Profissional', desc: 'Organizou a Gaveta dos Cabos Emaranhados.' },
-  promessa:     { name: 'Segunda-Feira Chegou', desc: 'Derrotou a PROMESSA DE SEGUNDA-FEIRA.' },
-  colecionador: { name: 'Colecionador de Meias', desc: 'Adquiriu todas as 3 Relíquias do Fundo do Sofá.' }
+  promessa:       { name: 'Segunda-Feira Chegou', desc: 'Derrotou a PROMESSA DE SEGUNDA-FEIRA.' },
+  colecionador:   { name: 'Colecionador de Meias', desc: 'Adquiriu todas as 3 Relíquias do Fundo do Sofá.' },
+  senhor_tempo:   { name: 'O Relógio Voltou a Girar', desc: 'Derrotou O GRANDE ADIAMENTO no topo da Torre.' },
+  final_aspirador:{ name: 'Faxina Cósmica', desc: 'Escolheu ligar o Grande Aspirador e retornar ao mundo real.' },
+  final_trono:    { name: 'Monarca do Ócio', desc: 'Escolheu assumir o Trono da Poeira e preservar o Dust Box.' }
 };
 
 const COMBAT_ZONES = [
@@ -198,6 +203,24 @@ const COMBAT_ZONES = [
       { id:'promessa_seg', name:'PROMESSA DE SEGUNDA-FEIRA', hp:3800, atk:26, reward:85000, magic:4, socks:3, boss:true,
         desc:'A entidade suprema de tudo que você disse que começaria na segunda.',
         art:'     .===SEG===.\n    /  (O) (O)  \\\n   |   .-----.   |\n   |  / AMANHÃ\\  |\n   \'._\\_______/._\'\n     ~ ~ ~ ~ ~ ~' }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Fase 5: Torre do Relógio Parado',
+    short: 'Fase 5',
+    desc: 'A escalada final até o relógio travado em 11:59.',
+    act3: true,
+    monsters: [
+      { id:'pendulo', name:'Pêndulo Enferrujado', hp:2800, atk:28, reward:45000,
+        desc:'Balança há décadas guardando a escada da torre.',
+        art:'        |\n        |\n      .-+-.\n     ( 11h )\n      \'---\'' },
+      { id:'relogio_1159', name:'RELÓGIO PARADO — 11:59', hp:4800, atk:34, reward:120000, magic:3, boss:true,
+        desc:'Forma I do Guardião do Tempo. Recusa-se a virar para o meio-dia.',
+        art:'     .-------.\n   .\'  11:59  \'.\n  |   \\  |  /   |\n  |    --o--    |\n   \'.  / | \\  .\'\n     \'-------\'' },
+      { id:'grande_adiamento', name:'O GRANDE ADIAMENTO — 12:00', hp:7200, atk:42, reward:300000, magic:5, socks:5, boss:true, finalBoss:true,
+        desc:'Forma Final. A soma de tudo que o mundo deixou para depois.',
+        art:'      .  *  .  *  .\n     /=============\\\n    |  (O)  12:00 (O)|\n    |   \\  ===  /    |\n   /|  [#########]   |\\\n  / |   \\#######/    | \\\n     \'._|#######|_.\'\n       ~ ~ ~ ~ ~ ~' }
     ]
   }
 ];

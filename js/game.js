@@ -15,9 +15,10 @@ const DIALOGUES = window.DustDialogues;
 
 function defaultState(){
   return {
-    version: "1.5.1",
+    version: "2.0.0",
+    ngPlus: 0,
     resources: { dust: 0, magicDust: 0, socks: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
-    unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, act2:false, cablesSolved:false, clockUnlocked:false, victory:false },
+    unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, act2:false, cablesSolved:false, clockUnlocked:false, finalChoiceReady:false, ending:null, viewingEnding:false, victory:false },
     accelerators: { window:0, cat:0, carpet:0, fan:0, pillow:0, box16:0, dvds:0 },
     inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], relics:[], potions:{ cha_poeira:0, tonico_cafeina:0 }, items:[] },
     player: { hp:100, maxHp:100, attack:2 },
@@ -28,7 +29,7 @@ function defaultState(){
     achievements: [],
     secrets: [],
     discoveredMonsters: {},
-    combat: { active:false, autoTea:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
+    combat: { active:false, autoTea:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
     flags: {},
     ui: { tab:'quarto', subview:null, compTab:'equip' },
     intro: { cleans: 0, done: false },
@@ -86,10 +87,12 @@ function load(){
     if(!Array.isArray(S.cables.order) || S.cables.order.length !== 4) S.cables.order = ['P2','VGA','USB','HDMI'];
     S.gears = Object.assign(def.gears, d.gears||{});
     S.key = Object.assign(def.key, d.key||{});
+    if(typeof S.ngPlus !== 'number' || S.ngPlus < 0) S.ngPlus = 0;
+    S.unlocks.viewingEnding = false;
     S.combat = Object.assign(def.combat, d.combat||{});
-    if(!Array.isArray(S.combat.zoneLoops) || S.combat.zoneLoops.length < 4){
+    if(!Array.isArray(S.combat.zoneLoops) || S.combat.zoneLoops.length < 5){
       const old = Array.isArray(S.combat.zoneLoops) ? S.combat.zoneLoops : [S.combat.loop||1];
-      S.combat.zoneLoops = [old[0]||1, old[1]||1, old[2]||1, old[3]||1];
+      S.combat.zoneLoops = [old[0]||1, old[1]||1, old[2]||1, old[3]||1, old[4]||1];
     }
     if(typeof S.combat.zone !== 'number' || S.combat.zone < 0 || S.combat.zone >= COMBAT_ZONES.length) S.combat.zone = 0;
     if(typeof S.combat.unlockedZones !== 'number' || S.combat.unlockedZones < 1) S.combat.unlockedZones = 1;
@@ -238,10 +241,13 @@ function baseDps(){
   return dps;
 }
 function recalc(){
-  const dps = baseDps() * secretDpsMult() * relicDpsMult();
+  const ngDpsMult = 1 + (S.ngPlus || 0);
+  const ngAtkMult = 1 + (S.ngPlus || 0) * 0.30;
+  const throneMult = S.unlocks.ending === 'trono' ? 1.5 : 1.0;
+  const dps = baseDps() * secretDpsMult() * relicDpsMult() * ngDpsMult * throneMult;
   S.resources.dustPerSecond = Math.round(dps*100)/100;
   const w = WEAPONS[S.inventory.weapon];
-  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult() * secretAtkMult());
+  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult() * secretAtkMult() * ngAtkMult);
   const a = ARMORS[S.inventory.armor];
   if(a){
     S.player.maxHp = a.maxHp;
@@ -502,14 +508,15 @@ function buyItem(id){
     case 'rodo_combate':
     case 'cabo_hdmi':
     case 'aspirador_entupido':
-    case 'vassoura_eletrica': {
+    case 'vassoura_eletrica':
+    case 'ponteiro_12h': {
       const w = WEAPONS[id];
       if(hasWeaponTier(id) || (w.req && !hasWeaponTier(w.req))) return;
-      const npcId = id==='vassoura_eletrica' ? 'guitar' : (S.ui.subview==='leste' ? 'termite' : 'moth');
+      const npcId = id==='ponteiro_12h' ? null : (id==='vassoura_eletrica' ? 'guitar' : (S.ui.subview==='leste' ? 'termite' : 'moth'));
       if(!need(w.price, npcId)) return;
       S.inventory.weapon = id;
       sfx('buy');
-      npcSay(npcId, `"${w.name} equipada! ${w.passive !== 'Nenhuma' ? 'Passiva: ' + w.passive + '.' : 'O cabo range, mas resolve.'}"`);
+      if(npcId) npcSay(npcId, `"${w.name} equipada! ${w.passive !== 'Nenhuma' ? 'Passiva: ' + w.passive + '.' : 'O cabo range, mas resolve.'}"`);
       notify(`${w.name} equipada (+${w.atk} ATK).`, 'amber');
       for(const sid in SKILLS){
         if(SKILLS[sid].reqWeapon === id){
@@ -522,16 +529,17 @@ function buyItem(id){
     case 'mascara_antipoeira':
     case 'capa_teia':
     case 'armadura_papelao':
-    case 'cobertor_pesado': {
+    case 'cobertor_pesado':
+    case 'manto_tempo': {
       const a = ARMORS[id];
       if(hasArmorTier(id) || (a.req && !hasArmorTier(a.req))) return;
-      const npcId = id==='cobertor_pesado' ? 'guitar' : 'spider';
+      const npcId = id==='manto_tempo' ? null : (id==='cobertor_pesado' ? 'guitar' : 'spider');
       if(!need(a.price, npcId)) return;
       const prevMax = S.player.maxHp;
       S.inventory.armor = id;
       S.player.hp = Math.min(a.maxHp, S.player.hp + Math.max(0, a.maxHp - prevMax));
       sfx('buy');
-      npcSay(npcId, `"${a.name} vestida! Conforto máximo."`);
+      if(npcId) npcSay(npcId, `"${a.name} vestida! Conforto máximo."`);
       notify(`${a.name} equipada (HP máx ${a.maxHp}).`, 'amber'); break;
     }
     case 'saco_teia':
@@ -691,8 +699,55 @@ function unlockClockTower(){
     return;
   }
   S.unlocks.clockUnlocked = true;
+  if(S.combat.unlockedZones < 5) S.combat.unlockedZones = 5;
   sfx('victory');
-  showToast('As engrenagens se encaixam... A Torre do Relógio Parado desperta! (Ato III em breve)');
+  showToast('ATO III — As portas da Torre do Relógio Parado se abrem! Fase 5 liberada.');
+  save(); render();
+}
+
+function chooseEnding(kind){
+  if(!S.unlocks.finalChoiceReady) return;
+  if(kind !== 'aspirador' && kind !== 'trono') return;
+  S.unlocks.ending = kind;
+  S.unlocks.viewingEnding = true;
+  if(kind === 'aspirador'){
+    achievement('final_aspirador', 'Faxina Cósmica', 'Escolheu ligar o Grande Aspirador e retornar ao mundo real');
+  } else {
+    achievement('final_trono', 'Monarca do Ócio', 'Escolheu assumir o Trono da Poeira e preservar o Dust Box');
+  }
+  recalc();
+  sfx('victory');
+  save(); render();
+}
+
+function continueAfterEnding(){
+  S.unlocks.viewingEnding = false;
+  S.ui.tab = 'desvao';
+  S.ui.subview = 'torre';
+  sfx('click');
+  save(); render();
+}
+
+function startNewGamePlus(){
+  const nextNg = (S.ngPlus || 0) + 1;
+  const keepAch = S.achievements.slice();
+  const keepSec = S.secrets.slice();
+  const keepMon = Object.assign({}, S.discoveredMonsters);
+  const keepComp = !!S.unlocks.hasCompendium;
+
+  S = defaultState();
+  S.ngPlus = nextNg;
+  S.achievements = keepAch;
+  S.secrets = keepSec;
+  S.discoveredMonsters = keepMon;
+  S.unlocks.hasCompendium = keepComp;
+  if(keepComp) S.inventory.items.push('compendio');
+  S.intro = { cleans: 3, done: true };
+  S.flags.rat = true;
+  resetCombatRuntime();
+  recalc();
+  sfx('victory');
+  showToast(`Novo Jogo+ ${nextNg} iniciado! (+${nextNg*100}% P/s e +${nextNg*30}% ATK permanentes)`);
   save(); render();
 }
 
@@ -1049,9 +1104,24 @@ function handleMonsterDefeated(){
         showToast('Engrenagem do Relógio (Sótão) obtida! Leve-a à Torre do Relógio Parado.');
       }
     }
+    if(c.monster.finalBoss){
+      achievement('senhor_tempo', 'O Relógio Voltou a Girar', 'Derrotou O GRANDE ADIAMENTO no topo da Torre');
+      S.unlocks.finalChoiceReady = true;
+      c.zoneLoops[c.zone] = loop + 1;
+      c.active = false;
+      c.monster = null;
+      c.idx = 0;
+      c.mhp = 0;
+      resetCombatRuntime();
+      sfx('victory');
+      showToast('12:00! O Grande Adiamento foi derrotado! Volte à Torre no Desvão para sua Escolha Final.');
+      return;
+    }
+  }
 
+  if(c.idx + 1 >= zone.monsters.length){
     c.zoneLoops[c.zone] = loop + 1;
-    // Fases 1->2->3 desbloqueiam por vitoria; Fase 4 desbloqueia ao visitar o Sotao das Promessas no Ato II
+    // Fases 1->2->3 desbloqueiam por vitoria; Fase 4 no Sotao; Fase 5 na Torre
     if(c.zone < 2 && c.zone + 1 >= c.unlockedZones){
       c.unlockedZones = c.zone + 2;
       showToast(`Nova fase desbloqueada: ${COMBAT_ZONES[c.zone + 1].name}!`);
@@ -1136,6 +1206,10 @@ function combatRound(){
     dmg = Math.round(dmg * 1.8);
     note = ' [RAIO ESTÁTICO!]';
   }
+  if(S.inventory.weapon === 'ponteiro_12h' && Math.random() < 0.35){
+    dmg = Math.round(dmg * 2.0);
+    note = ' [MEIO-DIA!]';
+  }
   if(c.monster.insect && hasSecret('chinelo_havaiana')){
     dmg = Math.round(dmg * 1.15);
   }
@@ -1146,6 +1220,10 @@ function combatRound(){
 
   if(S.inventory.weapon === 'aspirador_entupido'){
     const heal = Math.max(1, Math.round(dmg * 0.10));
+    S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
+    note += ` (+${heal} HP)`;
+  } else if(S.inventory.weapon === 'ponteiro_12h'){
+    const heal = Math.max(1, Math.round(dmg * 0.05));
     S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
     note += ` (+${heal} HP)`;
   }
@@ -1305,6 +1383,7 @@ function render(){
   });
 
   const c = document.getElementById('content');
+  if(S.unlocks.viewingEnding) { c.innerHTML = viewEnding(); return; }
   if(S.ui.tab==='quarto') c.innerHTML = viewQuarto();
   else if(S.ui.tab==='hall') c.innerHTML = S.ui.subview ? viewSub(S.ui.subview) : viewHall();
   else if(S.ui.tab==='inventario') c.innerHTML = viewInventario();
@@ -1529,6 +1608,7 @@ function viewInventario(){
     <div class="inv-row"><span>Total Atual</span><b class="amber">${S.resources.dustPerSecond.toFixed(2)} P/s</b></div>
     <div class="inv-row"><span>Poeira Total</span><b>${fmt(Math.floor(S.resources.totalEarned))}</b></div>
     <div class="inv-row"><span>Abates / Segredos</span><b>${S.combat.kills} / ${S.secrets.length}</b></div>
+    ${S.ngPlus > 0 ? `<div class="inv-row"><span>Novo Jogo+</span><b class="amber">NG+${S.ngPlus} (+${S.ngPlus*100}% P/s)</b></div>` : ''}
     ${S.unlocks.act2 ? `<div class="inv-row"><span>Engrenagens</span><b>${gearCount}/2</b></div>` : `<div class="inv-row"><span>Grande Chave</span><b>${S.key.complete ? 'PRONTA' : `${S.key.fragments}/3`}</b></div>`}
   </div>`;
 
@@ -1920,21 +2000,69 @@ function viewDesvaoSub(sub){
 
   if(sub === 'torre'){
     const gears = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
-    h += `<div class="scene-title">— A Torre do Relógio Parado —</div>`;
+    h += `<div class="scene-title">— Ato III: A Torre do Relógio Parado —</div>`;
     h += `<pre class="ascii-art">${esc(ART.clockTower)}</pre>`;
-    h += `<div class="box"><div class="scene-text">Os ponteiros travaram em <b>11:59</b>. É daqui que cai toda a poeira do mundo.</div>`;
-    if(S.unlocks.clockUnlocked){
-      h += `<div class="amber">As engrenagens giram! As portas da Torre estão abertas...</div><div class="muted" style="margin-top:6px">Ato III — O Chefe Final e a Escolha do Destino chegam na próxima atualização.</div>`;
-    } else if(gears >= 2){
-      h += `<div class="actions"><button class="cmd" onclick="Game.unlockClockTower()">Encaixar as 2 Engrenagens no Portão da Torre</button></div>`;
-    } else {
-      h += `<div class="red">Engrenagens do Relógio: ${gears}/2</div><div class="muted">Explore a Gaveta dos Cabos e o Sótão das Promessas.</div>`;
+
+    if(!S.unlocks.clockUnlocked){
+      h += `<div class="box"><div class="scene-text">Os ponteiros travaram em <b>11:59</b>. É daqui que cai toda a poeira do mundo.</div>`;
+      if(gears >= 2){
+        h += `<div class="actions"><button class="cmd" onclick="Game.unlockClockTower()">Encaixar as 2 Engrenagens no Portão da Torre</button></div>`;
+      } else {
+        h += `<div class="red">Engrenagens do Relógio: ${gears}/2</div><div class="muted">Explore a Gaveta dos Cabos e o Sótão das Promessas.</div>`;
+      }
+      h += `</div></div>`;
+      return h;
     }
-    h += `</div></div>`;
+
+    // Torre aberta: Oficina do Relogio + Fase 5 + Escolha Final
+    const w = WEAPONS.ponteiro_12h;
+    const wOwned = hasWeaponTier('ponteiro_12h');
+    const wReqOk = hasWeaponTier(w.req);
+    const a = ARMORS.manto_tempo;
+    const aOwned = hasArmorTier('manto_tempo');
+    const aReqOk = hasArmorTier(a.req);
+
+    h += `<div class="box"><span class="box-title">— OFICINA DO RELÓGIO —</span>
+      <div class="shop-item"><b>${w.name}</b> ${wOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(w.price)} poeira</b>`}<br><span class="muted">${w.desc} · ${w.passive}</span><br>${!wOwned?`<button class="cmd" data-cost="${w.price}" data-req-ok="${wReqOk?1:0}" onclick="Game.buyItem('ponteiro_12h')" ${(S.resources.dust<w.price||!wReqOk)?'disabled':''}>Forjar</button>${!wReqOk?`<div class="muted">requer ${WEAPONS[w.req].name}</div>`:''}`:''}</div>
+      <div class="shop-item"><b>${a.name}</b> ${aOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(a.price)} poeira</b>`}<br><span class="muted">${a.desc}</span><br>${!aOwned?`<button class="cmd" data-cost="${a.price}" data-req-ok="${aReqOk?1:0}" onclick="Game.buyItem('manto_tempo')" ${(S.resources.dust<a.price||!aReqOk)?'disabled':''}>Adquirir</button>${!aReqOk?`<div class="muted">requer ${ARMORS[a.req].name}</div>`:''}`:''}</div>
+    </div>`;
+
+    if(!S.unlocks.finalChoiceReady){
+      h += `<div class="box"><div class="scene-text">No topo da escada em espiral, o relógio range em <b>11:59</b>. O Guardião do Tempo aguarda.</div>
+      <div class="actions"><button class="cmd danger" onclick="Game.selectZone(4);Game.go('aventura')">Subir ao Topo (Fase 5: Chefe Final) -&gt;</button></div></div>`;
+    } else {
+      h += `<div class="box"><span class="box-title">— A ESCOLHA FINAL (12:00) —</span>
+        <div class="scene-text">O relógio voltou a bater. Diante de você, dois botões decidem o destino do Dust Box:</div>
+        <div class="actions">
+          <button class="cmd" onclick="Game.chooseEnding('aspirador')">Ligar o Grande Aspirador (Escapar)</button>
+          <button class="cmd" onclick="Game.chooseEnding('trono')">Assumir o Trono da Poeira (+50% P/s)</button>
+        </div>
+        ${S.unlocks.ending ? `<div class="actions" style="margin-top:10px"><button class="cmd subtle" onclick="if(confirm('Iniciar Novo Jogo+? Você mantém Conquistas, Segredos e Compêndio e ganha +100% P/s e +30% ATK permanentes!')) Game.startNewGamePlus()">Iniciar Novo Jogo+ (NG+${(S.ngPlus||0)+1})</button></div>` : ''}
+      </div>`;
+    }
+    h += `</div>`;
     return h;
   }
 
   return h + `<div class="muted">Lugar perdido no Desvão.</div></div>`;
+}
+
+function viewEnding(){
+  const isAsp = S.unlocks.ending === 'aspirador';
+  const art = isAsp ? ART.vacuumEnding : ART.throneEnding;
+  const title = isAsp ? 'FINAL A — FAXINA CÓSMICA' : 'FINAL B — MONARCA DO ÓCIO';
+  const body = isAsp
+    ? `Você aperta o botão do GRANDE ASPIRADOR.\n\nO zumbido ecoa pelo Castelo e pelo Desvão.\nO Rato acena com seu lenço. A Traça deixa cair uma última pitada de brilho.\nO Cupim, a Aranha, o Besouro, o Controle e o Violão viram luz cinzenta.\n\nVocê pisca — e está de volta na cadeira, diante do computador.\nO relógio marca 12:00.\n\nNo canto do monitor, repousa um único grão de poeira... e um bilhete:\n"Quando você deixar algo para segunda-feira, a gente se vê de novo." — Rato`
+    : `Você desliga o Grande Aspirador e se senta no TRONO DA POEIRA.\n\nO relógio bate 12:00, mas aqui ninguém tem pressa.\nO Rato abre um livro no capítulo 1. A Traça serve chá cinzento.\nO Vira-Lata Caramelo dorme aos pés do trono.\n\n"Ninguém precisa ser produtivo hoje."\nVocê recebeu a Coroa de Poeira (+50% P/s permanente neste ciclo)!`;
+
+  return `<div class="stage"><div class="scene-title">— ${title} —</div>
+  <pre class="ascii-art">${esc(art)}</pre>
+  <div class="box"><pre style="white-space:pre-wrap;text-align:center">${esc(body)}</pre><br>
+  <div class="muted">Poeira total: ${fmt(Math.floor(S.resources.totalEarned))} · Abates: ${S.combat.kills} · Conquistas: ${S.achievements.length}/${Object.keys(ACHIEVEMENT_INFO).length} · Segredos: ${S.secrets.length}/${Object.keys(SECRETS).length}</div>
+  <div class="actions" style="margin-top:14px">
+    <button class="cmd" onclick="Game.continueAfterEnding()">Continuar explorando</button>
+    <button class="cmd" onclick="if(confirm('Iniciar Novo Jogo+? Você mantém Conquistas, Segredos e Compêndio e ganha +100% P/s e +30% ATK permanentes!')) Game.startNewGamePlus()">Iniciar Novo Jogo+ (NG+${(S.ngPlus||0)+1})</button>
+  </div></div></div>`;
 }
 
 function viewAventura(){
@@ -2364,7 +2492,7 @@ function boot(){
 
 window.Game = {
   buyAccel, lubricate, cleanBody, buyItem, buyPotion, usePotion, toggleAutoTea, transmute, transmuteAll, craftFragment, fuseKey, openGate,
-  rummageSofa, buyRelic, swapCable, unlockClockTower,
+  rummageSofa, buyRelic, swapCable, unlockClockTower, chooseEnding, continueAfterEnding, startNewGamePlus,
   cycleLever, testLevers, searchCandy, enterWind, pullBook,
   selectZone, startExpedition, retreatExpedition, useSkill, rest,
   talkNpc, chooseDialogue,
