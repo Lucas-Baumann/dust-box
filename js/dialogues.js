@@ -4,7 +4,16 @@
 
 function getPool(npcId, S){
   if(npcId === 'rat'){
-    const list = [
+    const list = [];
+    if((S.ngPlus || 0) >= 1){
+      list.push({
+        text: `"Espera... você já sabia onde ficava a porta antes mesmo de eu abrir a boca. Quantas vezes você já girou aquele relógio? (NG+${S.ngPlus})"`
+      });
+      list.push({
+        text: '"Apesar de tudo, ainda é você... só que com muito mais poeira nos sapatos."'
+      });
+    }
+    list.push(
       {
         text: '"Você já percebeu que quanto mais a gente evita uma tarefa, mais ela ganha personalidade própria?"'
       },
@@ -24,7 +33,7 @@ function getPool(npcId, S){
           }
         ]
       }
-    ];
+    );
     if(S.unlocks.outOfRoom){
       list.push({
         id: 'rat_portao',
@@ -54,7 +63,13 @@ function getPool(npcId, S){
   }
 
   if(npcId === 'moth'){
-    const list = [
+    const list = [];
+    if((S.ngPlus || 0) >= 1){
+      list.push({
+        text: `"Ué... tenho um déjà vu estranho de já ter te vendido essa Vassoura Quebrada em outra linha do tempo. Você anda mexendo no relógio da Torre, né?"`
+      });
+    }
+    list.push(
       {
         id: 'moth_gosto',
         text: '"Todo mundo pergunta por que eu como poeira. Tem gosto de domingo às 18h, boleto esquecido e café esfriando na mesa."',
@@ -76,7 +91,7 @@ function getPool(npcId, S){
       {
         text: '"Já comi um trabalho salvo como trabalho_final_v3_AGORA_VAI.doc e um boleto de academia só visitada em janeiro. Uma iguaria."'
       }
-    ];
+    );
     if(S.unlocks.hasMap){
       list.push({ text: '"Gostou do mapa? Desenhei de memória enquanto comia uma cortina antiga."' });
     }

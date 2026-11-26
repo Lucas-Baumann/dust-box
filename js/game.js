@@ -12,24 +12,30 @@ const {
 } = window.DustData;
 const ART = window.DustArt;
 const DIALOGUES = window.DustDialogues;
+const PUZZLES = window.DustPuzzles;
 
 function defaultState(){
   return {
-    version: "2.0.0",
+    version: "2.1.0",
     ngPlus: 0,
     resources: { dust: 0, magicDust: 0, socks: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
     unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, act2:false, cablesSolved:false, clockUnlocked:false, finalChoiceReady:false, ending:null, viewingEnding:false, victory:false },
     accelerators: { window:0, cat:0, carpet:0, fan:0, pillow:0, box16:0, dvds:0 },
-    inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], relics:[], potions:{ cha_poeira:0, tonico_cafeina:0 }, items:[] },
+    inventory: { weapon:'none', armor:'roupa_mofada', bag:'bolso_furado', tools:[], relics:[], potions:{ cha_poeira:0, tonico_cafeina:0, cafe_meia:0 }, items:[] },
+    upgrades: { skillLv: 0, magicBless: 0, sockStitch: 0 },
     player: { hp:100, maxHp:100, attack:2 },
     puzzle: { solution:null, current:[0,0,0], attempts:0 },
+    safe: null,
+    radio: null,
+    maze: null,
+    clockDial: null,
     cables: { order:['P2','VGA','USB','HDMI'] },
     gears: { cable:false, boss:false },
     key: { fragments:0, complete:false },
     achievements: [],
     secrets: [],
     discoveredMonsters: {},
-    combat: { active:false, autoTea:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
+    combat: { active:false, autoTea:false, realm:'castelo', zone:0, unlockedZones:1, zoneLoops:[1,1,1,1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
     flags: {},
     ui: { tab:'quarto', subview:null, compTab:'equip' },
     intro: { cleans: 0, done: false },
@@ -55,6 +61,9 @@ const uiEphemeral = {
   idleSeconds: 0,
   moteTimer: 45,
   moteEl: null,
+  flashTimer: 110,
+  flashEvent: null,
+  fitaUsed: false,
   sofaCd: 0,
   track: { ppos: 2, mpos: 28, fx: '' },
   skillCd: { sweep: 0, cloud: 0, sneeze: 0 },
@@ -80,9 +89,14 @@ function load(){
     if(!Array.isArray(S.inventory.tools)) S.inventory.tools = [];
     if(!Array.isArray(S.inventory.relics)) S.inventory.relics = [];
     if(!Array.isArray(S.inventory.items)) S.inventory.items = [];
-    S.inventory.potions = Object.assign({ cha_poeira:0, tonico_cafeina:0 }, S.inventory.potions||{});
+    S.inventory.potions = Object.assign({ cha_poeira:0, tonico_cafeina:0, cafe_meia:0 }, S.inventory.potions||{});
+    S.upgrades = Object.assign(def.upgrades, d.upgrades||{});
     S.player = Object.assign(def.player, d.player||{});
     S.puzzle = Object.assign(def.puzzle, d.puzzle||{});
+    S.safe = d.safe || null;
+    S.radio = d.radio || null;
+    S.maze = d.maze || null;
+    S.clockDial = d.clockDial || null;
     S.cables = Object.assign(def.cables, d.cables||{});
     if(!Array.isArray(S.cables.order) || S.cables.order.length !== 4) S.cables.order = ['P2','VGA','USB','HDMI'];
     S.gears = Object.assign(def.gears, d.gears||{});
@@ -90,9 +104,9 @@ function load(){
     if(typeof S.ngPlus !== 'number' || S.ngPlus < 0) S.ngPlus = 0;
     S.unlocks.viewingEnding = false;
     S.combat = Object.assign(def.combat, d.combat||{});
-    if(!Array.isArray(S.combat.zoneLoops) || S.combat.zoneLoops.length < 5){
+    if(!Array.isArray(S.combat.zoneLoops) || S.combat.zoneLoops.length < 7){
       const old = Array.isArray(S.combat.zoneLoops) ? S.combat.zoneLoops : [S.combat.loop||1];
-      S.combat.zoneLoops = [old[0]||1, old[1]||1, old[2]||1, old[3]||1, old[4]||1];
+      S.combat.zoneLoops = [old[0]||1, old[1]||1, old[2]||1, old[3]||1, old[4]||1, old[5]||1, old[6]||1];
     }
     if(typeof S.combat.zone !== 'number' || S.combat.zone < 0 || S.combat.zone >= COMBAT_ZONES.length) S.combat.zone = 0;
     if(typeof S.combat.unlockedZones !== 'number' || S.combat.unlockedZones < 1) S.combat.unlockedZones = 1;
@@ -244,13 +258,15 @@ function recalc(){
   const ngDpsMult = 1 + (S.ngPlus || 0);
   const ngAtkMult = 1 + (S.ngPlus || 0) * 0.30;
   const throneMult = S.unlocks.ending === 'trono' ? 1.5 : 1.0;
-  const dps = baseDps() * secretDpsMult() * relicDpsMult() * ngDpsMult * throneMult;
+  const blessMult = 1 + ((S.upgrades && S.upgrades.magicBless) || 0) * 0.15;
+  const stitchMult = 1 + ((S.upgrades && S.upgrades.sockStitch) || 0) * 0.15;
+  const dps = baseDps() * secretDpsMult() * relicDpsMult() * ngDpsMult * throneMult * blessMult;
   S.resources.dustPerSecond = Math.round(dps*100)/100;
   const w = WEAPONS[S.inventory.weapon];
-  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult() * secretAtkMult() * ngAtkMult);
+  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult() * secretAtkMult() * ngAtkMult * stitchMult);
   const a = ARMORS[S.inventory.armor];
   if(a){
-    S.player.maxHp = a.maxHp;
+    S.player.maxHp = Math.round(a.maxHp * stitchMult);
     if(S.player.hp > S.player.maxHp) S.player.hp = S.player.maxHp;
   }
   const b = BAGS[S.inventory.bag];
@@ -318,6 +334,9 @@ function talkNpc(npcId){
   S.flags['talked_' + npcId] = true;
   const allTalked = ['rat','moth','termite','spider','beetle'].every(id => S.flags['talked_' + id]);
   if(allTalked) achievement('tagarela', 'Tagarela do Castelo', 'Conversou com todos os 5 habitantes do Castelo');
+  if(npcId === 'rat' && (S.ngPlus || 0) >= 1 && !hasSecret('determinacao')){
+    unlockSecret('determinacao');
+  }
 
   sfx('click');
   npcSay(npcId, entry.text, entry.choices ? { id: entry.id || `${npcId}_${idx}`, list: entry.choices } : null);
@@ -472,7 +491,7 @@ function buyItem(id){
   };
   if(TOOLS[id]){
     if(hasTool(id)) return;
-    const npcId = id==='pa_lixo' ? 'moth' : id==='luva_borracha' ? 'spider' : 'termite';
+    const npcId = id==='pa_lixo' ? 'moth' : id==='luva_borracha' ? 'spider' : id==='flanela_microfibra' ? 'termite' : id==='fita_isolante' ? 'remote' : 'guitar';
     if(!need(TOOLS[id].price, npcId)) return;
     S.inventory.tools.push(id);
     sfx('buy');
@@ -620,6 +639,7 @@ function openGate(){
     return;
   }
   S.unlocks.act2 = true;
+  if(S.combat.unlockedZones < 4) S.combat.unlockedZones = 4;
   S.ui.tab = 'desvao';
   S.ui.subview = null;
   sfx('victory');
@@ -699,9 +719,176 @@ function unlockClockTower(){
     return;
   }
   S.unlocks.clockUnlocked = true;
-  if(S.combat.unlockedZones < 5) S.combat.unlockedZones = 5;
+  if(S.combat.unlockedZones < 7) S.combat.unlockedZones = 7;
   sfx('victory');
-  showToast('ATO III — As portas da Torre do Relógio Parado se abrem! Fase 5 liberada.');
+  showToast('ATO III — Os ponteiros se alinham em 12:00! Fase 7 (Chefe Final) liberada.');
+  save(); render();
+}
+
+/* ---------- 4 novos puzzles + Altar + Eventos Relampago ---------- */
+function safeDigit(i, delta){
+  PUZZLES.ensureSafe(S);
+  if(S.safe.solved) return;
+  S.safe.guess[i] = (S.safe.guess[i] + delta + 10) % 10;
+  sfx('click');
+  save(); render();
+}
+function testSafe(){
+  PUZZLES.ensureSafe(S);
+  if(S.safe.solved){ notify('O cofre já está aberto.'); return; }
+  const res = PUZZLES.evalSafe(S.safe.guess, S.safe.code);
+  const str = S.safe.guess.join('');
+  S.safe.history.unshift(`${str} -> ${'●'.repeat(res.exact)}${'○'.repeat(res.partial)}${(res.exact+res.partial===0)?'—':''}`);
+  S.safe.history = S.safe.history.slice(0, 6);
+  if(res.exact === 3){
+    S.safe.solved = true;
+    S.resources.magicDust += 2;
+    const g = Math.min(1500, Math.max(0, S.resources.maxDust - S.resources.dust));
+    S.resources.dust += g; S.resources.totalEarned += g;
+    sfx('victory');
+    achievement('cofre', 'Arrombador de Cofre', 'Decifrou a senha do Cofre Antigo');
+    notify('CLIQUE! O Cofre Antigo abre: +2 Poeiras Mágicas e +1.500 poeiras!', 'amber');
+  } else {
+    sfx('error');
+  }
+  save(); render();
+}
+
+function radioBand(){
+  PUZZLES.ensureRadio(S);
+  S.radio.band = S.radio.band === 'AM' ? 'FM' : 'AM';
+  sfx('click');
+  checkRadioSolved();
+  save(); render();
+}
+function radioFreq(delta){
+  PUZZLES.ensureRadio(S);
+  S.radio.freq = Math.max(88, Math.min(108, S.radio.freq + delta));
+  sfx('click');
+  checkRadioSolved();
+  save(); render();
+}
+function checkRadioSolved(){
+  const sig = PUZZLES.radioSignal(S.radio);
+  if(sig.locked && !S.radio.solved){
+    S.radio.solved = true;
+    S.resources.socks = (S.resources.socks || 0) + 3;
+    sfx('victory');
+    achievement('radio', 'Sintonizador de Memórias', 'Captou a transmissão secreta no Rádio Velho');
+    showToast('Transmissão captada! +3 Meias Solitárias encontradas atrás do rádio!');
+  }
+}
+
+function mazeMove(dx, dy){
+  PUZZLES.ensureMaze(S);
+  const res = PUZZLES.moveMaze(S.maze, dx, dy);
+  if(res === 'wall'){ sfx('error'); notify('Parede fria no escuro.'); return; }
+  sfx('click');
+  if(res === 'goal' && !S.maze.solved){
+    S.maze.solved = true;
+    S.resources.socks = (S.resources.socks || 0) + 4;
+    S.resources.magicDust += 2;
+    sfx('victory');
+    achievement('labirinto', 'Cartógrafo do Escuro', 'Encontrou o tesouro no Labirinto da Meia Perdida');
+    showToast('Tesouro do Labirinto encontrado! +4 Meias Solitárias e +2 Poeiras Mágicas!');
+  }
+  save(); render();
+}
+
+function turnClock(i){
+  PUZZLES.ensureClockDial(S);
+  if(S.unlocks.clockUnlocked) return;
+  sfx('click');
+  const solved = PUZZLES.turnClockDial(S.clockDial, i);
+  if(solved){
+    S.clockDial.solved = true;
+    unlockClockTower();
+    return;
+  }
+  save(); render();
+}
+
+function upgradeSkillLv(){
+  const lv = (S.upgrades && S.upgrades.skillLv) || 0;
+  if(lv >= 5){ notify('Habilidades já estão no nível máximo (Nv 5)!'); return; }
+  const cost = 2 + lv;
+  if(S.resources.magicDust < cost){ sfx('error'); notify(`Precisa de ${cost} Poeiras Mágicas.`); return; }
+  S.resources.magicDust -= cost;
+  S.upgrades.skillLv = lv + 1;
+  sfx('unlock');
+  notify(`Habilidades Q/W/E evoluídas para Nv ${S.upgrades.skillLv} (+${S.upgrades.skillLv*15}% poder, -${(S.upgrades.skillLv*0.5).toFixed(1)}s cooldown)!`, 'amber');
+  save(); render();
+}
+
+function upgradeMagicBless(){
+  const lv = (S.upgrades && S.upgrades.magicBless) || 0;
+  const cost = 2 + lv;
+  if(S.resources.magicDust < cost){ sfx('error'); notify(`Precisa de ${cost} Poeiras Mágicas.`); return; }
+  S.resources.magicDust -= cost;
+  S.upgrades.magicBless = lv + 1;
+  recalc();
+  sfx('unlock');
+  notify(`Bênção de Poeira Nv ${S.upgrades.magicBless} (+${S.upgrades.magicBless*15}% P/s)!`, 'amber');
+  save(); render();
+}
+
+function upgradeSockStitch(){
+  const lv = (S.upgrades && S.upgrades.sockStitch) || 0;
+  const cost = 3 + lv * 2;
+  if((S.resources.socks || 0) < cost){ sfx('error'); notify(`Precisa de ${cost} Meias Solitárias.`); return; }
+  S.resources.socks -= cost;
+  S.upgrades.sockStitch = lv + 1;
+  recalc();
+  sfx('unlock');
+  notify(`Costura Reforçada Nv ${S.upgrades.sockStitch} (+${S.upgrades.sockStitch*15}% ATK e HP)!`, 'amber');
+  save(); render();
+}
+
+function spawnFlashEvent(){
+  if(uiEphemeral.flashEvent || !S.intro.done || S.combat.active || S.unlocks.viewingEnding) return;
+  const ev = PUZZLES.FLASH_EVENTS[Math.floor(Math.random() * PUZZLES.FLASH_EVENTS.length)];
+  uiEphemeral.flashEvent = ev;
+  render();
+  setTimeout(()=>{
+    if(uiEphemeral.flashEvent === ev){
+      uiEphemeral.flashEvent = null;
+      render();
+    }
+  }, 18000);
+}
+
+function resolveFlashEvent(choiceIdx){
+  const ev = uiEphemeral.flashEvent;
+  if(!ev || !ev.choices[choiceIdx]) return;
+  const ch = ev.choices[choiceIdx];
+  uiEphemeral.flashEvent = null;
+  if(ch.reward === 'dust'){
+    const gain = Math.max(80, Math.floor(S.resources.dustPerSecond * (ch.multSec || 90)));
+    const added = Math.min(gain, Math.max(0, S.resources.maxDust - S.resources.dust));
+    S.resources.dust += added; S.resources.totalEarned += added;
+    sfx('buy');
+    notify(`${ch.msg} (+${fmt(added)} poeira)`, 'amber');
+  } else if(ch.reward === 'sockOrDust'){
+    if(S.unlocks.act2){
+      S.resources.socks = (S.resources.socks || 0) + 1;
+      sfx('unlock');
+      notify(ch.msg, 'amber');
+    } else {
+      const gain = Math.max(120, Math.floor(S.resources.dustPerSecond * 120));
+      const added = Math.min(gain, Math.max(0, S.resources.maxDust - S.resources.dust));
+      S.resources.dust += added; S.resources.totalEarned += added;
+      sfx('buy');
+      notify(`${ch.msg} (+${fmt(added)} poeira)`, 'amber');
+    }
+  } else if(ch.reward === 'magic'){
+    S.resources.magicDust += 1;
+    sfx('unlock');
+    notify(ch.msg, 'amber');
+  } else if(ch.reward === 'tea'){
+    S.inventory.potions.cha_poeira = (S.inventory.potions.cha_poeira || 0) + 1;
+    sfx('buy');
+    notify(ch.msg, 'amber');
+  }
   save(); render();
 }
 
@@ -958,7 +1145,7 @@ function buyPotion(id, qty){
   const p = POTIONS[id];
   const n = qty || 1;
   if(!p) return;
-  const npcId = id === 'cha_poeira' ? 'moth' : 'beetle';
+  const npcId = id === 'cha_poeira' ? 'moth' : id === 'cafe_meia' ? 'remote' : 'beetle';
   const totalCost = p.price * n;
   if(S.resources.dust < totalCost){
     sfx('error');
@@ -1009,6 +1196,14 @@ function usePotion(id){
     S.combat.clog = S.combat.clog.slice(0, 6);
     sfx('unlock');
     save(); render();
+  } else if(id === 'cafe_meia'){
+    S.inventory.potions[id]--;
+    S.player.hp = S.player.maxHp;
+    uiEphemeral.skillCd = { sweep: 0, cloud: 0, sneeze: 0 };
+    S.combat.clog.unshift('Café Coado na Meia! (HP 100% + cooldowns zerados!)');
+    S.combat.clog = S.combat.clog.slice(0, 6);
+    sfx('victory');
+    save(); render();
   }
 }
 
@@ -1022,12 +1217,23 @@ function resetCombatRuntime(){
   uiEphemeral.track = { ppos: 2, mpos: 28, fx: '' };
   uiEphemeral.skillCd = { sweep: 0, cloud: 0, sneeze: 0 };
   uiEphemeral.buffs = { cloudTurns: 0, stunTurns: 0, tonicSec: 0 };
+  uiEphemeral.fitaUsed = false;
+}
+
+function selectRealm(r){
+  if(S.combat.active) return;
+  S.combat.realm = r;
+  const first = COMBAT_ZONES.findIndex(z => (z.realm || 'castelo') === r && z.id < S.combat.unlockedZones);
+  if(first >= 0) S.combat.zone = first;
+  sfx('click');
+  save(); render();
 }
 
 function selectZone(z){
   if(S.combat.active) return;
   if(z < 0 || z >= S.combat.unlockedZones || z >= COMBAT_ZONES.length) return;
   S.combat.zone = z;
+  S.combat.realm = COMBAT_ZONES[z].realm || 'castelo';
   sfx('click');
   save(); render();
 }
@@ -1081,7 +1287,7 @@ function handleMonsterDefeated(){
   const c = S.combat;
   const zone = COMBAT_ZONES[c.zone] || COMBAT_ZONES[0];
   const loop = (c.zoneLoops && c.zoneLoops[c.zone]) || 1;
-  const toolMult = hasTool('pa_lixo') ? 1.20 : 1.0;
+  const toolMult = (hasTool('pa_lixo') ? 1.20 : 1.0) * (hasTool('ima_geladeira') ? 1.25 : 1.0);
   const rw = Math.round(c.monster.reward * (1 + (loop - 1) * 0.45) * toolMult);
   S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + rw);
   S.resources.totalEarned += rw;
@@ -1089,6 +1295,7 @@ function handleMonsterDefeated(){
   if(c.monster.magic){ S.resources.magicDust += c.monster.magic; extra += ` +${c.monster.magic} MÁGICA`; }
   else if(c.monster.magicChance && Math.random() < c.monster.magicChance){ S.resources.magicDust += 1; extra += ' +1 MÁGICA'; }
   if(c.monster.socks){ S.resources.socks = (S.resources.socks || 0) + c.monster.socks; extra += ` +${c.monster.socks} MEIAS`; }
+  else if(zone.realm === 'desvao' && hasTool('ima_geladeira') && Math.random() < 0.20){ S.resources.socks = (S.resources.socks || 0) + 1; extra += ' +1 MEIA (Ímã)'; }
   c.clog.unshift(`${c.monster.name} virou poeira! +${rw} poeiras${extra}.`);
   c.kills++;
   S.discoveredMonsters[c.monster.id] = (S.discoveredMonsters[c.monster.id] || 0) + 1;
@@ -1097,6 +1304,8 @@ function handleMonsterDefeated(){
     if(c.monster.id === 'rei_mofo') achievement('mofo', 'Assassino de Mofo Real', 'Derrotou o REI MOFO');
     if(c.monster.id === 'baratao') achievement('baratao', 'Pânico da Cozinha', 'Derrotou o BARATÃO BLINDADO');
     if(c.monster.id === 'lorde_acaro') achievement('ancestral', 'Senhor da Alergia', 'Derrotou o LORDE ÁCARO ANCESTRAL');
+    if(c.monster.id === 'rei_meias') achievement('rei_meias', 'Par Finalmente Encontrado', 'Derrotou o REI DAS MEIAS SEM PAR');
+    if(c.monster.id === 'roteador') achievement('roteador', 'Tirou da Tomada e Botou de Novo', 'Derrotou o ROTEADOR SEM SINAL');
     if(c.monster.id === 'promessa_seg'){
       achievement('promessa', 'Segunda-Feira Chegou', 'Derrotou a PROMESSA DE SEGUNDA-FEIRA');
       if(!S.gears.boss){
@@ -1121,8 +1330,8 @@ function handleMonsterDefeated(){
 
   if(c.idx + 1 >= zone.monsters.length){
     c.zoneLoops[c.zone] = loop + 1;
-    // Fases 1->2->3 desbloqueiam por vitoria; Fase 4 no Sotao; Fase 5 na Torre
-    if(c.zone < 2 && c.zone + 1 >= c.unlockedZones){
+    // Fases 1->2->3 (Castelo) e 4->5 (Desvao) desbloqueiam por vitoria
+    if((c.zone < 2 || c.zone === 3) && c.zone + 1 >= c.unlockedZones){
       c.unlockedZones = c.zone + 2;
       showToast(`Nova fase desbloqueada: ${COMBAT_ZONES[c.zone + 1].name}!`);
     }
@@ -1142,9 +1351,12 @@ function useSkill(id){
   if(!sk || !hasSkillUnlocked(id) || !c.active || !c.monster) return;
   if((uiEphemeral.skillCd[id] || 0) > 0) return;
 
-  uiEphemeral.skillCd[id] = sk.cd;
+  const lv = (S.upgrades && S.upgrades.skillLv) || 0;
+  const cdFinal = Math.max(2, sk.cd - lv * 0.5);
+  const pwrMult = 1 + lv * 0.15;
+  uiEphemeral.skillCd[id] = cdFinal;
   if(id === 'sweep'){
-    let dmg = Math.round(effectiveAtk() * 2.2);
+    let dmg = Math.round(effectiveAtk() * 2.2 * pwrMult);
     if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.15);
     c.mhp -= dmg;
     uiEphemeral.track.fx = '>>';
@@ -1153,17 +1365,21 @@ function useSkill(id){
       const heal = Math.max(1, Math.round(dmg * 0.10));
       S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
       note = ` (+${heal} HP)`;
+    } else if(S.inventory.weapon === 'ponteiro_12h'){
+      const heal = Math.max(1, Math.round(dmg * 0.05));
+      S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
+      note = ` (+${heal} HP)`;
     }
     c.clog.unshift(`[Varredura] @ acerta ${dmg}${note} em ${c.monster.name}!`);
     sfx('unlock');
     if(c.mhp <= 0) handleMonsterDefeated();
   } else if(id === 'cloud'){
-    uiEphemeral.buffs.cloudTurns = 3;
+    uiEphemeral.buffs.cloudTurns = 3 + Math.floor(lv / 2);
     uiEphemeral.track.fx = '~~';
-    c.clog.unshift(`[Nuvem de Poeira] ${c.monster.name} cego (-50% dano por 3 turnos)!`);
+    c.clog.unshift(`[Nuvem de Poeira] ${c.monster.name} cego (-50% dano por ${uiEphemeral.buffs.cloudTurns} turnos)!`);
     sfx('click');
   } else if(id === 'sneeze'){
-    let dmg = Math.round(effectiveAtk() * 1.2);
+    let dmg = Math.round(effectiveAtk() * 1.2 * pwrMult);
     if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.15);
     c.mhp -= dmg;
     uiEphemeral.track.mpos = Math.min(30, uiEphemeral.track.mpos + 8);
@@ -1249,7 +1465,16 @@ function combatRound(){
         }
         S.player.hp -= md;
         c.clog.unshift(`${c.monster.name} revida ${md} em você.`);
-        if(S.player.hp <= 0){ faint(); return; }
+        if(S.player.hp <= 0){
+          if(hasTool('fita_isolante') && !uiEphemeral.fitaUsed){
+            uiEphemeral.fitaUsed = true;
+            S.player.hp = 1;
+            c.clog.unshift('[Fita Isolante] Remendou você no último instante (1 HP)!');
+            sfx('unlock');
+          } else {
+            faint(); return;
+          }
+        }
         // Auto-Cha opcional quando HP < 35%
         if(S.combat.autoTea && (S.player.hp / S.player.maxHp) < 0.35 && ((S.inventory.potions && S.inventory.potions.cha_poeira) || 0) > 0){
           S.inventory.potions.cha_poeira--;
@@ -1383,14 +1608,22 @@ function render(){
   });
 
   const c = document.getElementById('content');
-  if(S.unlocks.viewingEnding) { c.innerHTML = viewEnding(); return; }
-  if(S.ui.tab==='quarto') c.innerHTML = viewQuarto();
-  else if(S.ui.tab==='hall') c.innerHTML = S.ui.subview ? viewSub(S.ui.subview) : viewHall();
-  else if(S.ui.tab==='inventario') c.innerHTML = viewInventario();
-  else if(S.ui.tab==='mapa') c.innerHTML = S.ui.subview ? viewSub(S.ui.subview) : viewMapa();
-  else if(S.ui.tab==='desvao') c.innerHTML = S.ui.subview ? viewDesvaoSub(S.ui.subview) : viewDesvao();
-  else if(S.ui.tab==='aventura') c.innerHTML = viewAventura();
-  else if(S.ui.tab==='compendio') c.innerHTML = viewCompendio();
+  let bodyHtml = '';
+  if(S.unlocks.viewingEnding) { bodyHtml = viewEnding(); }
+  else if(S.ui.tab==='quarto') bodyHtml = viewQuarto();
+  else if(S.ui.tab==='hall') bodyHtml = S.ui.subview ? viewSub(S.ui.subview) : viewHall();
+  else if(S.ui.tab==='inventario') bodyHtml = viewInventario();
+  else if(S.ui.tab==='mapa') bodyHtml = S.ui.subview ? viewSub(S.ui.subview) : viewMapa();
+  else if(S.ui.tab==='desvao') bodyHtml = S.ui.subview ? viewDesvaoSub(S.ui.subview) : viewDesvao();
+  else if(S.ui.tab==='aventura') bodyHtml = viewAventura();
+  else if(S.ui.tab==='compendio') bodyHtml = viewCompendio();
+
+  if(uiEphemeral.flashEvent && !S.unlocks.viewingEnding){
+    const ev = uiEphemeral.flashEvent;
+    const banner = `<div class="flash-event"><div>✦ ${esc(ev.text)}</div><div class="actions">${ev.choices.map((ch, idx)=>`<button class="cmd" onclick="Game.resolveFlashEvent(${idx})">${esc(ch.label)}</button>`).join('')}</div></div>`;
+    bodyHtml = banner + bodyHtml;
+  }
+  c.innerHTML = bodyHtml;
 }
 
 function refreshDynamic(){
@@ -1715,6 +1948,7 @@ function viewGaleria(){
   const bCandy  = mapBtn('[Nicho Esquecido]', 'candy',   'Uma pequena caixa abandonada na parede');
   const bVento  = mapBtn('[Túnel do Vento]',  'vento',   'Um corredor barulhento com vento forte');
   const bEstante= mapBtn('[Estante Antiga]',  'estante', 'Três volumes empoeirados numa prateleira rangente');
+  const bCofre  = mapBtn('[Cofre Antigo]',    'cofre',   'Um cofre enferrujado com combinação de 3 dígitos');
 
   const submap = [
     `           _______________________________`,
@@ -1722,7 +1956,7 @@ function viewGaleria(){
     `        /                                   \\`,
     `       |   ${bPuz}     ${bCandy}  |`,
     `       |         \\                   /       |`,
-    `       |          \\_______   _______/        |`,
+    `       |          \\___ ${bCofre} ___/        |`,
     `       |                  | |                |`,
     `       |          .-------' '-------.        |`,
     `       |         /                   \\       |`,
@@ -1739,10 +1973,26 @@ function viewGaleria(){
 
 function viewSub(sub){
   if(sub==='galeria') return viewGaleria();
-  const backTarget = ['puzzles','candy','vento','estante'].includes(sub) ? "Game.go('mapa','galeria')" : "Game.go('mapa')";
-  const backLabel  = ['puzzles','candy','vento','estante'].includes(sub) ? '&lt;- Voltar à Galeria' : '&lt;- Voltar ao Castelo';
+  const inGal = ['puzzles','candy','vento','estante','cofre'].includes(sub);
+  const backTarget = inGal ? "Game.go('mapa','galeria')" : "Game.go('mapa')";
+  const backLabel  = inGal ? '&lt;- Voltar à Galeria' : '&lt;- Voltar ao Castelo';
   let h = `<div class="stage"><div class="actions"><button class="cmd subtle" onclick="${backTarget}">${backLabel}</button></div>`;
   if(sub==='hall') return h + `</div>` + viewHall();
+  if(sub==='cofre'){
+    PUZZLES.ensureSafe(S);
+    h += `<div class="scene-title">— Cofre Antigo —</div>`;
+    h += `<pre class="ascii-art">${esc(ART.safeBox)}</pre>`;
+    h += `<div class="box"><div class="muted">Descubra os 3 dígitos distintos (● = certo no lugar certo · ○ = certo fora do lugar).</div><br><div class="row">`;
+    S.safe.guess.forEach((d, i) => {
+      h += `<div><button class="cmd" onclick="Game.safeDigit(${i},1)">+</button><br><span class="safe-digit">${d}</span><br><button class="cmd" onclick="Game.safeDigit(${i},-1)">-</button></div>`;
+    });
+    h += `</div><div class="actions"><button class="cmd" onclick="Game.testSafe()" ${S.safe.solved?'disabled':''}>${S.safe.solved?'Cofre Aberto':'Testar Senha'}</button></div>`;
+    if(S.safe.history.length){
+      h += `<div class="muted" style="margin-top:8px">${S.safe.history.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`;
+    }
+    h += `</div></div>`;
+    return h;
+  }
 
   if(sub==='leste'){
     const speech = uiEphemeral.npcSpeech.termite ||
@@ -1888,28 +2138,29 @@ function desvaoBtn(label, sub, hint){
 }
 
 function viewDesvao(){
-  const bTorre   = desvaoBtn('[Torre]',   'torre',  'Torre do Relógio Parado — onde o tempo vira poeira');
-  const bSofa    = desvaoBtn('[Sofá]',    'sofa',   'O Fundo do Sofá — almofadas, meias e relíquias');
-  const bSotao   = desvaoBtn('[Sótão]',   'sotao',  'Sótão das Promessas de Janeiro — metas esquecidas');
-  const bGaveta  = desvaoBtn('[Gaveta]',  'gaveta', 'Gaveta dos Cabos Emaranhados — um nó ancestral');
+  const bTorre   = desvaoBtn('[Torre]',     'torre',     'Torre do Relógio Parado — onde o tempo vira poeira');
+  const bSofa    = desvaoBtn('[Sofá]',      'sofa',      'O Fundo do Sofá — almofadas, meias e relíquias');
+  const bSotao   = desvaoBtn('[Sótão]',     'sotao',     'Sótão das Promessas de Janeiro — metas esquecidas');
+  const bGaveta  = desvaoBtn('[Gaveta]',    'gaveta',    'Gaveta dos Cabos Emaranhados — e o Cemitério de Eletrônicos');
+  const bRadio   = desvaoBtn('[Rádio]',     'radio',     'Rádio Velho — capta sinais de outra década');
+  const bLab     = desvaoBtn('[Labirinto]', 'labirinto', 'Labirinto da Meia Perdida — exploração no escuro');
   const bCastelo = `<button class="map-node" onclick="Game.go('mapa')" onmouseenter="Game.setMapHint('Voltar ao Castelo da Poeira Eterna')" onfocus="Game.setMapHint('Voltar ao Castelo da Poeira Eterna')">[Castelo]</button>`;
 
   const world = [
-    `                       /\\`,
-    `                      /  \\`,
-    `                     | () |`,
-    `                    |${bTorre}|`,
-    `                      \\  /`,
-    `                       ||`,
-    `        .~~~~~~.       ||       .--------.`,
-    `       ( ${bSofa} )======++======( ${bSotao} )`,
-    `        '~~~~~~'       ||       '--------'`,
-    `                       ||`,
-    `                .------''------.`,
-    `               (    ${bGaveta}    )`,
-    `                '------..------'`,
-    `                       ||`,
-    `                   ${bCastelo}`
+    `                          /\\`,
+    `                         /  \\`,
+    `                        |(11)|`,
+    `                       |${bTorre}|`,
+    `                         \\  /`,
+    `          .~~~~~~.        ||        .--------.`,
+    `         ( ${bSofa} )=======++=======( ${bSotao} )`,
+    `          '~~..~~'        ||        '--..----'`,
+    `             ||           ||           ||`,
+    `        .----''---. .-----''-----. .---''------.`,
+    `       ( ${bRadio}  )-(   ${bGaveta}   )-( ${bLab} )`,
+    `        '---------' '-----..-----' '-----------'`,
+    `                          ||`,
+    `                      ${bCastelo}`
   ].join('\n');
 
   const gearCount = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
@@ -1933,7 +2184,10 @@ function viewDesvaoSub(sub){
 
     const cd = uiEphemeral.sofaCd || 0;
     h += `<div class="box"><span class="box-title">— ALMOFADAS PROFUNDAS —</span>
-      <div class="actions"><button id="btn-sofa" class="cmd" onclick="Game.rummageSofa()" ${cd>0?'disabled':''}>${cd>0?`Vasculhar almofadas (${Math.ceil(cd)}s)`:'Vasculhar almofadas'}</button></div></div>`;
+      <div class="actions">
+        <button id="btn-sofa" class="cmd" onclick="Game.rummageSofa()" ${cd>0?'disabled':''}>${cd>0?`Vasculhar almofadas (${Math.ceil(cd)}s)`:'Vasculhar almofadas'}</button>
+        <button class="cmd" onclick="Game.selectZone(3);Game.go('aventura')">Abismo das Almofadas (Fase 4) -&gt;</button>
+      </div></div>`;
 
     h += `<div class="box"><span class="box-title">— ACUMULADORES DO DESVÃO —</span>`;
     for(const k in ACCELS_ACT2){
@@ -1941,14 +2195,24 @@ function viewDesvaoSub(sub){
       h += `<div class="shop-item"><b>${a.name}</b> x${owned}<br><span class="muted">${a.desc} (+${a.bonus} P/s cada)</span><br>
       <button class="cmd" data-cost="${cost}" onclick="Game.buyAccel('${k}')" ${S.resources.dust<cost?'disabled':''}>Adquirir (${fmt(cost)} poeira)</button></div>`;
     }
+    const ft = TOOLS.fita_isolante;
+    const hasFt = hasTool('fita_isolante');
+    h += `<div class="shop-item"><b>${ft.name}</b> ${hasFt?'<span class="muted">[adquirido]</span>':`— <b>${fmt(ft.price)} poeira</b>`}<br><span class="muted">${ft.effect}. ${ft.desc}</span><br>${!hasFt?`<button class="cmd" data-cost="${ft.price}" onclick="Game.buyItem('fita_isolante')" ${S.resources.dust<ft.price?'disabled':''}>Adquirir</button>`:''}</div>`;
+    const cf = POTIONS.cafe_meia;
+    const cfQty = (S.inventory.potions && S.inventory.potions.cafe_meia) || 0;
+    h += `<div class="shop-item"><b>${cf.name}</b> <span class="muted">(você tem x${cfQty})</span> — <b>${fmt(cf.price)} poeira</b><br><span class="muted">${cf.effect}. ${cf.desc}</span><br><button class="cmd" data-cost="${cf.price}" onclick="Game.buyPotion('cafe_meia',1)" ${S.resources.dust<cf.price?'disabled':''}>Preparar x1</button><button class="cmd" data-cost="${cf.price*5}" onclick="Game.buyPotion('cafe_meia',5)" ${S.resources.dust<cf.price*5?'disabled':''}>+5 (${fmt(cf.price*5)})</button></div>`;
     h += `</div>`;
 
-    h += `<div class="box"><span class="box-title">— RELÍQUIAS (MEIAS SOLITÁRIAS) —</span>`;
+    const stitchLv = (S.upgrades && S.upgrades.sockStitch) || 0;
+    const stitchCost = 3 + stitchLv * 2;
+    h += `<div class="box"><span class="box-title">— RELÍQUIAS & COSTURA (MEIAS SOLITÁRIAS) —</span>`;
     for(const id in RELICS){
       const r = RELICS[id], owned = hasRelic(id);
       h += `<div class="shop-item"><b>${r.name}</b> ${owned?'<span class="muted">[adquirida]</span>':`— <b>${r.costSocks} Meias</b>`}<br><span class="muted">${r.effect}. ${r.desc}</span><br>
       ${owned?'':`<button class="cmd" onclick="Game.buyRelic('${id}')" ${(S.resources.socks||0)<r.costSocks?'disabled':''}>Trocar</button>`}</div>`;
     }
+    h += `<div class="shop-item"><b>Costura Reforçada</b> Nv ${stitchLv} — <b>${stitchCost} Meias</b><br><span class="muted">+15% ATK e +15% HP máx permanentes por nível.</span><br>
+      <button class="cmd" onclick="Game.upgradeSockStitch()" ${(S.resources.socks||0)<stitchCost?'disabled':''}>Aprimorar</button></div>`;
     h += `</div></div>`;
     return h;
   }
@@ -1966,14 +2230,51 @@ function viewDesvaoSub(sub){
       <button class="cmd" onclick="Game.swapCable(2)">Trocar 3 &lt;-&gt; 4</button>
     </div>`;
     if(S.unlocks.cablesSolved) h += `<div class="amber" style="margin-top:8px">Cabos desembaraçados! (Tinha até um cabo de Nokia tijolão intacto no fundo.)</div>`;
-    h += `</div></div>`;
+    h += `</div>`;
+    if(S.combat.unlockedZones >= 5){
+      h += `<div class="actions"><button class="cmd" onclick="Game.selectZone(4);Game.go('aventura')">Cemitério de Eletrônicos 2005 (Fase 5) -&gt;</button></div>`;
+    }
+    h += `</div>`;
+    return h;
+  }
+
+  if(sub === 'radio'){
+    PUZZLES.ensureRadio(S);
+    const sig = PUZZLES.radioSignal(S.radio);
+    h += `<div class="scene-title">— Rádio Velho —</div>`;
+    h += `<pre class="ascii-art">${esc(ART.oldRadio)}</pre>`;
+    h += `<div class="box"><div class="amber">${esc(sig.wave)}</div><div class="scene-text">${esc(sig.msg)}</div>
+      <div class="muted">Banda: <b>${S.radio.band}</b> · Frequência: <b>${S.radio.freq} MHz</b></div>
+      <div class="actions">
+        <button class="cmd" onclick="Game.radioBand()">Alternar AM/FM</button>
+        <button class="cmd" onclick="Game.radioFreq(-2)">-2 MHz</button>
+        <button class="cmd" onclick="Game.radioFreq(2)">+2 MHz</button>
+      </div></div></div>`;
+    return h;
+  }
+
+  if(sub === 'labirinto'){
+    PUZZLES.ensureMaze(S);
+    h += `<div class="scene-title">— Labirinto da Meia Perdida —</div>`;
+    h += `<div class="box"><div class="muted">Guie @ no escuro até encontrar o tesouro ($).</div>
+      <pre class="maze-grid">${esc(PUZZLES.renderMaze(S.maze))}</pre>
+      <div class="actions">
+        <button class="cmd" onclick="Game.mazeMove(0,-1)">Norte</button>
+      </div>
+      <div class="actions">
+        <button class="cmd" onclick="Game.mazeMove(-1,0)">Oeste</button>
+        <button class="cmd" onclick="Game.mazeMove(0,1)">Sul</button>
+        <button class="cmd" onclick="Game.mazeMove(1,0)">Leste</button>
+      </div>
+      ${S.maze.solved ? '<div class="amber">Tesouro do Labirinto recolhido!</div>' : ''}
+    </div></div>`;
     return h;
   }
 
   if(sub === 'sotao'){
-    if(S.combat.unlockedZones < 4){
-      S.combat.unlockedZones = 4;
-      showToast('Fase 4: Sótão das Promessas liberada em [ Aventura ]!');
+    if(S.combat.unlockedZones < 6){
+      S.combat.unlockedZones = 6;
+      showToast('Fase 6: Sótão das Promessas liberada em [ Aventura ]!');
       save();
     }
     const speech = uiEphemeral.npcSpeech.guitar ||
@@ -1989,12 +2290,15 @@ function viewDesvaoSub(sub){
     const a = ARMORS.cobertor_pesado;
     const aOwned = hasArmorTier('cobertor_pesado');
     const aReqOk = hasArmorTier(a.req);
+    const im = TOOLS.ima_geladeira;
+    const hasIm = hasTool('ima_geladeira');
 
     h += `<div class="box"><span class="box-title">— ACHADOS DO SÓTÃO —</span>
       <div class="shop-item"><b>${w.name}</b> ${wOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(w.price)} poeira</b>`}<br><span class="muted">${w.desc} · ${w.passive}</span><br>${!wOwned?`<button class="cmd" data-cost="${w.price}" data-req-ok="${wReqOk?1:0}" onclick="Game.buyItem('vassoura_eletrica')" ${(S.resources.dust<w.price||!wReqOk)?'disabled':''}>Adquirir</button>${!wReqOk?`<div class="muted">requer ${WEAPONS[w.req].name}</div>`:''}`:''}</div>
       <div class="shop-item"><b>${a.name}</b> ${aOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(a.price)} poeira</b>`}<br><span class="muted">${a.desc}</span><br>${!aOwned?`<button class="cmd" data-cost="${a.price}" data-req-ok="${aReqOk?1:0}" onclick="Game.buyItem('cobertor_pesado')" ${(S.resources.dust<a.price||!aReqOk)?'disabled':''}>Adquirir</button>${!aReqOk?`<div class="muted">requer ${ARMORS[a.req].name}</div>`:''}`:''}</div>
+      <div class="shop-item"><b>${im.name}</b> ${hasIm?'<span class="muted">[adquirido]</span>':`— <b>${fmt(im.price)} poeira</b>`}<br><span class="muted">${im.effect}. ${im.desc}</span><br>${!hasIm?`<button class="cmd" data-cost="${im.price}" onclick="Game.buyItem('ima_geladeira')" ${S.resources.dust<im.price?'disabled':''}>Adquirir</button>`:''}</div>
     </div>`;
-    h += `<div class="actions"><button class="cmd" onclick="Game.selectZone(3);Game.go('aventura')">Enfrentar Fase 4: Sótão das Promessas -&gt;</button></div></div>`;
+    h += `<div class="actions"><button class="cmd" onclick="Game.selectZone(5);Game.go('aventura')">Enfrentar Sótão das Promessas (Fase 6) -&gt;</button></div></div>`;
     return h;
   }
 
@@ -2006,7 +2310,14 @@ function viewDesvaoSub(sub){
     if(!S.unlocks.clockUnlocked){
       h += `<div class="box"><div class="scene-text">Os ponteiros travaram em <b>11:59</b>. É daqui que cai toda a poeira do mundo.</div>`;
       if(gears >= 2){
-        h += `<div class="actions"><button class="cmd" onclick="Game.unlockClockTower()">Encaixar as 2 Engrenagens no Portão da Torre</button></div>`;
+        PUZZLES.ensureClockDial(S);
+        const v = S.clockDial.vals;
+        h += `<div class="muted" style="margin-bottom:8px">As 2 Engrenagens encaixaram! Alinhe os 3 mostradores em <b>12h</b> para abrir a Torre:</div>`;
+        h += `<div class="row">
+          <div><b class="amber" style="font-size:20px">${v[0]}h</b><br><button class="cmd" onclick="Game.turnClock(0)">Girar I</button></div>
+          <div><b class="amber" style="font-size:20px">${v[1]}h</b><br><button class="cmd" onclick="Game.turnClock(1)">Girar II</button></div>
+          <div><b class="amber" style="font-size:20px">${v[2]}h</b><br><button class="cmd" onclick="Game.turnClock(2)">Girar III</button></div>
+        </div>`;
       } else {
         h += `<div class="red">Engrenagens do Relógio: ${gears}/2</div><div class="muted">Explore a Gaveta dos Cabos e o Sótão das Promessas.</div>`;
       }
@@ -2014,7 +2325,6 @@ function viewDesvaoSub(sub){
       return h;
     }
 
-    // Torre aberta: Oficina do Relogio + Fase 5 + Escolha Final
     const w = WEAPONS.ponteiro_12h;
     const wOwned = hasWeaponTier('ponteiro_12h');
     const wReqOk = hasWeaponTier(w.req);
@@ -2027,9 +2337,16 @@ function viewDesvaoSub(sub){
       <div class="shop-item"><b>${a.name}</b> ${aOwned?'<span class="muted">[equipado]</span>':`— <b>${fmt(a.price)} poeira</b>`}<br><span class="muted">${a.desc}</span><br>${!aOwned?`<button class="cmd" data-cost="${a.price}" data-req-ok="${aReqOk?1:0}" onclick="Game.buyItem('manto_tempo')" ${(S.resources.dust<a.price||!aReqOk)?'disabled':''}>Adquirir</button>${!aReqOk?`<div class="muted">requer ${ARMORS[a.req].name}</div>`:''}`:''}</div>
     </div>`;
 
+    const skLv = (S.upgrades && S.upgrades.skillLv) || 0;
+    const blLv = (S.upgrades && S.upgrades.magicBless) || 0;
+    h += `<div class="box"><span class="box-title">— ALTAR DE POEIRA MÁGICA —</span>
+      <div class="shop-item"><b>Maestria de Habilidades (Q/W/E)</b> Nv ${skLv}/5 ${skLv>=5?'<span class="muted">[MÁX]</span>':`— <b>${2+skLv} Mágicas</b>`}<br><span class="muted">+15% poder e -0.5s cooldown por nível.</span><br>${skLv<5?`<button class="cmd" onclick="Game.upgradeSkillLv()" ${S.resources.magicDust<(2+skLv)?'disabled':''}>Evoluir</button>`:''}</div>
+      <div class="shop-item"><b>Bênção de Poeira</b> Nv ${blLv} — <b>${2+blLv} Mágicas</b><br><span class="muted">+15% P/s global por nível.</span><br><button class="cmd" onclick="Game.upgradeMagicBless()" ${S.resources.magicDust<(2+blLv)?'disabled':''}>Abençoar</button></div>
+    </div>`;
+
     if(!S.unlocks.finalChoiceReady){
       h += `<div class="box"><div class="scene-text">No topo da escada em espiral, o relógio range em <b>11:59</b>. O Guardião do Tempo aguarda.</div>
-      <div class="actions"><button class="cmd danger" onclick="Game.selectZone(4);Game.go('aventura')">Subir ao Topo (Fase 5: Chefe Final) -&gt;</button></div></div>`;
+      <div class="actions"><button class="cmd danger" onclick="Game.selectZone(6);Game.go('aventura')">Subir ao Topo (Fase 7: Chefe Final) -&gt;</button></div></div>`;
     } else {
       h += `<div class="box"><span class="box-title">— A ESCOLHA FINAL (12:00) —</span>
         <div class="scene-text">O relógio voltou a bater. Diante de você, dois botões decidem o destino do Dust Box:</div>
@@ -2068,12 +2385,20 @@ function viewEnding(){
 function viewAventura(){
   const c = S.combat;
   const zone = COMBAT_ZONES[c.zone] || COMBAT_ZONES[0];
+  const realm = S.unlocks.act2 ? (c.realm || zone.realm || 'castelo') : 'castelo';
   const loop = (c.zoneLoops && c.zoneLoops[c.zone]) || 1;
   const w = WEAPONS[S.inventory.weapon];
 
   let h = `<div class="stage"><div class="scene-title">— ${esc(zone.name)} —</div>`;
+  if(S.unlocks.act2){
+    h += `<div class="zone-tabs">
+      <button class="zone-btn${realm==='castelo'?' active':''}" onclick="Game.selectRealm('castelo')" ${c.active?'disabled':''}>Castelo (1–3)</button>
+      <button class="zone-btn${realm==='desvao'?' active':''}" onclick="Game.selectRealm('desvao')" ${c.active?'disabled':''}>Desvão (4–7)</button>
+    </div>`;
+  }
   h += `<div class="zone-tabs">`;
   COMBAT_ZONES.forEach((z, idx) => {
+    if((z.realm || 'castelo') !== realm) return;
     const unlocked = idx < c.unlockedZones;
     const activeCls = idx === c.zone ? ' active' : '';
     h += `<button class="zone-btn${activeCls}" onclick="Game.selectZone(${idx})" ${(c.active || !unlocked) ? 'disabled' : ''}>${unlocked ? esc(z.short) : `Fase ${idx+1} [trancada]`}</button>`;
@@ -2120,8 +2445,10 @@ function viewAventura(){
     }
     const chaQty = (S.inventory.potions && S.inventory.potions.cha_poeira) || 0;
     const tonQty = (S.inventory.potions && S.inventory.potions.tonico_cafeina) || 0;
+    const cfQty  = (S.inventory.potions && S.inventory.potions.cafe_meia) || 0;
     if(chaQty > 0) h += `<button class="skill-btn" onclick="Game.usePotion('cha_poeira')" title="${esc(POTIONS.cha_poeira.effect)}">[R] Chá x${chaQty}</button>`;
     if(tonQty > 0) h += `<button class="skill-btn" onclick="Game.usePotion('tonico_cafeina')" title="${esc(POTIONS.tonico_cafeina.effect)}">[T] Tônico x${tonQty}</button>`;
+    if(cfQty > 0)  h += `<button class="skill-btn" onclick="Game.usePotion('cafe_meia')" title="${esc(POTIONS.cafe_meia.effect)}">[F] Café x${cfQty}</button>`;
     h += `</div>`;
 
     h += `<div class="combat-log">${c.clog.map(l=>`<div>${esc(l)}</div>`).join('')}</div></div>`;
@@ -2386,11 +2713,16 @@ function tick(dt){
     }
   }
 
-  if(S.intro.done && !S.unlocks.victory){
+  if(S.intro.done && !S.unlocks.viewingEnding){
     uiEphemeral.moteTimer -= dt;
     if(uiEphemeral.moteTimer <= 0){
       uiEphemeral.moteTimer = 90 + Math.floor(Math.random()*90);
       spawnGoldenMote();
+    }
+    uiEphemeral.flashTimer -= dt;
+    if(uiEphemeral.flashTimer <= 0){
+      uiEphemeral.flashTimer = 140 + Math.floor(Math.random()*90);
+      spawnFlashEvent();
     }
   }
 
@@ -2483,6 +2815,7 @@ function boot(){
       else if(k === 'e') useSkill('sneeze');
       else if(k === 'r') usePotion('cha_poeira');
       else if(k === 't') usePotion('tonico_cafeina');
+      else if(k === 'f') usePotion('cafe_meia');
     }
   });
 
@@ -2493,8 +2826,10 @@ function boot(){
 window.Game = {
   buyAccel, lubricate, cleanBody, buyItem, buyPotion, usePotion, toggleAutoTea, transmute, transmuteAll, craftFragment, fuseKey, openGate,
   rummageSofa, buyRelic, swapCable, unlockClockTower, chooseEnding, continueAfterEnding, startNewGamePlus,
+  safeDigit, testSafe, radioBand, radioFreq, mazeMove, turnClock,
+  upgradeSkillLv, upgradeMagicBless, upgradeSockStitch, resolveFlashEvent,
   cycleLever, testLevers, searchCandy, enterWind, pullBook,
-  selectZone, startExpedition, retreatExpedition, useSkill, rest,
+  selectRealm, selectZone, startExpedition, retreatExpedition, useSkill, rest,
   talkNpc, chooseDialogue,
   pokeRat, pokeSpiderWord, pokeTermite, pokeMonster, pokeRemote, pokeGuitar, pokeCandy,
   go, setCompTab, setMapHint,

@@ -64,12 +64,15 @@ const BAGS = {
 const TOOLS = {
   pa_lixo:            { name: 'Pá de Lixo', price: 1200, where: 'Hall', effect: '+20% poeira em combates', desc: 'Recolhe cada farelo deixado pelos monstros.', hint: 'À venda no coração do castelo.' },
   luva_borracha:      { name: 'Luva de Borracha Amarela', price: 2500, where: 'Asa Oeste', effect: '-15% dano recebido', desc: 'Proteção doméstica contra ameaças existenciais.', hint: 'Acessório no ateliê a oeste.' },
-  flanela_microfibra: { name: 'Flanela de Microfibra', price: 3500, where: 'Asa Leste', effect: 'Regen de HP 2x fora de luta', desc: 'Um carinho nas feridas entre uma expedição e outra.', hint: 'Guardada na oficina a leste.' }
+  flanela_microfibra: { name: 'Flanela de Microfibra', price: 3500, where: 'Asa Leste', effect: 'Regen de HP 2x fora de luta', desc: 'Um carinho nas feridas entre uma expedição e outra.', hint: 'Guardada na oficina a leste.' },
+  fita_isolante:      { name: 'Fita Isolante', price: 22000, where: 'Fundo do Sofá', effect: 'Sobrevive a 1 golpe fatal com 1 HP por expedição', desc: 'Remenda qualquer coisa no universo brasileiro.', hint: 'Achada entre almofadas além do Portão.' },
+  ima_geladeira:      { name: 'Ímã de Geladeira', price: 35000, where: 'Sótão das Promessas', effect: '+25% poeira e chance extra de Meias em combate', desc: 'De uma pizzaria que fechou em 2013, mas ainda atrai tudo.', hint: 'Esquecido no Sótão das Promessas.' }
 };
 
 const POTIONS = {
   cha_poeira:     { name: 'Chá de Poeira', price: 400, key: 'R', effect: 'Cura 50% do HP em combate', desc: 'Quente, cinzento e surpreendentemente revigorante.', hint: 'Vendido no Hall Principal.' },
-  tonico_cafeina: { name: 'Tônico de Cafeína Mofada', price: 1200, key: 'T', effect: '+50% ATK por 15s', desc: 'Destilado no Porão. Faz seu @ vibrar em alta frequência.', hint: 'Preparado no Porão Obscuro.' }
+  tonico_cafeina: { name: 'Tônico de Cafeína Mofada', price: 1200, key: 'T', effect: '+50% ATK por 15s', desc: 'Destilado no Porão. Faz seu @ vibrar em alta frequência.', hint: 'Preparado no Porão Obscuro.' },
+  cafe_meia:      { name: 'Café Coado na Meia', price: 3500, key: 'F', effect: 'Cura 100% HP + zera cooldown de Q/W/E', desc: 'Forte o bastante para acordar até o relógio parado.', hint: 'Preparado no Fundo do Sofá.' }
 };
 
 const SKILLS = {
@@ -96,23 +99,29 @@ const SECRETS = {
   grao_dourado:     { name: 'Observador do Brilho', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Capturou um grão de poeira brilhante flutuando pela tela.', hint: 'Fique de olho: algo brilha na tela de tempos em tempos.' },
   tapa_controle:    { name: 'Tapa no Controle', bonusText: '+15% P/s', dpsBonus: 0.15, desc: 'Bateu na lateral do Controle Remoto e funcionou. Engenharia clássica.', hint: 'O que todo brasileiro faz quando a pilha do controle falha?' },
   acorde_desafinado:{ name: 'Acorde Desafinado', bonusText: '+15% ATK', atkBonus: 0.15, desc: 'Tocou os 3 primeiros segundos de Faroeste Caboclo e parou. Dano psicológico.', hint: 'Alguém no Sótão sente falta de ter as cordas tocadas...' },
-  maldicao_do_3:    { name: 'A Maldição do 3', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Insistiu na Caixa de Doces esperando o número 3 — junto com Half-Life e Portal.', hint: 'Algumas caixas famosas nunca receberam uma terceira parte...' }
+  maldicao_do_3:    { name: 'A Maldição do 3', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Insistiu na Caixa de Doces esperando o número 3 — junto com Half-Life e Portal.', hint: 'Algumas caixas famosas nunca receberam uma terceira parte...' },
+  determinacao:     { name: 'Determinação Empoeirada', bonusText: '+20% P/s e +20% ATK', dpsBonus: 0.20, atkBonus: 0.20, desc: 'Apesar de tudo, ainda é você... no Novo Jogo+. O Rato se lembra.', hint: 'Só quem já girou o relógio e voltou ao começo conhece esse déjà vu.' }
 };
 
 const ACHIEVEMENT_INFO = {
-  chave:        { name: 'Chaveiro do Apocalipse Higiênico', desc: 'Fundiu a Grande Chave do Portão.' },
-  fuga:         { name: 'Ar Puro (alegadamente)', desc: 'Abriu o Portão Principal.' },
-  eletricista:  { name: 'Eletricista de Ruína', desc: 'Acendeu a Câmara Escura.' },
-  dieta:        { name: 'Caixa de Doces Vazia', desc: 'Revirou o nicho esquecido e achou 1 Poeira Mágica.' },
-  vento:        { name: 'Perdeu Tudo no Vento', desc: 'Entrou no Túnel do Vento sem a Pedra de Peso.' },
-  mofo:         { name: 'Assassino de Mofo Real', desc: 'Derrotou o REI MOFO.' },
-  baratao:      { name: 'Pânico da Cozinha', desc: 'Derrotou o BARATÃO BLINDADO.' },
-  ancestral:    { name: 'Senhor da Alergia', desc: 'Derrotou o LORDE ÁCARO ANCESTRAL.' },
-  exterminador: { name: 'Exterminador de Sujeira', desc: '10 abates nas expedições.' },
-  bibliotecario:{ name: 'Leitor de Poeira', desc: 'Encontrou o Compêndio na Estante Antiga.' },
-  tagarela:     { name: 'Tagarela do Castelo', desc: 'Conversou com todos os 5 habitantes do Castelo.' },
-  desvao:       { name: 'Além do Portão', desc: 'Entrou no Desvão do Mundo.' },
-  cabos:        { name: 'Desembaraçador Profissional', desc: 'Organizou a Gaveta dos Cabos Emaranhados.' },
+  chave:          { name: 'Chaveiro do Apocalipse Higiênico', desc: 'Fundiu a Grande Chave do Portão.' },
+  fuga:           { name: 'Ar Puro (alegadamente)', desc: 'Abriu o Portão Principal.' },
+  eletricista:    { name: 'Eletricista de Ruína', desc: 'Acendeu a Câmara Escura.' },
+  cofre:          { name: 'Arrombador de Cofre', desc: 'Decifrou a senha do Cofre Antigo.' },
+  dieta:          { name: 'Caixa de Doces Vazia', desc: 'Revirou o nicho esquecido e achou 1 Poeira Mágica.' },
+  vento:          { name: 'Perdeu Tudo no Vento', desc: 'Entrou no Túnel do Vento sem a Pedra de Peso.' },
+  mofo:           { name: 'Assassino de Mofo Real', desc: 'Derrotou o REI MOFO.' },
+  baratao:        { name: 'Pânico da Cozinha', desc: 'Derrotou o BARATÃO BLINDADO.' },
+  ancestral:      { name: 'Senhor da Alergia', desc: 'Derrotou o LORDE ÁCARO ANCESTRAL.' },
+  rei_meias:      { name: 'Par Finalmente Encontrado', desc: 'Derrotou o REI DAS MEIAS SEM PAR.' },
+  roteador:       { name: 'Tirou da Tomada e Botou de Novo', desc: 'Derrotou o ROTEADOR SEM SINAL.' },
+  exterminador:   { name: 'Exterminador de Sujeira', desc: '10 abates nas expedições.' },
+  bibliotecario:  { name: 'Leitor de Poeira', desc: 'Encontrou o Compêndio na Estante Antiga.' },
+  tagarela:       { name: 'Tagarela do Castelo', desc: 'Conversou com todos os 5 habitantes do Castelo.' },
+  desvao:         { name: 'Além do Portão', desc: 'Entrou no Desvão do Mundo.' },
+  cabos:          { name: 'Desembaraçador Profissional', desc: 'Organizou a Gaveta dos Cabos Emaranhados.' },
+  radio:          { name: 'Sintonizador de Memórias', desc: 'Captou a transmissão secreta no Rádio Velho.' },
+  labirinto:      { name: 'Cartógrafo do Escuro', desc: 'Encontrou o tesouro no Labirinto da Meia Perdida.' },
   promessa:       { name: 'Segunda-Feira Chegou', desc: 'Derrotou a PROMESSA DE SEGUNDA-FEIRA.' },
   colecionador:   { name: 'Colecionador de Meias', desc: 'Adquiriu todas as 3 Relíquias do Fundo do Sofá.' },
   senhor_tempo:   { name: 'O Relógio Voltou a Girar', desc: 'Derrotou O GRANDE ADIAMENTO no topo da Torre.' },
@@ -186,10 +195,52 @@ const COMBAT_ZONES = [
   },
   {
     id: 3,
-    name: 'Fase 4: Sótão das Promessas',
-    short: 'Fase 4',
+    name: 'Fase 4: Abismo das Almofadas',
+    short: 'Almofadas',
+    desc: 'As profundezas escuras entre as almofadas do sofá.',
+    realm: 'desvao',
+    monsters: [
+      { id:'moeda_ox', name:'Moeda de 5 Centavos Oxidada', hp:750, atk:11, reward:6500,
+        desc:'Ninguém aceita de troco, mas ela ainda morde.',
+        art:'    .---.\n   / 5¢  \\\n  | (o_o) |\n   \\_____/' },
+      { id:'migalha', name:'Migalha de Biscoito Petrificada', hp:1050, atk:13, reward:9500,
+        desc:'Dura como concreto desde a Copa de 2014.',
+        art:'    _/\\_.\n  .(o . o).\n  \'--~~~--\'' },
+      { id:'mola_solta', name:'Mola Solta Traiçoeira', hp:1350, atk:16, reward:13000,
+        desc:'Pula exatamente quando você tenta relaxar.',
+        art:'     (o_o)\n     /\\/\\/\n     \\/\\/\\\n     =====' },
+      { id:'rei_meias', name:'REI DAS MEIAS SEM PAR', hp:2200, atk:19, reward:26000, magic:2, socks:2, boss:true,
+        desc:'Costurado com 14 meias órfãs de lavanderias diferentes.',
+        art:'      _.-._\n     | / \\ |\n     |(O_O)|\n    /|     |\\\n   /  \\___/  \\\n  (____/ \\____)' }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Fase 5: Cemitério de Eletrônicos 2005',
+    short: 'Eletrônicos',
+    desc: 'Relíquias tecnológicas que se recusam a ligar.',
+    realm: 'desvao',
+    monsters: [
+      { id:'cd_riscado', name:'CD Riscado Cortante', hp:950, atk:13, reward:9500,
+        desc:'Tinha 180 MP3 baixadas no Ares. Trava na faixa 3.',
+        art:'    .-----.\n   /  ._.  \\\n  |  ( o )  |\n   \\  \'-\'  /\n    \'-----\'' },
+      { id:'mouse_bola', name:'Mouse de Bolinha Furioso', hp:1350, atk:16, reward:14000,
+        desc:'A bolinha travou de sujeira e ele culpa você.',
+        art:'     .---.\n    / | | \\\n   | (o.o) |\n   |  (_)  |\n    \'-----\'' },
+      { id:'impressora', name:'Impressora Sem Tinta Amarela', hp:1750, atk:19, reward:19000, magicChance:0.30,
+        desc:'Recusa-se a imprimir texto preto porque acabou o ciano.',
+        art:'   .---------.\n  |[!] ERR 04 |\n  +-----------+\n  | [=======] |\n  \'-----------\'' },
+      { id:'roteador', name:'ROTEADOR SEM SINAL', hp:2900, atk:23, reward:42000, magic:3, socks:2, boss:true,
+        desc:'Luz vermelha piscando eternamente. Tentar reiniciar só o irrita.',
+        art:'     |     |\n     |     |\n   .---------.\n  | (X) (X) ! |\n  | [* * * *] |\n   \'---------\'' }
+    ]
+  },
+  {
+    id: 5,
+    name: 'Fase 6: Sótão das Promessas',
+    short: 'Promessas',
     desc: 'Metas de janeiro que viraram cabide.',
-    act2: true,
+    realm: 'desvao',
     monsters: [
       { id:'halter_2kg', name:'Halter de 2kg Enferrujado', hp:1100, atk:14, reward:14000,
         desc:'Comprado com empolgação, usado como peso de porta.',
@@ -206,10 +257,11 @@ const COMBAT_ZONES = [
     ]
   },
   {
-    id: 4,
-    name: 'Fase 5: Torre do Relógio Parado',
-    short: 'Fase 5',
+    id: 6,
+    name: 'Fase 7: Torre do Relógio Parado',
+    short: 'Torre Final',
     desc: 'A escalada final até o relógio travado em 11:59.',
+    realm: 'desvao',
     act3: true,
     monsters: [
       { id:'pendulo', name:'Pêndulo Enferrujado', hp:2800, atk:28, reward:45000,

@@ -467,6 +467,33 @@ button.cmd.subtle:hover:not(:disabled) { border-color: var(--ink); color: var(--
   50% { opacity: 1; transform: scale(1.25); }
 }
 
+/* Eventos relampago e mini-labirinto */
+.flash-event {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto 12px auto;
+  padding: 10px 14px;
+  border: 1px dashed var(--ink);
+  background: var(--bg2);
+  text-align: center;
+  font-size: 13px;
+}
+.maze-grid {
+  display: inline-block;
+  text-align: left;
+  font-size: 16px;
+  line-height: 1.25;
+  letter-spacing: 3px;
+  margin: 8px auto;
+}
+.safe-digit {
+  display: inline-block;
+  width: 34px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+}
+
 .hpbar {
   display: inline-block;
   width: 140px;
