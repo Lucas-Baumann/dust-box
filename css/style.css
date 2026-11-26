@@ -67,6 +67,10 @@ body {
   font-size: 15px;
 }
 #stats b { color: #fff; }
+#s-dust.full-alert {
+  border-bottom: 1px dashed var(--ink);
+  color: #fff;
+}
 nav#tabs {
   display: flex;
   justify-content: center;

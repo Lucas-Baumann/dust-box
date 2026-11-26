@@ -15,7 +15,7 @@ const DIALOGUES = window.DustDialogues;
 
 function defaultState(){
   return {
-    version: "1.5.0",
+    version: "1.5.1",
     resources: { dust: 0, magicDust: 0, socks: 0, dustPerSecond: 1, maxDust: 1000, totalEarned: 0 },
     unlocks: { outOfRoom:false, metMoth:false, hasMap:false, hasLantern:false, hasCompendium:false, candyLooted:false, windLooted:false, puzzleSolved:false, act2:false, cablesSolved:false, clockUnlocked:false, victory:false },
     accelerators: { window:0, cat:0, carpet:0, fan:0, pillow:0, box16:0, dvds:0 },
@@ -28,7 +28,7 @@ function defaultState(){
     achievements: [],
     secrets: [],
     discoveredMonsters: {},
-    combat: { active:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
+    combat: { active:false, autoTea:false, zone:0, unlockedZones:1, zoneLoops:[1,1,1,1], idx:0, monster:null, mhp:0, mmax:1, clog:[], kills:0 },
     flags: {},
     ui: { tab:'quarto', subview:null, compTab:'equip' },
     intro: { cleans: 0, done: false },
@@ -48,6 +48,9 @@ const uiEphemeral = {
   lastRatVisible: false,
   cursorClicks: 0,
   barataClicks: 0,
+  remoteClicks: 0,
+  guitarClicks: 0,
+  candyClicks: 0,
   idleSeconds: 0,
   moteTimer: 45,
   moteEl: null,
@@ -214,6 +217,13 @@ function relicDpsMult(){
   });
   return 1 + bonus;
 }
+function secretAtkMult(){
+  let bonus = 0;
+  S.secrets.forEach(id => {
+    if(SECRETS[id] && SECRETS[id].atkBonus) bonus += SECRETS[id].atkBonus;
+  });
+  return 1 + bonus;
+}
 function relicAtkMult(){
   let bonus = 0;
   (S.inventory.relics||[]).forEach(id => {
@@ -231,7 +241,7 @@ function recalc(){
   const dps = baseDps() * secretDpsMult() * relicDpsMult();
   S.resources.dustPerSecond = Math.round(dps*100)/100;
   const w = WEAPONS[S.inventory.weapon];
-  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult());
+  S.player.attack = Math.round((2 + (w ? w.atk : 0)) * relicAtkMult() * secretAtkMult());
   const a = ARMORS[S.inventory.armor];
   if(a){
     S.player.maxHp = a.maxHp;
@@ -558,6 +568,17 @@ function transmute(){
   save(); render();
 }
 
+function transmuteAll(){
+  const count = Math.floor(S.resources.dust / 10000);
+  if(count <= 0){ transmute(); return; }
+  S.resources.dust -= count * 10000;
+  S.resources.magicDust += count;
+  sfx('unlock');
+  npcSay('beetle', `"*CRONCH x${count}!* Compactei ${fmt(count * 10000)} poeiras de uma vez em ${count} Poeira(s) Mágica(s)."`);
+  notify(`+${count} Poeira(s) Mágica(s) obtida(s)!`, 'amber');
+  save(); render();
+}
+
 function craftFragment(){
   if(S.key.complete){ npcSay('beetle', '"A chave já está pronta. Ansiedade é poeira da alma."'); render(); return; }
   if(S.key.fragments >= 3){ npcSay('beetle', '"Você já tem os 3 fragmentos! Agora é hora de fundir."'); render(); return; }
@@ -630,6 +651,9 @@ function buyRelic(id){
   sfx('victory');
   npcSay('remote', `"${r.name} é sua! (${r.effect})."`);
   showToast(`Relíquia adquirida: ${r.name} (${r.effect})`);
+  if(Object.keys(RELICS).every(rid => hasRelic(rid))){
+    achievement('colecionador', 'Colecionador de Meias', 'Adquiriu todas as 3 Relíquias do Fundo do Sofá');
+  }
   save(); render();
 }
 
@@ -813,6 +837,35 @@ function pokeMonster(){
     }
   }
 }
+function pokeRemote(){
+  sfx('click');
+  uiEphemeral.remoteClicks++;
+  if(uiEphemeral.remoteClicks >= 5 && !hasSecret('tapa_controle')){
+    npcSay('remote', '"AI! ...Ei, minha luzinha piscou! Bater na lateral realmente funcionou!"');
+    unlockSecret('tapa_controle');
+    return;
+  }
+  if(!hasSecret('tapa_controle')){
+    notify(`*tap* (${uiEphemeral.remoteClicks}/5)`);
+  }
+}
+function pokeGuitar(){
+  sfx('click');
+  uiEphemeral.guitarClicks++;
+  if(uiEphemeral.guitarClicks >= 3 && !hasSecret('acorde_desafinado')){
+    npcSay('guitar', '"*BLÉIM!* Os 3 primeiros segundos de Faroeste Caboclo ecoam pelo sótão! Sinta a energia."');
+    unlockSecret('acorde_desafinado');
+    return;
+  }
+}
+function pokeCandy(){
+  if(!S.unlocks.candyLooted) return;
+  sfx('click');
+  uiEphemeral.candyClicks++;
+  if(uiEphemeral.candyClicks >= 3 && !hasSecret('maldicao_do_3')){
+    unlockSecret('maldicao_do_3');
+  }
+}
 function spawnGoldenMote(){
   if(uiEphemeral.moteEl || !S.intro.done || S.unlocks.victory) return;
   if(typeof document === 'undefined' || !document.body || !document.body.appendChild) return;
@@ -846,22 +899,30 @@ function spawnGoldenMote(){
   }, 11000);
 }
 
-function buyPotion(id){
+function buyPotion(id, qty){
   const p = POTIONS[id];
+  const n = qty || 1;
   if(!p) return;
   const npcId = id === 'cha_poeira' ? 'moth' : 'beetle';
-  if(S.resources.dust < p.price){
+  const totalCost = p.price * n;
+  if(S.resources.dust < totalCost){
     sfx('error');
     npcSay(npcId, '"Poeira insuficiente para essa poção."');
     notify('Poeira insuficiente.');
     render();
     return;
   }
-  S.resources.dust -= p.price;
-  S.inventory.potions[id] = (S.inventory.potions[id] || 0) + 1;
+  S.resources.dust -= totalCost;
+  S.inventory.potions[id] = (S.inventory.potions[id] || 0) + n;
   sfx('buy');
-  npcSay(npcId, `"${p.name} pronta! Agora você tem x${S.inventory.potions[id]}."`);
+  npcSay(npcId, `"${p.name} (+${n}) pronta! Agora você tem x${S.inventory.potions[id]}."`);
   notify(`${p.name} adquirida (x${S.inventory.potions[id]}).`, 'amber');
+  save(); render();
+}
+
+function toggleAutoTea(){
+  S.combat.autoTea = !S.combat.autoTea;
+  sfx('click');
   save(); render();
 }
 
@@ -1111,6 +1172,14 @@ function combatRound(){
         S.player.hp -= md;
         c.clog.unshift(`${c.monster.name} revida ${md} em você.`);
         if(S.player.hp <= 0){ faint(); return; }
+        // Auto-Cha opcional quando HP < 35%
+        if(S.combat.autoTea && (S.player.hp / S.player.maxHp) < 0.35 && ((S.inventory.potions && S.inventory.potions.cha_poeira) || 0) > 0){
+          S.inventory.potions.cha_poeira--;
+          const heal = Math.round(S.player.maxHp * 0.50);
+          S.player.hp = Math.min(S.player.maxHp, S.player.hp + heal);
+          c.clog.unshift(`[Auto-Chá] +${heal} HP restaurados!`);
+          sfx('unlock');
+        }
       }
     }
   }
@@ -1200,6 +1269,8 @@ function tabs(){
 function paintStats(){
   document.getElementById('stat-dust').textContent = fmt(Math.floor(S.resources.dust));
   document.getElementById('stat-max').textContent = S.intro.done ? `/${fmt(S.resources.maxDust)}` : '';
+  const dustSpan = document.getElementById('s-dust');
+  if(dustSpan) dustSpan.classList.toggle('full-alert', S.intro.done && !S.flags.dustInf && S.resources.dust >= S.resources.maxDust);
   document.getElementById('stat-magic').textContent = S.resources.magicDust;
   const sockEl = document.getElementById('stat-socks');
   if(sockEl) sockEl.textContent = S.resources.socks || 0;
@@ -1415,7 +1486,7 @@ function viewHall(){
   h += item('pa_lixo', TOOLS.pa_lixo.name, TOOLS.pa_lixo.price, `${TOOLS.pa_lixo.effect}. ${TOOLS.pa_lixo.desc}`);
   const cha = POTIONS.cha_poeira;
   const chaQty = (S.inventory.potions && S.inventory.potions.cha_poeira) || 0;
-  h += `<div class="shop-item"><b>${cha.name}</b> <span class="muted">(você tem x${chaQty})</span> — <b>${cha.price} poeira</b><br><span class="muted">${cha.effect}. ${cha.desc}</span><br><button class="cmd" data-cost="${cha.price}" onclick="Game.buyPotion('cha_poeira')" ${S.resources.dust<cha.price?'disabled':''}>Comprar</button></div>`;
+  h += `<div class="shop-item"><b>${cha.name}</b> <span class="muted">(você tem x${chaQty})</span> — <b>${cha.price} poeira</b><br><span class="muted">${cha.effect}. ${cha.desc}</span><br><button class="cmd" data-cost="${cha.price}" onclick="Game.buyPotion('cha_poeira',1)" ${S.resources.dust<cha.price?'disabled':''}>Comprar x1</button><button class="cmd" data-cost="${cha.price*5}" onclick="Game.buyPotion('cha_poeira',5)" ${S.resources.dust<cha.price*5?'disabled':''}>+5 (${fmt(cha.price*5)})</button></div>`;
   h += `</div>`;
 
   h += `<div class="box"><span class="box-title">— MELHORIAS DO CASTELO —</span><div class="muted">compre sujeira para atrair mais sujeira. Economia circular.</div>`;
@@ -1437,7 +1508,9 @@ function viewInventario(){
   const a = ARMORS[S.inventory.armor];
   const b = BAGS[S.inventory.bag];
   const secBonusPct = Math.round((secretDpsMult() - 1) * 100);
+  const relBonusPct = Math.round((relicDpsMult() - 1) * 100);
   const totalAch = Object.keys(ACHIEVEMENT_INFO).length;
+  const gearCount = (S.gears.cable ? 1 : 0) + (S.gears.boss ? 1 : 0);
 
   let h = `<div class="stage"><div class="scene-title">— Inventário —</div><div class="inv-grid">`;
 
@@ -1450,21 +1523,26 @@ function viewInventario(){
     <div class="muted" style="font-size:12px">Cap. efetiva: ${fmt(S.resources.maxDust)}</div>
   </div>`;
 
-  h += `<div class="inv-card"><div class="inv-card-title">Produção & Chave</div>
+  h += `<div class="inv-card"><div class="inv-card-title">Produção & Estatísticas</div>
     <div class="inv-row"><span>Base</span><b>${baseDps().toFixed(2)} P/s</b></div>
-    <div class="inv-row"><span>Bônus de Segredos</span><b>+${secBonusPct}%</b></div>
+    <div class="inv-row"><span>Segredos / Relíquias</span><b>+${secBonusPct}% / +${relBonusPct}%</b></div>
     <div class="inv-row"><span>Total Atual</span><b class="amber">${S.resources.dustPerSecond.toFixed(2)} P/s</b></div>
-    <div class="inv-row"><span>Poeira Mágica</span><b>${S.resources.magicDust}</b></div>
-    <div class="inv-row"><span>Grande Chave</span><b>${S.key.complete ? 'PRONTA' : `${S.key.fragments}/3`}</b></div>
+    <div class="inv-row"><span>Poeira Total</span><b>${fmt(Math.floor(S.resources.totalEarned))}</b></div>
+    <div class="inv-row"><span>Abates / Segredos</span><b>${S.combat.kills} / ${S.secrets.length}</b></div>
+    ${S.unlocks.act2 ? `<div class="inv-row"><span>Engrenagens</span><b>${gearCount}/2</b></div>` : `<div class="inv-row"><span>Grande Chave</span><b>${S.key.complete ? 'PRONTA' : `${S.key.fragments}/3`}</b></div>`}
   </div>`;
 
-  h += `<div class="inv-card"><div class="inv-card-title">Ferramentas (${S.inventory.tools.length}/${Object.keys(TOOLS).length})</div>`;
-  if(!S.inventory.tools.length){
-    h += `<div class="muted">Nenhuma ferramenta equipada ainda.</div>`;
+  h += `<div class="inv-card"><div class="inv-card-title">Ferramentas & Relíquias</div>`;
+  if(!S.inventory.tools.length && !(S.inventory.relics && S.inventory.relics.length)){
+    h += `<div class="muted">Nenhuma ferramenta ou relíquia ainda.</div>`;
   } else {
     h += S.inventory.tools.map(id => {
       const t = TOOLS[id];
       return t ? `<div style="margin:4px 0"><b>${t.name}</b><br><span class="muted">${t.effect}</span></div>` : '';
+    }).join('');
+    h += (S.inventory.relics||[]).map(id => {
+      const r = RELICS[id];
+      return r ? `<div style="margin:4px 0"><b>✦ ${r.name}</b><br><span class="muted">${r.effect}</span></div>` : '';
     }).join('');
   }
   h += `</div>`;
@@ -1648,10 +1726,13 @@ function viewSub(sub){
     h += `<pre class="ascii-art npc-idle">${esc(ART.beetle)}</pre>`;
     h += renderNpcTalkControls('beetle');
     h += `<div class="box"><span class="box-title">— TRANSMUTAÇÃO —</span><div class="muted">10.000 Poeiras -&gt; 1 Poeira Mágica</div>
-    <div class="actions"><button class="cmd" data-cost="10000" onclick="Game.transmute()" ${S.resources.dust<10000?'disabled':''}>Compactar (10.000 poeira -&gt; 1 mágica)</button></div></div>`;
+    <div class="actions">
+      <button class="cmd" data-cost="10000" onclick="Game.transmute()" ${S.resources.dust<10000?'disabled':''}>Compactar (10k -&gt; 1)</button>
+      <button class="cmd" data-cost="20000" onclick="Game.transmuteAll()" ${S.resources.dust<20000?'disabled':''}>Compactar tudo</button>
+    </div></div>`;
     const ton = POTIONS.tonico_cafeina;
     const tonQty = (S.inventory.potions && S.inventory.potions.tonico_cafeina) || 0;
-    h += `<div class="box"><span class="box-title">— POÇÕES DE POEIRA —</span><div class="shop-item"><b>${ton.name}</b> <span class="muted">(você tem x${tonQty})</span> — <b>${fmt(ton.price)} poeira</b><br><span class="muted">${ton.effect}. ${ton.desc}</span><br><button class="cmd" data-cost="${ton.price}" onclick="Game.buyPotion('tonico_cafeina')" ${S.resources.dust<ton.price?'disabled':''}>Preparar</button></div></div>`;
+    h += `<div class="box"><span class="box-title">— POÇÕES DE POEIRA —</span><div class="shop-item"><b>${ton.name}</b> <span class="muted">(você tem x${tonQty})</span> — <b>${fmt(ton.price)} poeira</b><br><span class="muted">${ton.effect}. ${ton.desc}</span><br><button class="cmd" data-cost="${ton.price}" onclick="Game.buyPotion('tonico_cafeina',1)" ${S.resources.dust<ton.price?'disabled':''}>Preparar x1</button><button class="cmd" data-cost="${ton.price*5}" onclick="Game.buyPotion('tonico_cafeina',5)" ${S.resources.dust<ton.price*5?'disabled':''}>+5 (${fmt(ton.price*5)})</button></div></div>`;
     h += `<div class="box"><span class="box-title">— GRANDE CHAVE DO PORTÃO —</span><div class="muted">Cada fragmento: 2 Mágicas + 5.000 poeiras — Precisa de 3.<br>Fragmentos atuais: <b>${S.key.fragments}/3</b></div>
     <div class="actions">
       <button class="cmd" data-cost="5000" data-magic-cost="2" data-req-ok="${S.key.fragments<3?1:0}" onclick="Game.craftFragment()" ${(S.resources.magicDust<2||S.resources.dust<5000||S.key.fragments>=3)?'disabled':''}>Forjar fragmento</button>
@@ -1676,7 +1757,7 @@ function viewSub(sub){
 
   if(sub==='candy'){
     h += `<div class="scene-title">— Nicho Esquecido —</div>`;
-    h += `<pre class="ascii-art">${esc(ART.candy)}</pre>`;
+    h += `<pre class="ascii-art" style="cursor:pointer" onclick="Game.pokeCandy()">${esc(ART.candy)}</pre>`;
     h += `<div class="scene-text">"Uma caixa de doces? Que coisa inútil... Faz sentido estar coberta de poeira."</div>`;
     h += `<div class="actions"><button class="cmd" onclick="Game.searchCandy()" ${S.unlocks.candyLooted?'disabled':''}>${S.unlocks.candyLooted?'Caixa já revirada':'Mexer no fundo da caixa'}</button></div></div>`;
     return h;
@@ -1767,7 +1848,7 @@ function viewDesvaoSub(sub){
       '"Bem-vindo ao Fundo do Sofá! Se você perdeu uma meia ou 50 centavos desde 2014, provavelmente está aqui."';
     h += `<div class="scene-title">— O Fundo do Sofá — Controle Remoto Sem Pilha —</div>`;
     h += speechBubble(speech, 46);
-    h += `<pre class="ascii-art npc-idle">${esc(ART.remote)}</pre>`;
+    h += `<pre class="ascii-art npc-idle" style="cursor:pointer" onclick="Game.pokeRemote()">${esc(ART.remote)}</pre>`;
     h += renderNpcTalkControls('remote');
 
     const cd = uiEphemeral.sofaCd || 0;
@@ -1794,15 +1875,17 @@ function viewDesvaoSub(sub){
 
   if(sub === 'gaveta'){
     const ord = S.cables.order;
+    const target = ['USB','HDMI','P2','VGA'];
+    const tag = (i)=> ord[i] === target[i] ? `[ ${ord[i]} ✓ ]` : `[ ${ord[i]} ]`;
     h += `<div class="scene-title">— Gaveta dos Cabos Emaranhados —</div>`;
     h += `<div class="box"><div class="scene-text">Quatro cabos jurássicos embolados. Troque cabos vizinhos até alinhar na ordem: <b>USB -&gt; HDMI -&gt; P2 -&gt; VGA</b>.</div>`;
-    h += `<pre class="ascii-art">[ ${ord[0]} ] ~~~ [ ${ord[1]} ] ~~~ [ ${ord[2]} ] ~~~ [ ${ord[3]} ]</pre>`;
+    h += `<pre class="ascii-art">${tag(0)} ~~~ ${tag(1)} ~~~ ${tag(2)} ~~~ ${tag(3)}</pre>`;
     h += `<div class="actions">
       <button class="cmd" onclick="Game.swapCable(0)">Trocar 1 &lt;-&gt; 2</button>
       <button class="cmd" onclick="Game.swapCable(1)">Trocar 2 &lt;-&gt; 3</button>
       <button class="cmd" onclick="Game.swapCable(2)">Trocar 3 &lt;-&gt; 4</button>
     </div>`;
-    if(S.unlocks.cablesSolved) h += `<div class="amber" style="margin-top:8px">Cabos desembaraçados! Engrenagem do Relógio recolhida.</div>`;
+    if(S.unlocks.cablesSolved) h += `<div class="amber" style="margin-top:8px">Cabos desembaraçados! (Tinha até um cabo de Nokia tijolão intacto no fundo.)</div>`;
     h += `</div></div>`;
     return h;
   }
@@ -1817,7 +1900,7 @@ function viewDesvaoSub(sub){
       '"Bem-vindo ao Sótão das Promessas de Janeiro! Aqui descansam todas as metas que começariam na próxima segunda."';
     h += `<div class="scene-title">— Sótão das Promessas — Violão Sem Corda —</div>`;
     h += speechBubble(speech, 46);
-    h += `<pre class="ascii-art npc-idle">${esc(ART.guitar)}</pre>`;
+    h += `<pre class="ascii-art npc-idle" style="cursor:pointer" onclick="Game.pokeGuitar()">${esc(ART.guitar)}</pre>`;
     h += renderNpcTalkControls('guitar');
 
     const w = WEAPONS.vassoura_eletrica;
@@ -1876,6 +1959,10 @@ function viewAventura(){
     h += `<button class="cmd" onclick="Game.rest()">Curar (descansar)</button>`;
   } else {
     h += `<button class="cmd danger" onclick="Game.retreatExpedition()">Recuar (reinicia a fase)</button>`;
+  }
+  const hasCha = ((S.inventory.potions && S.inventory.potions.cha_poeira) || 0) > 0 || S.combat.autoTea;
+  if(hasCha){
+    h += `<button class="cmd subtle" onclick="Game.toggleAutoTea()" title="Usa Chá de Poeira automaticamente abaixo de 35% HP">Auto-Chá: ${S.combat.autoTea?'ON':'OFF'}</button>`;
   }
   h += `</div>`;
 
@@ -1945,10 +2032,14 @@ function viewCompendio(){
       const b = BAGS[id];
       h += renderEntry(hasBagTier(id), b.name, `Base ${fmt(b.max)}`, b.desc, b.hint);
     }
-    h += `</div><div class="box"><span class="box-title">— FERRAMENTAS —</span>`;
+    h += `</div><div class="box"><span class="box-title">— FERRAMENTAS & RELÍQUIAS —</span>`;
     for(const id in TOOLS){
       const t = TOOLS[id];
       h += renderEntry(hasTool(id), t.name, t.effect, t.desc, t.hint);
+    }
+    for(const id in RELICS){
+      const r = RELICS[id];
+      h += renderEntry(hasRelic(id), `✦ ${r.name}`, r.effect, r.desc, 'Trocada por Meias Solitárias além do Portão.');
     }
     h += `</div><div class="box"><span class="box-title">— HABILIDADES DE COMBATE —</span>`;
     for(const sid in SKILLS){
@@ -2272,12 +2363,12 @@ function boot(){
 }
 
 window.Game = {
-  buyAccel, lubricate, cleanBody, buyItem, buyPotion, usePotion, transmute, craftFragment, fuseKey, openGate,
+  buyAccel, lubricate, cleanBody, buyItem, buyPotion, usePotion, toggleAutoTea, transmute, transmuteAll, craftFragment, fuseKey, openGate,
   rummageSofa, buyRelic, swapCable, unlockClockTower,
   cycleLever, testLevers, searchCandy, enterWind, pullBook,
   selectZone, startExpedition, retreatExpedition, useSkill, rest,
   talkNpc, chooseDialogue,
-  pokeRat, pokeSpiderWord, pokeTermite, pokeMonster,
+  pokeRat, pokeSpiderWord, pokeTermite, pokeMonster, pokeRemote, pokeGuitar, pokeCandy,
   go, setCompTab, setMapHint,
   reset(){ window.__dustboxSkipSave = true; localStorage.removeItem(SAVE_KEY); location.reload(); },
   debug: Debug,

@@ -72,6 +72,9 @@ function getPool(npcId, S){
       },
       {
         text: '"Ninguém construiu este castelo. Ele foi se montando sozinho com cada tarefa adiada para segunda-feira."'
+      },
+      {
+        text: '"Já comi um trabalho salvo como trabalho_final_v3_AGORA_VAI.doc e um boleto de academia só visitada em janeiro. Uma iguaria."'
       }
     ];
     if(S.unlocks.hasMap){
@@ -195,6 +198,9 @@ function getPool(npcId, S){
       },
       {
         text: '"Tudo que escorrega entre as almofadas do sofá termina aqui. Já vi 43 moedas, 12 tampas de caneta e uma fatia seca de pizza."'
+      },
+      {
+        text: '"Outro dia caiu aqui um perfil inteiro do Orkut cheio de depoimentos \'não aceita\', um CD do Nero e uma conta do MSN com status Ocupado desde 2011."'
       }
     ];
   }
@@ -219,6 +225,9 @@ function getPool(npcId, S){
       },
       {
         text: '"Lá no fundo deste sótão vive a Promessa de Segunda-Feira. Se você derrotar ela nos Corredores, dizem que ela guarda uma engrenagem da Torre."'
+      },
+      {
+        text: '"Na prateleira do fundo tem um pé-de-cabra enferrujado, uma arma de portais sem bateria e uma caixa de doces — todos esperando o número 3 que nunca chegou."'
       }
     ];
   }

@@ -91,7 +91,10 @@ const SECRETS = {
   pano_vo:          { name: 'Pano de Prato da Vó', bonusText: '+10% capacidade do saco', bagBonus: 0.10, desc: 'Costura sagrada descoberta nas palavras da Aranha.', hint: 'Leia com atenção o que a alfaiate diz...' },
   chinelo_havaiana: { name: 'Chinelo Havaiana', bonusText: '+15% dano em insetos', insectBonus: 0.15, desc: 'Arma cultural brasileira despertada contra baratas.', hint: 'Alguns insetos nos Corredores merecem uns cliques extras.' },
   cafe_ontem:       { name: 'Café Passado de Ontem', bonusText: '+10% velocidade de ataque', atkSpeedBonus: 0.10, desc: 'Amargo, frio e funcional. O Cupim aprovou.', hint: 'Com luz na mão, converse de perto com quem trabalha madeira.' },
-  grao_dourado:     { name: 'Observador do Brilho', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Capturou um grão de poeira brilhante flutuando pela tela.', hint: 'Fique de olho: algo brilha na tela de tempos em tempos.' }
+  grao_dourado:     { name: 'Observador do Brilho', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Capturou um grão de poeira brilhante flutuando pela tela.', hint: 'Fique de olho: algo brilha na tela de tempos em tempos.' },
+  tapa_controle:    { name: 'Tapa no Controle', bonusText: '+15% P/s', dpsBonus: 0.15, desc: 'Bateu na lateral do Controle Remoto e funcionou. Engenharia clássica.', hint: 'O que todo brasileiro faz quando a pilha do controle falha?' },
+  acorde_desafinado:{ name: 'Acorde Desafinado', bonusText: '+15% ATK', atkBonus: 0.15, desc: 'Tocou os 3 primeiros segundos de Faroeste Caboclo e parou. Dano psicológico.', hint: 'Alguém no Sótão sente falta de ter as cordas tocadas...' },
+  maldicao_do_3:    { name: 'A Maldição do 3', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Insistiu na Caixa de Doces esperando o número 3 — junto com Half-Life e Portal.', hint: 'Algumas caixas famosas nunca receberam uma terceira parte...' }
 };
 
 const ACHIEVEMENT_INFO = {
@@ -108,7 +111,8 @@ const ACHIEVEMENT_INFO = {
   tagarela:     { name: 'Tagarela do Castelo', desc: 'Conversou com todos os 5 habitantes do Castelo.' },
   desvao:       { name: 'Além do Portão', desc: 'Entrou no Desvão do Mundo.' },
   cabos:        { name: 'Desembaraçador Profissional', desc: 'Organizou a Gaveta dos Cabos Emaranhados.' },
-  promessa:     { name: 'Segunda-Feira Chegou', desc: 'Derrotou a PROMESSA DE SEGUNDA-FEIRA.' }
+  promessa:     { name: 'Segunda-Feira Chegou', desc: 'Derrotou a PROMESSA DE SEGUNDA-FEIRA.' },
+  colecionador: { name: 'Colecionador de Meias', desc: 'Adquiriu todas as 3 Relíquias do Fundo do Sofá.' }
 };
 
 const COMBAT_ZONES = [
