@@ -7,8 +7,10 @@
        ~ Castelo da Poeira Eterna ~
 ```
 
+**Português** · [English](./README.en.md) · [Español](./README.es.md)
+
 > **Status: Em desenvolvimento ativo (WIP)**  
-> Algumas paredes ainda estão sendo rebocadas com poeira fresca. Novos segredos, áreas e capítulos chegam aos poucos.
+> Algumas paredes ainda estão sendo rebocadas com poeira fresca. Novos segredos, áreas e melhorias continuam chegando.
 >
 > **Jogue direto no navegador:** https://lucas-baumann.github.io/dust-box/
 
@@ -16,7 +18,7 @@
 
 ### O que é isso?
 
-**DUST BOX** é um jogo incremental / *idle RPG* textual em português com estética de terminal ASCII.
+**DUST BOX** é um jogo incremental / *idle RPG* textual com estética de terminal ASCII.
 
 Não existe tutorial. Não existe mapa logo de cara. Você só precisa abrir a página, existir por alguns segundos e observar o que acontece quando a poeira começa a se acumular.
 
@@ -26,18 +28,41 @@ Inspirado na filosofia de descoberta progressiva de **Candy Box 2**, o jogo esco
 
 ### Como jogar
 
-Você pode jogar online pelo link acima ou rodar localmente sem instalar absolutamente nada:
+Jogue online pelo link acima ou rode localmente sem instalar nada:
 
 ```bash
 git clone https://github.com/Lucas-Baumann/dust-box.git
 cd dust-box
 ```
 
-Depois, basta abrir o arquivo `index.html` no seu navegador favorito.
+Depois, basta abrir `index.html` no seu navegador favorito.
 
-- **Autosave local:** seu progresso fica salvo automaticamente no `localStorage` (com opção de exportar e importar o código de save quando quiser).
+- **Autosave local:** progresso salvo automaticamente no `localStorage` (com opção de exportar/importar código de save).
+- **Idiomas & `trad. hover`:** jogue em **Português**, **English** ou **Español**, e ative **`trad. hover`** no rodapé para ver a tradução em um balão flutuante ao passar o mouse sobre os textos *(ótimo também para praticar outro idioma!)*.
 - **Temas e som:** escolha entre estilos de terminal (incluindo efeito CRT) e ligue/desligue os efeitos sonoros retrô no rodapé.
-- **Atalhos:** teclas numéricas alternam abas desbloqueadas e `Esc` fecha janelas.
+- **Atalhos:** teclas numéricas trocam abas desbloqueadas e `Esc` fecha janelas.
+
+---
+
+### Como traduzir (Traduções da Comunidade)
+
+Quer adicionar seu idioma no balão flutuante **`trad. hover`** (sem quebrar nenhuma arte ASCII)? É 100% estático e leva 3 passos:
+
+1. **Copie o modelo:** duplique [`lang/community/_template.json`](./lang/community/_template.json) para `lang/community/<codigo>.json` (ex.: `fr.json`, `de.json`, `ja.json`).
+2. **Traduza os textos:** mantenha as chaves (esquerda) e marcadores como `{v}`, `{n}`, `{cur}`, `{tot}`, `{name}` intactos. Traduções parciais já funcionam!
+3. **Registre em [`lang/community/index.json`](./lang/community/index.json) e abra um Pull Request:**
+   ```json
+   [
+     {
+       "code": "fr",
+       "name": "Français",
+       "author": "seu-usuario",
+       "file": "fr.json"
+     }
+   ]
+   ```
+
+Mais detalhes em [`TRANSLATING.md`](./TRANSLATING.md). Assim que o PR for aprovado na `main`, o GitHub Pages publica sua tradução automaticamente!
 
 ---
 
@@ -45,9 +70,9 @@ Depois, basta abrir o arquivo `index.html` no seu navegador favorito.
 
 Sem frameworks, sem build, sem dependências externas — só a boa e velha tríade da web em estado puro:
 
-- **HTML5** (`index.html`) — estrutura minimalista da interface
-- **CSS3** (`css/style.css`) — temas por variáveis CSS, efeito CRT e animações leves
-- **JavaScript Vanilla** (`js/game.js`) — engine do jogo, arte ASCII, persistência e áudio retrô sintetizado direto na **Web Audio API**
+- **HTML5** (`index.html`) — estrutura minimalista e acessível
+- **CSS3** (`css/style.css`) — temas por variáveis CSS, efeito CRT, balão de tradução e animações leves
+- **JavaScript Vanilla modular** (`js/i18n.js`, `js/lang/`, `js/data.js`, `js/art.js`, `js/dialogues.js`, `js/puzzles.js`, `js/game.js`) — engine, arte ASCII, persistência e áudio retrô sintetizado via **Web Audio API**
 - **GitHub Pages** — deploy automático a cada push na branch `main`
 
 ---
