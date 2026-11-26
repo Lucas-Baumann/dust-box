@@ -1,3 +1,20 @@
+<div align="center">
+
+<h1>DUST BOX_</h1>
+<p><em>~ Castelo da Poeira Eterna ~</em></p>
+
+<p>
+  <a href="./README.md"><img src="https://img.shields.io/badge/Portugu%C3%AAs-e8e8e8?style=for-the-badge" alt="Português"></a>
+  <a href="./README.en.md"><img src="https://img.shields.io/badge/English-2b2b2b?style=for-the-badge" alt="English"></a>
+  <a href="./README.es.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-2b2b2b?style=for-the-badge" alt="Español"></a>
+</p>
+
+<p>
+  <a href="https://lucas-baumann.github.io/dust-box/"><img src="https://img.shields.io/badge/JOGAR_NO_NAVEGADOR-111111?style=for-the-badge" alt="Jogar no navegador"></a>
+</p>
+
+</div>
+
 ```text
  ____  _   _ ____ _____   ____   _____  __
 |  _ \| | | / ___|_   _| | __ ) / _ \ \/ /
@@ -7,12 +24,8 @@
        ~ Castelo da Poeira Eterna ~
 ```
 
-**Português** · [English](./README.en.md) · [Español](./README.es.md)
-
 > **Status: Em desenvolvimento ativo (WIP)**  
 > Algumas paredes ainda estão sendo rebocadas com poeira fresca. Novos segredos, áreas e melhorias continuam chegando.
->
-> **Jogue direto no navegador:** https://lucas-baumann.github.io/dust-box/
 
 ---
 

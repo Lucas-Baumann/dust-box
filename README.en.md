@@ -1,3 +1,20 @@
+<div align="center">
+
+<h1>DUST BOX_</h1>
+<p><em>~ Castle of Eternal Dust ~</em></p>
+
+<p>
+  <a href="./README.md"><img src="https://img.shields.io/badge/Portugu%C3%AAs-2b2b2b?style=for-the-badge" alt="Português"></a>
+  <a href="./README.en.md"><img src="https://img.shields.io/badge/English-e8e8e8?style=for-the-badge" alt="English"></a>
+  <a href="./README.es.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-2b2b2b?style=for-the-badge" alt="Español"></a>
+</p>
+
+<p>
+  <a href="https://lucas-baumann.github.io/dust-box/"><img src="https://img.shields.io/badge/PLAY_IN_BROWSER-111111?style=for-the-badge" alt="Play in browser"></a>
+</p>
+
+</div>
+
 ```text
  ____  _   _ ____ _____   ____   _____  __
 |  _ \| | | / ___|_   _| | __ ) / _ \ \/ /
@@ -7,12 +24,8 @@
        ~ Castle of Eternal Dust ~
 ```
 
-[Português](./README.md) · **English** · [Español](./README.es.md)
-
 > **Status: Work in Progress (WIP)**  
 > A few walls are still being plastered with fresh dust. New secrets, tweaks, and surprises keep rolling in.
->
-> **Play directly in your browser:** https://lucas-baumann.github.io/dust-box/
 
 ---
 

@@ -1,3 +1,20 @@
+<div align="center">
+
+<h1>DUST BOX_</h1>
+<p><em>~ Castillo del Polvo Eterno ~</em></p>
+
+<p>
+  <a href="./README.md"><img src="https://img.shields.io/badge/Portugu%C3%AAs-2b2b2b?style=for-the-badge" alt="Português"></a>
+  <a href="./README.en.md"><img src="https://img.shields.io/badge/English-2b2b2b?style=for-the-badge" alt="English"></a>
+  <a href="./README.es.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-e8e8e8?style=for-the-badge" alt="Español"></a>
+</p>
+
+<p>
+  <a href="https://lucas-baumann.github.io/dust-box/"><img src="https://img.shields.io/badge/JUGAR_EN_EL_NAVEGADOR-111111?style=for-the-badge" alt="Jugar en el navegador"></a>
+</p>
+
+</div>
+
 ```text
  ____  _   _ ____ _____   ____   _____  __
 |  _ \| | | / ___|_   _| | __ ) / _ \ \/ /
@@ -7,12 +24,8 @@
        ~ Castillo del Polvo Eterno ~
 ```
 
-[Português](./README.md) · [English](./README.en.md) · **Español**
-
 > **Estado: En desarrollo activo (WIP)**  
 > Algunas paredes todavía se están revocando con polvo fresco. Nuevos secretos y mejoras siguen llegando.
->
-> **Juega directo en tu navegador:** https://lucas-baumann.github.io/dust-box/
 
 ---
 
