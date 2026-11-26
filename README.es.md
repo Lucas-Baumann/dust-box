@@ -1,7 +1,13 @@
 <div align="center">
 
-<h1>DUST BOX_</h1>
-<p><em>~ Castillo del Polvo Eterno ~</em></p>
+<pre>
+ ____  _   _ ____ _____   ____   _____  __ 
+|  _ \| | | / ___|_   _| | __ ) / _ \ \/ / 
+| | | | | | \___ \ | |   |  _ \| | | \  /  
+| |_| | |_| |___) || |   | |_) | |_| /  \  
+|____/ \___/|____/ |_|   |____/ \___/_/\_\ 
+       ~ Castillo del Polvo Eterno ~       
+</pre>
 
 <p>
   <a href="./README.md"><img src="https://img.shields.io/badge/Portugu%C3%AAs-2b2b2b?style=for-the-badge" alt="Português"></a>
@@ -14,15 +20,6 @@
 </p>
 
 </div>
-
-```text
- ____  _   _ ____ _____   ____   _____  __
-|  _ \| | | / ___|_   _| | __ ) / _ \ \/ /
-| | | | | | \___ \ | |   |  _ \| | | \  / 
-| |_| | |_| |___) || |   | |_) | |_| /  \ 
-|____/ \___/|____/ |_|   |____/ \___/_/\_\
-       ~ Castillo del Polvo Eterno ~
-```
 
 > **Estado: En desarrollo activo (WIP)**  
 > Algunas paredes todavía se están revocando con polvo fresco. Nuevos secretos y mejoras siguen llegando.

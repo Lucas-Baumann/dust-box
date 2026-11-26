@@ -1,7 +1,13 @@
 <div align="center">
 
-<h1>DUST BOX_</h1>
-<p><em>~ Castelo da Poeira Eterna ~</em></p>
+<pre>
+ ____  _   _ ____ _____   ____   _____  __ 
+|  _ \| | | / ___|_   _| | __ ) / _ \ \/ / 
+| | | | | | \___ \ | |   |  _ \| | | \  /  
+| |_| | |_| |___) || |   | |_) | |_| /  \  
+|____/ \___/|____/ |_|   |____/ \___/_/\_\ 
+       ~ Castelo da Poeira Eterna ~        
+</pre>
 
 <p>
   <a href="./README.md"><img src="https://img.shields.io/badge/Portugu%C3%AAs-e8e8e8?style=for-the-badge" alt="Português"></a>
@@ -14,15 +20,6 @@
 </p>
 
 </div>
-
-```text
- ____  _   _ ____ _____   ____   _____  __
-|  _ \| | | / ___|_   _| | __ ) / _ \ \/ /
-| | | | | | \___ \ | |   |  _ \| | | \  / 
-| |_| | |_| |___) || |   | |_) | |_| /  \ 
-|____/ \___/|____/ |_|   |____/ \___/_/\_\
-       ~ Castelo da Poeira Eterna ~
-```
 
 > **Status: Em desenvolvimento ativo (WIP)**  
 > Algumas paredes ainda estão sendo rebocadas com poeira fresca. Novos segredos, áreas e melhorias continuam chegando.
