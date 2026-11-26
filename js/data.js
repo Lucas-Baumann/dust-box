@@ -55,7 +55,7 @@ const ARMORS = {
 
 const BAGS = {
   bolso_furado:    { name: 'Bolso Furado', max: 1000, price: 0, desc: 'Cabe pouca coisa, e metade vaza.', hint: 'Vem de fábrica.' },
-  saco_teia:       { name: 'Saco de Teia', max: 5000, price: 1500, desc: 'Base 5.000 (+ mínimo de 2h de P/s). Tecelagem aracnídea.', hint: 'Tecido na Asa Oeste.' },
+  saco_teia:       { name: 'Saco de Teia', max: 5000, price: 800, desc: 'Base 5.000 (+ mínimo de 2h de P/s). Tecelagem aracnídea.', hint: 'Tecido na Asa Oeste.' },
   saco_compactado: { name: 'Saco Compactado', max: 25000, price: 4000, req: 'saco_teia', desc: 'Base 25.000 (+ mínimo de 2h de P/s). Poeira prensada.', hint: 'Evolução de tecido na Asa Oeste.' },
   mala_sotao:      { name: 'Mala de Sótão', max: 150000, price: 16000, req: 'saco_compactado', desc: 'Base 150k (+ mínimo de 2h de P/s). Cheia de lembranças.', hint: 'Bagagem pesada da Asa Oeste.' },
   bau_sem_fundo:   { name: 'Baú Sem Fundo', max: 1000000, price: 75000, req: 'mala_sotao', desc: 'Base 1M (+ mínimo de 2h de P/s). Cabe um século de ócio.', hint: 'O maior recipiente do ateliê.' }
