@@ -13,9 +13,9 @@ global.DustI18n.register('en', {
   'acc.dvds.name': 'Bootleg DVD Shelf', 'acc.dvds.desc': '3-in-1 collections coated in gray nostalgia.',
 
   // Relics
-  'rel.meia_sorte.name': 'Lucky Sock', 'rel.meia_sorte.effect': '+35% global D/s', 'rel.meia_sorte.desc': 'Never found its match, yet brings dusty fortune.',
-  'rel.controle_univ.name': 'Universal Remote', 'rel.controle_univ.effect': '+25% global ATK', 'rel.controle_univ.desc': 'Cannot turn on the TV, yet boosts your combat morale.',
-  'rel.moeda_1998.name': '1998 Coin', 'rel.moeda_1998.effect': '+60% global D/s', 'rel.moeda_1998.desc': 'Found in the deepest abyss of the couch.',
+  'rel.meia_sorte.name': 'Lucky Sock', 'rel.meia_sorte.effect': '+45% global D/s', 'rel.meia_sorte.desc': 'Never found its match, yet brings dusty fortune.',
+  'rel.controle_univ.name': 'Universal Remote', 'rel.controle_univ.effect': '+35% global ATK', 'rel.controle_univ.desc': 'Cannot turn on the TV, yet boosts your combat morale.',
+  'rel.moeda_1998.name': '1998 Coin', 'rel.moeda_1998.effect': '+75% global D/s', 'rel.moeda_1998.desc': 'Found in the deepest abyss of the couch.',
 
   // Weapons
   'wep.vassoura_quebrada.name': 'Broken Broom', 'wep.vassoura_quebrada.passive': 'None', 'wep.vassoura_quebrada.desc': '+2 ATK. Breaks more than it sweeps.', 'wep.vassoura_quebrada.hint': 'Sold where someone snacks on dust in the castle center.',
@@ -67,17 +67,17 @@ global.DustI18n.register('en', {
   'itm.grande_chave.name': 'Great Gate Key',
 
   // Secrets
-  'sec.cursor_inquieto.name': 'Restless Cursor', 'sec.cursor_inquieto.bonusText': '+10% D/s', 'sec.cursor_inquieto.desc': 'You poked the blinking title cursor until dust fell out.', 'sec.cursor_inquieto.hint': 'Something is blinking at the very top of the page...',
-  'sec.estatua_viva.name': 'Living Statue', 'sec.estatua_viva.bonusText': '+15% D/s', 'sec.estatua_viva.desc': 'Did not click anything for 60 seconds. Peak idleness.', 'sec.estatua_viva.hint': 'Sometimes doing absolutely nothing is the answer.',
-  'sec.caramelo.name': 'Caramel Stray Dog', 'sec.caramelo.bonusText': '+15% D/s', 'sec.caramelo.desc': 'A Brazilian caramel dog wandered in after so many cats.', 'sec.caramelo.hint': 'Too many cats attract unexpected visitors in the Room...',
-  'sec.pano_vo.name': 'Grandma\'s Dish Towel', 'sec.pano_vo.bonusText': '+10% bag capacity', 'sec.pano_vo.desc': 'Sacred stitching discovered in the Spider\'s words.', 'sec.pano_vo.hint': 'Read carefully what the tailor says...',
-  'sec.chinelo_havaiana.name': 'Flip-Flop Strike', 'sec.chinelo_havaiana.bonusText': '+15% dmg vs insects', 'sec.chinelo_havaiana.desc': 'Legendary anti-roach weapon awakened in combat.', 'sec.chinelo_havaiana.hint': 'Some bugs in the Corridors deserve a few extra clicks.',
-  'sec.cafe_ontem.name': 'Yesterday\'s Coffee', 'sec.cafe_ontem.bonusText': '+10% attack speed', 'sec.cafe_ontem.desc': 'Bitter, cold, and effective. Termite approved.', 'sec.cafe_ontem.hint': 'With light in hand, get closer to the woodworker.',
-  'sec.grao_dourado.name': 'Shimmer Watcher', 'sec.grao_dourado.bonusText': '+10% D/s', 'sec.grao_dourado.desc': 'Caught a glowing dust mote floating across the screen.', 'sec.grao_dourado.hint': 'Keep your eyes open: something sparkles occasionally.',
-  'sec.tapa_controle.name': 'Remote Slap', 'sec.tapa_controle.bonusText': '+15% D/s', 'sec.tapa_controle.desc': 'Slapped the side of the Remote and it worked. Classic engineering.', 'sec.tapa_controle.hint': 'What does everyone do when remote batteries die?',
-  'sec.acorde_desafinado.name': 'Out-of-Tune Chord', 'sec.acorde_desafinado.bonusText': '+15% ATK', 'sec.acorde_desafinado.desc': 'Played the first 3 seconds of a rock epic and stopped.', 'sec.acorde_desafinado.hint': 'Someone in the Attic misses having their strings strummed...',
-  'sec.maldicao_do_3.name': 'Curse of the 3', 'sec.maldicao_do_3.bonusText': '+10% D/s', 'sec.maldicao_do_3.desc': 'Kept clicking the Candy Box hoping for a #3 — alongside Half-Life and Portal.', 'sec.maldicao_do_3.hint': 'Some famous boxes never got a third installment...',
-  'sec.determinacao.name': 'Dusty Determination', 'sec.determinacao.bonusText': '+20% D/s & +20% ATK', 'sec.determinacao.desc': 'Despite everything, it is still you... in New Game+. The Rat remembers.', 'sec.determinacao.hint': 'Only those who spun the clock and returned know this déjà vu.',
+  'sec.cursor_inquieto.name': 'Restless Cursor', 'sec.cursor_inquieto.bonusText': '+20% D/s', 'sec.cursor_inquieto.desc': 'You poked the blinking title cursor until dust fell out.', 'sec.cursor_inquieto.hint': 'Something is blinking at the very top of the page...',
+  'sec.estatua_viva.name': 'Living Statue', 'sec.estatua_viva.bonusText': '+25% D/s', 'sec.estatua_viva.desc': 'Did not click anything for 60 seconds. Peak idleness.', 'sec.estatua_viva.hint': 'Sometimes doing absolutely nothing is the answer.',
+  'sec.caramelo.name': 'Caramel Stray Dog', 'sec.caramelo.bonusText': '+25% D/s', 'sec.caramelo.desc': 'A Brazilian caramel dog wandered in after so many cats.', 'sec.caramelo.hint': 'Too many cats attract unexpected visitors in the Room...',
+  'sec.pano_vo.name': 'Grandma\'s Dish Towel', 'sec.pano_vo.bonusText': '+20% bag capacity', 'sec.pano_vo.desc': 'Sacred stitching discovered in the Spider\'s words.', 'sec.pano_vo.hint': 'Read carefully what the tailor says...',
+  'sec.chinelo_havaiana.name': 'Flip-Flop Strike', 'sec.chinelo_havaiana.bonusText': '+25% dmg vs insects', 'sec.chinelo_havaiana.desc': 'Legendary anti-roach weapon awakened in combat.', 'sec.chinelo_havaiana.hint': 'Some bugs in the Corridors deserve a few extra clicks.',
+  'sec.cafe_ontem.name': 'Yesterday\'s Coffee', 'sec.cafe_ontem.bonusText': '+15% attack speed', 'sec.cafe_ontem.desc': 'Bitter, cold, and effective. Termite approved.', 'sec.cafe_ontem.hint': 'With light in hand, get closer to the woodworker.',
+  'sec.grao_dourado.name': 'Shimmer Watcher', 'sec.grao_dourado.bonusText': '+20% D/s', 'sec.grao_dourado.desc': 'Caught a glowing dust mote floating across the screen.', 'sec.grao_dourado.hint': 'Keep your eyes open: something sparkles occasionally.',
+  'sec.tapa_controle.name': 'Remote Slap', 'sec.tapa_controle.bonusText': '+25% D/s', 'sec.tapa_controle.desc': 'Slapped the side of the Remote and it worked. Classic engineering.', 'sec.tapa_controle.hint': 'What does everyone do when remote batteries die?',
+  'sec.acorde_desafinado.name': 'Out-of-Tune Chord', 'sec.acorde_desafinado.bonusText': '+25% ATK', 'sec.acorde_desafinado.desc': 'Played the first 3 seconds of a rock epic and stopped.', 'sec.acorde_desafinado.hint': 'Someone in the Attic misses having their strings strummed...',
+  'sec.maldicao_do_3.name': 'Curse of the 3', 'sec.maldicao_do_3.bonusText': '+20% D/s', 'sec.maldicao_do_3.desc': 'Kept clicking the Candy Box hoping for a #3 — alongside Half-Life and Portal.', 'sec.maldicao_do_3.hint': 'Some famous boxes never got a third installment...',
+  'sec.determinacao.name': 'Dusty Determination', 'sec.determinacao.bonusText': '+35% D/s & +30% ATK', 'sec.determinacao.desc': 'Despite everything, it is still you... in New Game+. The Rat remembers.', 'sec.determinacao.hint': 'Only those who spun the clock and returned know this déjà vu.',
 
   // Achievements
   'ach.chave.name': 'Keysmith of Hygiene', 'ach.chave.desc': 'Fused the Great Gate Key.',

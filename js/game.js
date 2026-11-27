@@ -301,7 +301,7 @@ function accelTable(k){
 function accelCost(k){
   const a = accelTable(k);
   const owned = S.accelerators[k]||0;
-  return Math.floor(a.base * Math.pow(1.75, owned));
+  return Math.floor(a.base * Math.pow(2.05, owned));
 }
 function secretDpsMult(){
   let bonus = 0;
@@ -355,7 +355,7 @@ function recalc(){
   const b = BAGS[S.inventory.bag];
   if(b){
     const dynamicFloor = S.inventory.bag !== 'bolso_furado' ? Math.floor(S.resources.dustPerSecond * 7200) : 0;
-    const bagMult = hasSecret('pano_vo') ? 1.10 : 1.0;
+    const bagMult = hasSecret('pano_vo') ? 1.20 : 1.0;
     S.resources.maxDust = Math.round(Math.max(b.max, dynamicFloor) * bagMult);
   }
 }
@@ -715,10 +715,10 @@ function transmuteAll(){
 function craftFragment(){
   if(S.key.complete){ npcSay('beetle', t('msg.frag_done_npc'), null, 'msg.frag_done_npc'); render(); return; }
   if(S.key.fragments >= 3){ npcSay('beetle', t('msg.frag_max_npc'), null, 'msg.frag_max_npc'); render(); return; }
-  if(S.resources.magicDust < 2){ sfx('error'); npcSay('beetle', t('msg.frag_nomagic_npc'), null, 'msg.frag_nomagic_npc'); notify(t('msg.frag_nomagic')); render(); return; }
-  if(S.resources.dust < 5000){ sfx('error'); npcSay('beetle', t('msg.frag_nodust_npc'), null, 'msg.frag_nodust_npc'); notify(t('msg.frag_nodust')); render(); return; }
-  S.resources.magicDust -= 2;
-  S.resources.dust -= 5000;
+  if(S.resources.magicDust < 3){ sfx('error'); npcSay('beetle', t('msg.frag_nomagic_npc'), null, 'msg.frag_nomagic_npc'); notify(t('msg.frag_nomagic')); render(); return; }
+  if(S.resources.dust < 8000){ sfx('error'); npcSay('beetle', t('msg.frag_nodust_npc'), null, 'msg.frag_nodust_npc'); notify(t('msg.frag_nodust')); render(); return; }
+  S.resources.magicDust -= 3;
+  S.resources.dust -= 8000;
   S.key.fragments++;
   sfx('unlock');
   if(S.key.fragments === 3) npcSay('beetle', t('msg.frag_3_npc'), null, 'msg.frag_3_npc');
@@ -1340,8 +1340,9 @@ function spawnMonster(){
   const zone = COMBAT_ZONES[c.zone] || COMBAT_ZONES[0];
   const base = zone.monsters[c.idx % zone.monsters.length];
   const loop = (c.zoneLoops && c.zoneLoops[c.zone]) || 1;
-  const hpMult = 1 + (loop - 1) * 0.35;
-  const atkMult = 1 + (loop - 1) * 0.20;
+  const ng = S.ngPlus || 0;
+  const hpMult = (1 + (loop - 1) * 0.35) * (1 + ng * 0.45);
+  const atkMult = (1 + (loop - 1) * 0.20) * (1 + ng * 0.25);
   c.monster = Object.assign({}, base, { atk: Math.max(1, Math.round(base.atk * atkMult)) });
   c.mhp = Math.round(base.hp * hpMult);
   c.mmax = c.mhp;
@@ -1388,7 +1389,8 @@ function handleMonsterDefeated(){
   const zone = COMBAT_ZONES[c.zone] || COMBAT_ZONES[0];
   const loop = (c.zoneLoops && c.zoneLoops[c.zone]) || 1;
   const toolMult = (hasTool('pa_lixo') ? 1.20 : 1.0) * (hasTool('ima_geladeira') ? 1.25 : 1.0);
-  const rw = Math.round(c.monster.reward * (1 + (loop - 1) * 0.45) * toolMult);
+  const ngRwMult = 1 + (S.ngPlus || 0) * 0.30;
+  const rw = Math.round(c.monster.reward * (1 + (loop - 1) * 0.45) * toolMult * ngRwMult);
   S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + rw);
   S.resources.totalEarned += rw;
   let extra = '';
@@ -1461,7 +1463,7 @@ function useSkill(id){
   const mname = o('mon', c.monster.id, 'name', c.monster.name);
   if(id === 'sweep'){
     let dmg = Math.round(effectiveAtk() * 2.2 * pwrMult);
-    if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.15);
+    if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.25);
     c.mhp -= dmg;
     uiEphemeral.track.fx = '>>';
     let note = '';
@@ -1484,7 +1486,7 @@ function useSkill(id){
     sfx('click');
   } else if(id === 'sneeze'){
     let dmg = Math.round(effectiveAtk() * 1.2 * pwrMult);
-    if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.15);
+    if(c.monster.insect && hasSecret('chinelo_havaiana')) dmg = Math.round(dmg * 1.25);
     c.mhp -= dmg;
     uiEphemeral.track.mpos = Math.min(30, uiEphemeral.track.mpos + 8);
     uiEphemeral.buffs.stunTurns = 1;
@@ -1531,7 +1533,7 @@ function combatRound(){
     note = t('msg.hit_noon');
   }
   if(c.monster.insect && hasSecret('chinelo_havaiana')){
-    dmg = Math.round(dmg * 1.15);
+    dmg = Math.round(dmg * 1.25);
   }
 
   c.mhp -= dmg;
@@ -2167,7 +2169,7 @@ function viewSub(sub){
     h += `<div class="box"><span class="box-title">${tx('scene.porao.potions')}</span><div class="shop-item"><b>${ox('pot','tonico_cafeina','name', ton.name)}</b> <span class="muted">${tx('btn.you_have', { n: tonQty })}</span> — <b>${fmt(ton.price)} ${dustUnit}</b><br><span class="muted">${ox('pot','tonico_cafeina','effect', ton.effect)}. ${ox('pot','tonico_cafeina','desc', ton.desc)}</span><br><button class="cmd"${trAttr('btn.prepare_x1')} data-cost="${ton.price}" onclick="Game.buyPotion('tonico_cafeina',1)" ${S.resources.dust<ton.price?'disabled':''}>${esc(t('btn.prepare_x1'))}</button><button class="cmd" data-cost="${ton.price*5}" onclick="Game.buyPotion('tonico_cafeina',5)" ${S.resources.dust<ton.price*5?'disabled':''}>+5 (${fmt(ton.price*5)})</button></div></div>`;
     h += `<div class="box"><span class="box-title">${tx('scene.porao.key')}</span><div class="muted">${tx('scene.porao.key_desc')}<br>${tx('scene.porao.frags')} <b>${S.key.fragments}/3</b></div>
     <div class="actions">
-      <button class="cmd"${trAttr('scene.porao.craft_frag')} data-cost="5000" data-magic-cost="2" data-req-ok="${S.key.fragments<3?1:0}" onclick="Game.craftFragment()" ${(S.resources.magicDust<2||S.resources.dust<5000||S.key.fragments>=3)?'disabled':''}>${esc(t('scene.porao.craft_frag'))}</button>
+      <button class="cmd"${trAttr('scene.porao.craft_frag')} data-cost="8000" data-magic-cost="3" data-req-ok="${S.key.fragments<3?1:0}" onclick="Game.craftFragment()" ${(S.resources.magicDust<3||S.resources.dust<8000||S.key.fragments>=3)?'disabled':''}>${esc(t('scene.porao.craft_frag'))}</button>
       <button class="cmd"${trAttr('scene.porao.fuse_key')} data-cost="0" data-req-ok="${(S.key.fragments>=3 && !S.key.complete)?1:0}" onclick="Game.fuseKey()" ${(S.key.fragments<3||S.key.complete)?'disabled':''}>${esc(t('scene.porao.fuse_key'))}</button>
     </div></div></div>`;
     return h;
@@ -2855,7 +2857,7 @@ function tick(dt){
     if(uiEphemeral.buffs.tonicSec > 0) uiEphemeral.buffs.tonicSec = Math.max(0, uiEphemeral.buffs.tonicSec - dt);
 
     const approaching = (uiEphemeral.track.mpos - uiEphemeral.track.ppos) > 3;
-    const interval = approaching ? 0.25 : (hasSecret('cafe_ontem') ? 0.72 : 0.80);
+    const interval = approaching ? 0.25 : (hasSecret('cafe_ontem') ? 0.68 : 0.80);
     combatAcc += dt;
     if(combatAcc >= interval){ combatAcc = 0; combatRound(); render(); }
   }

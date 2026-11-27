@@ -15,50 +15,50 @@ const ARMOR_ORDER  = ['roupa_mofada', 'casaco_pano_mofado', 'mascara_antipoeira'
 const BAG_ORDER    = ['bolso_furado', 'saco_teia', 'saco_compactado', 'mala_sotao', 'bau_sem_fundo'];
 
 const ACCELS = {
-  window: { name: 'Janela Entreaberta', desc: 'Deixa a brisa da rua entrar trazendo poeira.', base: 60, bonus: 0.5 },
-  cat:    { name: 'Gato Preguiçoso', desc: 'Não limpa nada e troca de pelo duas vezes ao dia.', base: 350, bonus: 2.5 },
-  carpet: { name: 'Carpete de 1980', desc: 'Retém sujeira de quatro décadas diferentes.', base: 2200, bonus: 12.0 },
-  fan:    { name: 'Ventilador Troncho', desc: 'Gira devagar e espalha a poeira pelo recinto.', base: 14000, bonus: 55.0 }
+  window: { name: 'Janela Entreaberta', desc: 'Deixa a brisa da rua entrar trazendo poeira.', base: 80, bonus: 0.35 },
+  cat:    { name: 'Gato Preguiçoso', desc: 'Não limpa nada e troca de pelo duas vezes ao dia.', base: 450, bonus: 1.6 },
+  carpet: { name: 'Carpete de 1980', desc: 'Retém sujeira de quatro décadas diferentes.', base: 3200, bonus: 7.5 },
+  fan:    { name: 'Ventilador Troncho', desc: 'Gira devagar e espalha a poeira pelo recinto.', base: 22000, bonus: 32.0 }
 };
 
 const ACCELS_ACT2 = {
-  pillow: { name: 'Almofada Esquecida', desc: 'Guarda migalhas de 2019 e moedas de 5 centavos.', base: 45000, bonus: 180 },
-  box16:  { name: 'Caixa de Mudança 2016', desc: 'Nunca foi aberta desde a última mudança.', base: 220000, bonus: 900 },
-  dvds:   { name: 'Estante de DVDs Piratas', desc: 'Coletânea 3 em 1 coberta de nostalgia cinzenta.', base: 1100000, bonus: 4200 }
+  pillow: { name: 'Almofada Esquecida', desc: 'Guarda migalhas de 2019 e moedas de 5 centavos.', base: 65000, bonus: 95 },
+  box16:  { name: 'Caixa de Mudança 2016', desc: 'Nunca foi aberta desde a última mudança.', base: 320000, bonus: 450 },
+  dvds:   { name: 'Estante de DVDs Piratas', desc: 'Coletânea 3 em 1 coberta de nostalgia cinzenta.', base: 1600000, bonus: 2000 }
 };
 
 const RELICS = {
-  meia_sorte:     { name: 'Meia da Sorte', costSocks: 3, dpsBonus: 0.35, effect: '+35% P/s global', desc: 'Nunca encontrou o par, mas traz fortuna empoeirada.' },
-  controle_univ:  { name: 'Controle Universal', costSocks: 5, atkBonus: 0.25, effect: '+25% ATK global', desc: 'Não liga a TV, mas aumenta sua força moral em combate.' },
-  moeda_1998:     { name: 'Moeda de 1 Real (1998)', costSocks: 8, dpsBonus: 0.60, effect: '+60% P/s global', desc: 'Achada no fundo mais profundo do sofá.' }
+  meia_sorte:     { name: 'Meia da Sorte', costSocks: 3, dpsBonus: 0.45, effect: '+45% P/s global', desc: 'Nunca encontrou o par, mas traz fortuna empoeirada.' },
+  controle_univ:  { name: 'Controle Universal', costSocks: 5, atkBonus: 0.35, effect: '+35% ATK global', desc: 'Não liga a TV, mas aumenta sua força moral em combate.' },
+  moeda_1998:     { name: 'Moeda de 1 Real (1998)', costSocks: 8, dpsBonus: 0.75, effect: '+75% P/s global', desc: 'Achada no fundo mais profundo do sofá.' }
 };
 
 const WEAPONS = {
   vassoura_quebrada:  { name: 'Vassoura Quebrada', atk: 2, price: 100, passive: 'Nenhuma', desc: '+2 ATK. Quebra mais do que varre.', hint: 'Vendida onde alguém come poeira no centro do castelo.' },
-  espanador_pena:     { name: 'Espanador de Pena', atk: 8, price: 800, req: 'vassoura_quebrada', passive: '15% Crítico (1.5x dano)', desc: '+8 ATK. Pena de pombo ancestral.', hint: 'Forjado onde a madeira range a leste.' },
-  rodo_combate:       { name: 'Rodo de Combate', atk: 25, price: 3000, req: 'espanador_pena', passive: '20% Empurrão (anula contra-ataque)', desc: '+25 ATK. A arma clássica do zelador.', hint: 'Forjado na Asa Leste após o Espanador.' },
-  cabo_hdmi:          { name: 'Cabo HDMI de 5 Metros', atk: 55, price: 12000, req: 'rodo_combate', passive: '25% Chicote Duplo (+50% dano)', desc: '+55 ATK. Enrolado desde 2014, letal ao desenrolar.', hint: 'Uma relíquia de cabos forjada na Asa Leste.' },
-  aspirador_entupido: { name: 'Aspirador Portátil Entupido', atk: 110, price: 38000, req: 'cabo_hdmi', passive: 'Drena 10% do dano como HP', desc: '+110 ATK. Faz mais barulho do que suga, mas impõe respeito.', hint: 'O ápice da forja da Asa Leste.' },
-  vassoura_eletrica:  { name: 'Vassoura Elétrica Sem Fio', atk: 220, price: 180000, req: 'aspirador_entupido', passive: '30% Raio Estático (+80% dano)', desc: '+220 ATK. Bateria dura 4 minutos, mas eletriza tudo.', hint: 'Vendida além do Portão Principal, entre promessas antigas.' },
-  ponteiro_12h:       { name: 'Ponteiro das 12h', atk: 360, price: 450000, req: 'vassoura_eletrica', passive: '35% Meio-Dia (2x dano + drena 5% HP)', desc: '+360 ATK. A lâmina dourada que faz o relógio voltar a andar.', hint: 'Forjado dentro da Torre do Relógio Parado.' }
+  espanador_pena:     { name: 'Espanador de Pena', atk: 8, price: 850, req: 'vassoura_quebrada', passive: '15% Crítico (1.5x dano)', desc: '+8 ATK. Pena de pombo ancestral.', hint: 'Forjado onde a madeira range a leste.' },
+  rodo_combate:       { name: 'Rodo de Combate', atk: 25, price: 3600, req: 'espanador_pena', passive: '20% Empurrão (anula contra-ataque)', desc: '+25 ATK. A arma clássica do zelador.', hint: 'Forjado na Asa Leste após o Espanador.' },
+  cabo_hdmi:          { name: 'Cabo HDMI de 5 Metros', atk: 55, price: 16000, req: 'rodo_combate', passive: '25% Chicote Duplo (+50% dano)', desc: '+55 ATK. Enrolado desde 2014, letal ao desenrolar.', hint: 'Uma relíquia de cabos forjada na Asa Leste.' },
+  aspirador_entupido: { name: 'Aspirador Portátil Entupido', atk: 110, price: 52000, req: 'cabo_hdmi', passive: 'Drena 10% do dano como HP', desc: '+110 ATK. Faz mais barulho do que suga, mas impõe respeito.', hint: 'O ápice da forja da Asa Leste.' },
+  vassoura_eletrica:  { name: 'Vassoura Elétrica Sem Fio', atk: 220, price: 240000, req: 'aspirador_entupido', passive: '30% Raio Estático (+80% dano)', desc: '+220 ATK. Bateria dura 4 minutos, mas eletriza tudo.', hint: 'Vendida além do Portão Principal, entre promessas antigas.' },
+  ponteiro_12h:       { name: 'Ponteiro das 12h', atk: 360, price: 620000, req: 'vassoura_eletrica', passive: '35% Meio-Dia (2x dano + drena 5% HP)', desc: '+360 ATK. A lâmina dourada que faz o relógio voltar a andar.', hint: 'Forjado dentro da Torre do Relógio Parado.' }
 };
 
 const ARMORS = {
   roupa_mofada:       { name: 'Roupa Mofada', maxHp: 100, price: 0, desc: 'Cheira a guarda-roupa fechado.', hint: 'Você já acordou vestindo isso.' },
-  casaco_pano_mofado: { name: 'Casaco de Pano Mofado', maxHp: 130, price: 600, desc: '+30 HP máx. Quentinho e questionável.', hint: 'Costurado em fios finos a oeste.' },
-  mascara_antipoeira: { name: 'Máscara Anti-Poeira', maxHp: 160, price: 1200, req: 'casaco_pano_mofado', desc: '+60 HP máx. Respire com estilo.', hint: 'Encontrada no ateliê da Asa Oeste.' },
-  capa_teia:          { name: 'Capa de Teia Reforçada', maxHp: 260, price: 9500, req: 'mascara_antipoeira', desc: '260 HP máx. Leve como seda, grudenta como culpa.', hint: 'Alta costura aracnídea avançada.' },
-  armadura_papelao:   { name: 'Armadura de Papelão 1994', maxHp: 400, price: 28000, req: 'capa_teia', desc: '400 HP máx. Caixa de TV de tubo reforçada com fita.', hint: 'A defesa definitiva da Asa Oeste.' },
-  cobertor_pesado:    { name: 'Cobertor de Microfibra Pesado', maxHp: 650, price: 140000, req: 'armadura_papelao', desc: '650 HP máx. Impossível sair de baixo dele num domingo.', hint: 'Encontrado além do Portão Principal.' },
-  manto_tempo:        { name: 'Manto do Tempo Parado', maxHp: 950, price: 380000, req: 'cobertor_pesado', desc: '950 HP máx. Tecido com minutos esquecidos da Torre.', hint: 'Encontrado dentro da Torre do Relógio Parado.' }
+  casaco_pano_mofado: { name: 'Casaco de Pano Mofado', maxHp: 130, price: 650, desc: '+30 HP máx. Quentinho e questionável.', hint: 'Costurado em fios finos a oeste.' },
+  mascara_antipoeira: { name: 'Máscara Anti-Poeira', maxHp: 160, price: 1400, req: 'casaco_pano_mofado', desc: '+60 HP máx. Respire com estilo.', hint: 'Encontrada no ateliê da Asa Oeste.' },
+  capa_teia:          { name: 'Capa de Teia Reforçada', maxHp: 260, price: 12500, req: 'mascara_antipoeira', desc: '260 HP máx. Leve como seda, grudenta como culpa.', hint: 'Alta costura aracnídea avançada.' },
+  armadura_papelao:   { name: 'Armadura de Papelão 1994', maxHp: 400, price: 38000, req: 'capa_teia', desc: '400 HP máx. Caixa de TV de tubo reforçada com fita.', hint: 'A defesa definitiva da Asa Oeste.' },
+  cobertor_pesado:    { name: 'Cobertor de Microfibra Pesado', maxHp: 650, price: 190000, req: 'armadura_papelao', desc: '650 HP máx. Impossível sair de baixo dele num domingo.', hint: 'Encontrado além do Portão Principal.' },
+  manto_tempo:        { name: 'Manto do Tempo Parado', maxHp: 950, price: 520000, req: 'cobertor_pesado', desc: '950 HP máx. Tecido com minutos esquecidos da Torre.', hint: 'Encontrado dentro da Torre do Relógio Parado.' }
 };
 
 const BAGS = {
   bolso_furado:    { name: 'Bolso Furado', max: 1000, price: 0, desc: 'Cabe pouca coisa, e metade vaza.', hint: 'Vem de fábrica.' },
-  saco_teia:       { name: 'Saco de Teia', max: 5000, price: 800, desc: 'Base 5.000 (+ mínimo de 2h de P/s). Tecelagem aracnídea.', hint: 'Tecido na Asa Oeste.' },
-  saco_compactado: { name: 'Saco Compactado', max: 25000, price: 4000, req: 'saco_teia', desc: 'Base 25.000 (+ mínimo de 2h de P/s). Poeira prensada.', hint: 'Evolução de tecido na Asa Oeste.' },
-  mala_sotao:      { name: 'Mala de Sótão', max: 150000, price: 16000, req: 'saco_compactado', desc: 'Base 150k (+ mínimo de 2h de P/s). Cheia de lembranças.', hint: 'Bagagem pesada da Asa Oeste.' },
-  bau_sem_fundo:   { name: 'Baú Sem Fundo', max: 1000000, price: 75000, req: 'mala_sotao', desc: 'Base 1M (+ mínimo de 2h de P/s). Cabe um século de ócio.', hint: 'O maior recipiente do ateliê.' }
+  saco_teia:       { name: 'Saco de Teia', max: 5000, price: 900, desc: 'Base 5.000 (+ mínimo de 2h de P/s). Tecelagem aracnídea.', hint: 'Tecido na Asa Oeste.' },
+  saco_compactado: { name: 'Saco Compactado', max: 25000, price: 4500, req: 'saco_teia', desc: 'Base 25.000 (+ mínimo de 2h de P/s). Poeira prensada.', hint: 'Evolução de tecido na Asa Oeste.' },
+  mala_sotao:      { name: 'Mala de Sótão', max: 150000, price: 20000, req: 'saco_compactado', desc: 'Base 150k (+ mínimo de 2h de P/s). Cheia de lembranças.', hint: 'Bagagem pesada da Asa Oeste.' },
+  bau_sem_fundo:   { name: 'Baú Sem Fundo', max: 1000000, price: 110000, req: 'mala_sotao', desc: 'Base 1M (+ mínimo de 2h de P/s). Cabe um século de ócio.', hint: 'O maior recipiente do ateliê.' }
 };
 
 const TOOLS = {
@@ -90,17 +90,17 @@ const ITEM_LABELS = {
 };
 
 const SECRETS = {
-  cursor_inquieto:  { name: 'Cursor Inquieto', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Você cutucou o cursor do título até cair poeira dele.', hint: 'Há algo piscando lá no alto da página...' },
-  estatua_viva:     { name: 'Estátua Viva', bonusText: '+15% P/s', dpsBonus: 0.15, desc: 'Ficou 60 segundos sem clicar em nada. A arte suprema do ócio.', hint: 'Às vezes, não fazer absolutamente nada é a resposta.' },
-  caramelo:         { name: 'Vira-Lata Caramelo', bonusText: '+15% P/s', dpsBonus: 0.15, desc: 'Um caramelo invadiu o castelo após tantos gatos e se deitou no sol.', hint: 'Gatos demais atraem visitas inesperadas no Quarto...' },
-  pano_vo:          { name: 'Pano de Prato da Vó', bonusText: '+10% capacidade do saco', bagBonus: 0.10, desc: 'Costura sagrada descoberta nas palavras da Aranha.', hint: 'Leia com atenção o que a alfaiate diz...' },
-  chinelo_havaiana: { name: 'Chinelo Havaiana', bonusText: '+15% dano em insetos', insectBonus: 0.15, desc: 'Arma cultural brasileira despertada contra baratas.', hint: 'Alguns insetos nos Corredores merecem uns cliques extras.' },
-  cafe_ontem:       { name: 'Café Passado de Ontem', bonusText: '+10% velocidade de ataque', atkSpeedBonus: 0.10, desc: 'Amargo, frio e funcional. O Cupim aprovou.', hint: 'Com luz na mão, converse de perto com quem trabalha madeira.' },
-  grao_dourado:     { name: 'Observador do Brilho', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Capturou um grão de poeira brilhante flutuando pela tela.', hint: 'Fique de olho: algo brilha na tela de tempos em tempos.' },
-  tapa_controle:    { name: 'Tapa no Controle', bonusText: '+15% P/s', dpsBonus: 0.15, desc: 'Bateu na lateral do Controle Remoto e funcionou. Engenharia clássica.', hint: 'O que todo brasileiro faz quando a pilha do controle falha?' },
-  acorde_desafinado:{ name: 'Acorde Desafinado', bonusText: '+15% ATK', atkBonus: 0.15, desc: 'Tocou os 3 primeiros segundos de Faroeste Caboclo e parou. Dano psicológico.', hint: 'Alguém no Sótão sente falta de ter as cordas tocadas...' },
-  maldicao_do_3:    { name: 'A Maldição do 3', bonusText: '+10% P/s', dpsBonus: 0.10, desc: 'Insistiu na Caixa de Doces esperando o número 3 — junto com Half-Life e Portal.', hint: 'Algumas caixas famosas nunca receberam uma terceira parte...' },
-  determinacao:     { name: 'Determinação Empoeirada', bonusText: '+20% P/s e +20% ATK', dpsBonus: 0.20, atkBonus: 0.20, desc: 'Apesar de tudo, ainda é você... no Novo Jogo+. O Rato se lembra.', hint: 'Só quem já girou o relógio e voltou ao começo conhece esse déjà vu.' }
+  cursor_inquieto:  { name: 'Cursor Inquieto', bonusText: '+20% P/s', dpsBonus: 0.20, desc: 'Você cutucou o cursor do título até cair poeira dele.', hint: 'Há algo piscando lá no alto da página...' },
+  estatua_viva:     { name: 'Estátua Viva', bonusText: '+25% P/s', dpsBonus: 0.25, desc: 'Ficou 60 segundos sem clicar em nada. A arte suprema do ócio.', hint: 'Às vezes, não fazer absolutamente nada é a resposta.' },
+  caramelo:         { name: 'Vira-Lata Caramelo', bonusText: '+25% P/s', dpsBonus: 0.25, desc: 'Um caramelo invadiu o castelo após tantos gatos e se deitou no sol.', hint: 'Gatos demais atraem visitas inesperadas no Quarto...' },
+  pano_vo:          { name: 'Pano de Prato da Vó', bonusText: '+20% capacidade do saco', bagBonus: 0.20, desc: 'Costura sagrada descoberta nas palavras da Aranha.', hint: 'Leia com atenção o que a alfaiate diz...' },
+  chinelo_havaiana: { name: 'Chinelo Havaiana', bonusText: '+25% dano em insetos', insectBonus: 0.25, desc: 'Arma cultural brasileira despertada contra baratas.', hint: 'Alguns insetos nos Corredores merecem uns cliques extras.' },
+  cafe_ontem:       { name: 'Café Passado de Ontem', bonusText: '+15% velocidade de ataque', atkSpeedBonus: 0.15, desc: 'Amargo, frio e funcional. O Cupim aprovou.', hint: 'Com luz na mão, converse de perto com quem trabalha madeira.' },
+  grao_dourado:     { name: 'Observador do Brilho', bonusText: '+20% P/s', dpsBonus: 0.20, desc: 'Capturou um grão de poeira brilhante flutuando pela tela.', hint: 'Fique de olho: algo brilha na tela de tempos em tempos.' },
+  tapa_controle:    { name: 'Tapa no Controle', bonusText: '+25% P/s', dpsBonus: 0.25, desc: 'Bateu na lateral do Controle Remoto e funcionou. Engenharia clássica.', hint: 'O que todo brasileiro faz quando a pilha do controle falha?' },
+  acorde_desafinado:{ name: 'Acorde Desafinado', bonusText: '+25% ATK', atkBonus: 0.25, desc: 'Tocou os 3 primeiros segundos de Faroeste Caboclo e parou. Dano psicológico.', hint: 'Alguém no Sótão sente falta de ter as cordas tocadas...' },
+  maldicao_do_3:    { name: 'A Maldição do 3', bonusText: '+20% P/s', dpsBonus: 0.20, desc: 'Insistiu na Caixa de Doces esperando o número 3 — junto com Half-Life e Portal.', hint: 'Algumas caixas famosas nunca receberam uma terceira parte...' },
+  determinacao:     { name: 'Determinação Empoeirada', bonusText: '+35% P/s e +30% ATK', dpsBonus: 0.35, atkBonus: 0.30, desc: 'Apesar de tudo, ainda é você... no Novo Jogo+. O Rato se lembra.', hint: 'Só quem já girou o relógio e voltou ao começo conhece esse déjà vu.' }
 };
 
 const ACHIEVEMENT_INFO = {

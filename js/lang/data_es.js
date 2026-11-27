@@ -13,9 +13,9 @@ global.DustI18n.register('es', {
   'acc.dvds.name': 'Estante de DVDs Piratas', 'acc.dvds.desc': 'Compilados 3 en 1 cubiertos de nostalgia gris.',
 
   // Reliquias
-  'rel.meia_sorte.name': 'Media de la Suerte', 'rel.meia_sorte.effect': '+35% P/s global', 'rel.meia_sorte.desc': 'Nunca halló su par, pero trae fortuna polvorienta.',
-  'rel.controle_univ.name': 'Control Universal', 'rel.controle_univ.effect': '+25% ATK global', 'rel.controle_univ.desc': 'No enciende la TV, pero sube tu moral en combate.',
-  'rel.moeda_1998.name': 'Moneda de 1998', 'rel.moeda_1998.effect': '+60% P/s global', 'rel.moeda_1998.desc': 'Hallada en lo más profundo del sofá.',
+  'rel.meia_sorte.name': 'Media de la Suerte', 'rel.meia_sorte.effect': '+45% P/s global', 'rel.meia_sorte.desc': 'Nunca halló su par, pero trae fortuna polvorienta.',
+  'rel.controle_univ.name': 'Control Universal', 'rel.controle_univ.effect': '+35% ATK global', 'rel.controle_univ.desc': 'No enciende la TV, pero sube tu moral en combate.',
+  'rel.moeda_1998.name': 'Moneda de 1998', 'rel.moeda_1998.effect': '+75% P/s global', 'rel.moeda_1998.desc': 'Hallada en lo más profundo del sofá.',
 
   // Armas
   'wep.vassoura_quebrada.name': 'Escoba Rota', 'wep.vassoura_quebrada.passive': 'Ninguna', 'wep.vassoura_quebrada.desc': '+2 ATK. Rompe más de lo que barre.', 'wep.vassoura_quebrada.hint': 'Vendida donde alguien come polvo en el centro.',
@@ -67,17 +67,17 @@ global.DustI18n.register('es', {
   'itm.grande_chave.name': 'Gran Llave del Portón',
 
   // Secretos
-  'sec.cursor_inquieto.name': 'Cursor Inquieto', 'sec.cursor_inquieto.bonusText': '+10% P/s', 'sec.cursor_inquieto.desc': 'Picaste el cursor del título hasta que soltó polvo.', 'sec.cursor_inquieto.hint': 'Hay algo parpadeando allá arriba en la página...',
-  'sec.estatua_viva.name': 'Estatua Viva', 'sec.estatua_viva.bonusText': '+15% P/s', 'sec.estatua_viva.desc': '60 segundos sin hacer clic en nada. Arte supremo del ocio.', 'sec.estatua_viva.hint': 'A veces no hacer absolutamente nada es la respuesta.',
-  'sec.caramelo.name': 'Perro Callejero Caramelo', 'sec.caramelo.bonusText': '+15% P/s', 'sec.caramelo.desc': 'Un perro caramelo entró tras tantos gatos y se echó al sol.', 'sec.caramelo.hint': 'Demasiados gatos atraen visitas inesperadas en el Cuarto...',
-  'sec.pano_vo.name': 'Trapo de Cocina de la Abuela', 'sec.pano_vo.bonusText': '+10% capacidad de bolsa', 'sec.pano_vo.desc': 'Costura sagrada descubierta en las palabras de la Araña.', 'sec.pano_vo.hint': 'Lee con atención lo que dice la sastra...',
-  'sec.chinelo_havaiana.name': 'La Chancla', 'sec.chinelo_havaiana.bonusText': '+15% daño a insectos', 'sec.chinelo_havaiana.desc': 'Arma legendaria despertada contra cucarachas.', 'sec.chinelo_havaiana.hint': 'Algunos insectos en los Corredores merecen clics extra.',
-  'sec.cafe_ontem.name': 'Café de Ayer', 'sec.cafe_ontem.bonusText': '+10% velocidad de ataque', 'sec.cafe_ontem.desc': 'Amargo, frío y efectivo. Aprobado por la Termita.', 'sec.cafe_ontem.hint': 'Con luz en mano, acércate a quien trabaja la madera.',
-  'sec.grao_dourado.name': 'Observador del Brillo', 'sec.grao_dourado.bonusText': '+10% P/s', 'sec.grao_dourado.desc': 'Atrapaste una mota brillante flotando en pantalla.', 'sec.grao_dourado.hint': 'Mantén los ojos abiertos: algo brilla de vez en cuando.',
-  'sec.tapa_controle.name': 'Golpe al Control', 'sec.tapa_controle.bonusText': '+15% P/s', 'sec.tapa_controle.desc': 'Golpeaste el Control de lado y funcionó. Ingeniería clásica.', 'sec.tapa_controle.hint': '¿Qué hace todo el mundo cuando falla la pila del control?',
-  'sec.acorde_desafinado.name': 'Acorde Desafinado', 'sec.acorde_desafinado.bonusText': '+15% ATK', 'sec.acorde_desafinado.desc': 'Tocaste 3 segundos de un clásico del rock y paraste.', 'sec.acorde_desafinado.hint': 'Alguien en el Ático extraña que toquen sus cuerdas...',
-  'sec.maldicao_do_3.name': 'La Maldición del 3', 'sec.maldicao_do_3.bonusText': '+10% P/s', 'sec.maldicao_do_3.desc': 'Insististe en la Caja de Dulces esperando un 3 — junto a Half-Life y Portal.', 'sec.maldicao_do_3.hint': 'Algunas cajas famosas jamás tuvieron tercera parte...',
-  'sec.determinacao.name': 'Determinación Polvorienta', 'sec.determinacao.bonusText': '+20% P/s y +20% ATK', 'sec.determinacao.desc': 'A pesar de todo, sigues siendo tú... en Nuevo Juego+. El Ratón recuerda.', 'sec.determinacao.hint': 'Solo quien giró el reloj y volvió conoce este déjà vu.',
+  'sec.cursor_inquieto.name': 'Cursor Inquieto', 'sec.cursor_inquieto.bonusText': '+20% P/s', 'sec.cursor_inquieto.desc': 'Picaste el cursor del título hasta que soltó polvo.', 'sec.cursor_inquieto.hint': 'Hay algo parpadeando allá arriba en la página...',
+  'sec.estatua_viva.name': 'Estatua Viva', 'sec.estatua_viva.bonusText': '+25% P/s', 'sec.estatua_viva.desc': '60 segundos sin hacer clic en nada. Arte supremo del ocio.', 'sec.estatua_viva.hint': 'A veces no hacer absolutamente nada es la respuesta.',
+  'sec.caramelo.name': 'Perro Callejero Caramelo', 'sec.caramelo.bonusText': '+25% P/s', 'sec.caramelo.desc': 'Un perro caramelo entró tras tantos gatos y se echó al sol.', 'sec.caramelo.hint': 'Demasiados gatos atraen visitas inesperadas en el Cuarto...',
+  'sec.pano_vo.name': 'Trapo de Cocina de la Abuela', 'sec.pano_vo.bonusText': '+20% capacidad de bolsa', 'sec.pano_vo.desc': 'Costura sagrada descubierta en las palabras de la Araña.', 'sec.pano_vo.hint': 'Lee con atención lo que dice la sastra...',
+  'sec.chinelo_havaiana.name': 'La Chancla', 'sec.chinelo_havaiana.bonusText': '+25% daño a insectos', 'sec.chinelo_havaiana.desc': 'Arma legendaria despertada contra cucarachas.', 'sec.chinelo_havaiana.hint': 'Algunos insectos en los Corredores merecen clics extra.',
+  'sec.cafe_ontem.name': 'Café de Ayer', 'sec.cafe_ontem.bonusText': '+15% velocidad de ataque', 'sec.cafe_ontem.desc': 'Amargo, frío y efectivo. Aprobado por la Termita.', 'sec.cafe_ontem.hint': 'Con luz en mano, acércate a quien trabaja la madera.',
+  'sec.grao_dourado.name': 'Observador del Brillo', 'sec.grao_dourado.bonusText': '+20% P/s', 'sec.grao_dourado.desc': 'Atrapaste una mota brillante flotando en pantalla.', 'sec.grao_dourado.hint': 'Mantén los ojos abiertos: algo brilla de vez en cuando.',
+  'sec.tapa_controle.name': 'Golpe al Control', 'sec.tapa_controle.bonusText': '+25% P/s', 'sec.tapa_controle.desc': 'Golpeaste el Control de lado y funcionó. Ingeniería clásica.', 'sec.tapa_controle.hint': '¿Qué hace todo el mundo cuando falla la pila del control?',
+  'sec.acorde_desafinado.name': 'Acorde Desafinado', 'sec.acorde_desafinado.bonusText': '+25% ATK', 'sec.acorde_desafinado.desc': 'Tocaste 3 segundos de un clásico del rock y paraste.', 'sec.acorde_desafinado.hint': 'Alguien en el Ático extraña que toquen sus cuerdas...',
+  'sec.maldicao_do_3.name': 'La Maldición del 3', 'sec.maldicao_do_3.bonusText': '+20% P/s', 'sec.maldicao_do_3.desc': 'Insististe en la Caja de Dulces esperando un 3 — junto a Half-Life y Portal.', 'sec.maldicao_do_3.hint': 'Algunas cajas famosas jamás tuvieron tercera parte...',
+  'sec.determinacao.name': 'Determinación Polvorienta', 'sec.determinacao.bonusText': '+35% P/s y +30% ATK', 'sec.determinacao.desc': 'A pesar de todo, sigues siendo tú... en Nuevo Juego+. El Ratón recuerda.', 'sec.determinacao.hint': 'Solo quien giró el reloj y volvió conoce este déjà vu.',
 
   // Logros
   'ach.chave.name': 'Cerrajero de la Higiene', 'ach.chave.desc': 'Fundiste la Gran Llave del Portón.',
