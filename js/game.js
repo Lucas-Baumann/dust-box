@@ -793,6 +793,7 @@ function buyRelic(id){
 }
 
 function swapCable(i){
+  if(S.unlocks.cablesSolved){ notify(t('msg.cable_repeat')); return; }
   const ord = S.cables.order;
   if(i < 0 || i >= ord.length - 1) return;
   const tmp = ord[i];
@@ -801,20 +802,13 @@ function swapCable(i){
   sfx('click');
   const solved = ord[0]==='USB' && ord[1]==='HDMI' && ord[2]==='P2' && ord[3]==='VGA';
   if(solved){
-    if(!S.unlocks.cablesSolved){
-      S.unlocks.cablesSolved = true;
-      S.gears.cable = true;
-      S.resources.socks = (S.resources.socks || 0) + 3;
-      S.resources.magicDust += 2;
-      sfx('victory');
-      achievement('cabos', 'Desembaraçador Profissional', 'Organizou a Gaveta dos Cabos Emaranhados');
-      showToast(t('msg.cable_toast'));
-    } else {
-      const gain = Math.min(5000, Math.max(0, S.resources.maxDust - S.resources.dust));
-      S.resources.dust += gain;
-      S.resources.totalEarned += gain;
-      notify(t('msg.cable_repeat', { dust: fmt(gain) }));
-    }
+    S.unlocks.cablesSolved = true;
+    S.gears.cable = true;
+    S.resources.socks = (S.resources.socks || 0) + 3;
+    S.resources.magicDust += 2;
+    sfx('victory');
+    achievement('cabos', 'Desembaraçador Profissional', 'Organizou a Gaveta dos Cabos Emaranhados');
+    showToast(t('msg.cable_toast'));
   }
   save(); render();
 }
@@ -1060,19 +1054,14 @@ function cycleLever(i){
 }
 function testLevers(){
   ensurePuzzle();
+  if(S.unlocks.puzzleSolved){ notify(t('msg.levers_repeat')); return; }
   const a = S.puzzle.current, b = S.puzzle.solution;
   if(a[0]===b[0] && a[1]===b[1] && a[2]===b[2]){
-    if(!S.unlocks.puzzleSolved){
-      S.unlocks.puzzleSolved = true;
-      S.resources.magicDust += 1;
-      sfx('unlock');
-      achievement('eletricista', 'Eletricista de Ruína', 'Acendeu a Câmara Escura');
-      notify(t('msg.levers_ok'), 'amber');
-    } else {
-      S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + 200);
-      sfx('buy');
-      notify(t('msg.levers_repeat'));
-    }
+    S.unlocks.puzzleSolved = true;
+    S.resources.magicDust += 1;
+    sfx('unlock');
+    achievement('eletricista', 'Eletricista de Ruína', 'Acendeu a Câmara Escura');
+    notify(t('msg.levers_ok'), 'amber');
   } else {
     S.player.hp -= 2;
     S.resources.dust = Math.min(S.resources.dust + 10, S.resources.maxDust);
@@ -1109,8 +1098,7 @@ function enterWind(){
       sfx('unlock');
       notify(t('msg.wind_ok'), 'amber');
     } else {
-      S.resources.dust = Math.min(S.resources.maxDust, S.resources.dust + 300);
-      sfx('buy');
+      sfx('click');
       notify(t('msg.wind_repeat'));
     }
   }
@@ -2190,9 +2178,9 @@ function viewSub(sub){
     h += `<div class="scene-title">${tx('scene.puzzles')}</div>`;
     h += `<div class="box"><span class="box-title">${tx('scene.puzzles.title')}</span><div class="muted">${tx('scene.puzzles.desc')}</div><br><div class="row">`;
     S.puzzle.current.forEach((v,i)=>{
-      h += `<div>${tx('scene.puzzles.lever', { n: i+1 })}<br><b class="amber" style="font-size:22px">${LEVERS[v]}</b><br><button class="cmd"${trAttr('scene.puzzles.pull')} onclick="Game.cycleLever(${i})">${esc(t('scene.puzzles.pull'))}</button></div>`;
+      h += `<div>${tx('scene.puzzles.lever', { n: i+1 })}<br><b class="amber" style="font-size:22px">${LEVERS[v]}</b><br><button class="cmd"${trAttr('scene.puzzles.pull')} onclick="Game.cycleLever(${i})" ${S.unlocks.puzzleSolved?'disabled':''}>${esc(t('scene.puzzles.pull'))}</button></div>`;
     });
-    h += `</div><div class="actions"><button class="cmd"${trAttr('scene.puzzles.test')} onclick="Game.testLevers()">${esc(t('scene.puzzles.test'))}</button></div>`;
+    h += `</div><div class="actions"><button class="cmd"${trAttr('scene.puzzles.test')} onclick="Game.testLevers()" ${S.unlocks.puzzleSolved?'disabled':''}>${esc(t('scene.puzzles.test'))}</button></div>`;
     h += `<div class="muted">${tx('scene.puzzles.attempts', { n: S.puzzle.attempts })}</div>`;
     if(S.unlocks.puzzleSolved) h += `<div class="amber" style="margin-top:8px">${tx('scene.puzzles.lit')}</div>`;
     h += `</div></div>`;
@@ -2211,7 +2199,8 @@ function viewSub(sub){
   if(sub==='vento'){
     h += `<div class="scene-title">${tx('scene.vento')}</div>`;
     h += `<div class="box"><div class="scene-text">${tx('scene.vento.desc')}</div>
-    <div class="actions"><button class="cmd danger"${trAttr('scene.vento.btn')} onclick="Game.enterWind()">${esc(t('scene.vento.btn'))}</button></div></div></div>`;
+    <div class="actions"><button class="cmd danger"${trAttr('scene.vento.btn')} onclick="Game.enterWind()" ${S.unlocks.windLooted?'disabled':''}>${esc(t('scene.vento.btn'))}</button></div>
+    ${S.unlocks.windLooted ? `<div class="amber" style="margin-top:8px">${tx('msg.wind_repeat')}</div>` : ''}</div></div>`;
     return h;
   }
 
@@ -2345,9 +2334,9 @@ function viewDesvaoSub(sub){
     h += `<div class="box"><div class="scene-text">${tx('scene.gaveta.desc')} <b>USB -&gt; HDMI -&gt; P2 -&gt; VGA</b>.</div>`;
     h += `<pre class="ascii-art">${tag(0)} ~~~ ${tag(1)} ~~~ ${tag(2)} ~~~ ${tag(3)}</pre>`;
     h += `<div class="actions">
-      <button class="cmd"${trAttr('scene.gaveta.swap', { a:1, b:2 })} onclick="Game.swapCable(0)">${esc(t('scene.gaveta.swap', { a:1, b:2 }))}</button>
-      <button class="cmd"${trAttr('scene.gaveta.swap', { a:2, b:3 })} onclick="Game.swapCable(1)">${esc(t('scene.gaveta.swap', { a:2, b:3 }))}</button>
-      <button class="cmd"${trAttr('scene.gaveta.swap', { a:3, b:4 })} onclick="Game.swapCable(2)">${esc(t('scene.gaveta.swap', { a:3, b:4 }))}</button>
+      <button class="cmd"${trAttr('scene.gaveta.swap', { a:1, b:2 })} onclick="Game.swapCable(0)" ${S.unlocks.cablesSolved?'disabled':''}>${esc(t('scene.gaveta.swap', { a:1, b:2 }))}</button>
+      <button class="cmd"${trAttr('scene.gaveta.swap', { a:2, b:3 })} onclick="Game.swapCable(1)" ${S.unlocks.cablesSolved?'disabled':''}>${esc(t('scene.gaveta.swap', { a:2, b:3 }))}</button>
+      <button class="cmd"${trAttr('scene.gaveta.swap', { a:3, b:4 })} onclick="Game.swapCable(2)" ${S.unlocks.cablesSolved?'disabled':''}>${esc(t('scene.gaveta.swap', { a:3, b:4 }))}</button>
     </div>`;
     if(S.unlocks.cablesSolved) h += `<div class="amber" style="margin-top:8px">${tx('scene.gaveta.done')}</div>`;
     h += `</div>`;

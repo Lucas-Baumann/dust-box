@@ -200,16 +200,16 @@ const COMBAT_ZONES = [
     desc: 'As profundezas escuras entre as almofadas do sofá.',
     realm: 'desvao',
     monsters: [
-      { id:'moeda_ox', name:'Moeda de 5 Centavos Oxidada', hp:750, atk:11, reward:6500,
+      { id:'moeda_ox', name:'Moeda de 5 Centavos Oxidada', hp:1200, atk:18, reward:6500,
         desc:'Ninguém aceita de troco, mas ela ainda morde.',
         art:'    .---.\n   / 5¢  \\\n  | (o_o) |\n   \\_____/' },
-      { id:'migalha', name:'Migalha de Biscoito Petrificada', hp:1050, atk:13, reward:9500,
+      { id:'migalha', name:'Migalha de Biscoito Petrificada', hp:1600, atk:21, reward:9500,
         desc:'Dura como concreto desde a Copa de 2014.',
         art:'    _/\\_.\n  .(o . o).\n  \'--~~~--\'' },
-      { id:'mola_solta', name:'Mola Solta Traiçoeira', hp:1350, atk:16, reward:13000,
+      { id:'mola_solta', name:'Mola Solta Traiçoeira', hp:2100, atk:24, reward:13000,
         desc:'Pula exatamente quando você tenta relaxar.',
         art:'     (o_o)\n     /\\/\\/\n     \\/\\/\\\n     =====' },
-      { id:'rei_meias', name:'REI DAS MEIAS SEM PAR', hp:2200, atk:19, reward:26000, magic:2, socks:2, boss:true,
+      { id:'rei_meias', name:'REI DAS MEIAS SEM PAR', hp:3400, atk:29, reward:26000, magic:2, socks:2, boss:true,
         desc:'Costurado com 14 meias órfãs de lavanderias diferentes.',
         art:'      _.-._\n     | / \\ |\n     |(O_O)|\n    /|     |\\\n   /  \\___/  \\\n  (____/ \\____)' }
     ]
@@ -221,16 +221,16 @@ const COMBAT_ZONES = [
     desc: 'Relíquias tecnológicas que se recusam a ligar.',
     realm: 'desvao',
     monsters: [
-      { id:'cd_riscado', name:'CD Riscado Cortante', hp:950, atk:13, reward:9500,
+      { id:'cd_riscado', name:'CD Riscado Cortante', hp:1650, atk:22, reward:9500,
         desc:'Tinha 180 MP3 baixadas no Ares. Trava na faixa 3.',
         art:'    .-----.\n   /  ._.  \\\n  |  ( o )  |\n   \\  \'-\'  /\n    \'-----\'' },
-      { id:'mouse_bola', name:'Mouse de Bolinha Furioso', hp:1350, atk:16, reward:14000,
+      { id:'mouse_bola', name:'Mouse de Bolinha Furioso', hp:2200, atk:25, reward:14000,
         desc:'A bolinha travou de sujeira e ele culpa você.',
         art:'     .---.\n    / | | \\\n   | (o.o) |\n   |  (_)  |\n    \'-----\'' },
-      { id:'impressora', name:'Impressora Sem Tinta Amarela', hp:1750, atk:19, reward:19000, magicChance:0.30,
+      { id:'impressora', name:'Impressora Sem Tinta Amarela', hp:2800, atk:28, reward:19000, magicChance:0.30,
         desc:'Recusa-se a imprimir texto preto porque acabou o ciano.',
         art:'   .---------.\n  |[!] ERR 04 |\n  +-----------+\n  | [=======] |\n  \'-----------\'' },
-      { id:'roteador', name:'ROTEADOR SEM SINAL', hp:2900, atk:23, reward:42000, magic:3, socks:2, boss:true,
+      { id:'roteador', name:'ROTEADOR SEM SINAL', hp:4500, atk:34, reward:42000, magic:3, socks:2, boss:true,
         desc:'Luz vermelha piscando eternamente. Tentar reiniciar só o irrita.',
         art:'     |     |\n     |     |\n   .---------.\n  | (X) (X) ! |\n  | [* * * *] |\n   \'---------\'' }
     ]
@@ -242,16 +242,16 @@ const COMBAT_ZONES = [
     desc: 'Metas de janeiro que viraram cabide.',
     realm: 'desvao',
     monsters: [
-      { id:'halter_2kg', name:'Halter de 2kg Enferrujado', hp:1100, atk:14, reward:14000,
+      { id:'halter_2kg', name:'Halter de 2kg Enferrujado', hp:2200, atk:26, reward:14000,
         desc:'Comprado com empolgação, usado como peso de porta.',
         art:'   .___.     .___.\n  |#####|===|#####|\n   \'---\'     \'---\'' },
-      { id:'livro_auto', name:'Livro de Autoajuda Lacrado', hp:1600, atk:17, reward:22000, magicChance:0.30,
+      { id:'livro_auto', name:'Livro de Autoajuda Lacrado', hp:3000, atk:30, reward:22000, magicChance:0.30,
         desc:'"Acorde às 5h da Manhã" — ainda no plástico original.',
         art:'   .---------.\n  /  5AM!   /|\n +---------+ |\n |  LACRE  |/\n \'---------\'' },
-      { id:'bike_cabide', name:'Bicicleta Ergométrica Cabide', hp:2300, atk:21, reward:35000,
+      { id:'bike_cabide', name:'Bicicleta Ergométrica Cabide', hp:3900, atk:34, reward:35000,
         desc:'Sustenta 4 casacos e 2 mochilas com equilíbrio heroico.',
         art:'     _o/  [casaco]\n    / |___\n   (O)----(O)' },
-      { id:'promessa_seg', name:'PROMESSA DE SEGUNDA-FEIRA', hp:3800, atk:26, reward:85000, magic:4, socks:3, boss:true,
+      { id:'promessa_seg', name:'PROMESSA DE SEGUNDA-FEIRA', hp:5800, atk:42, reward:85000, magic:4, socks:3, boss:true,
         desc:'A entidade suprema de tudo que você disse que começaria na segunda.',
         art:'     .===SEG===.\n    /  (O) (O)  \\\n   |   .-----.   |\n   |  / AMANHÃ\\  |\n   \'._\\_______/._\'\n     ~ ~ ~ ~ ~ ~' }
     ]
@@ -264,13 +264,13 @@ const COMBAT_ZONES = [
     realm: 'desvao',
     act3: true,
     monsters: [
-      { id:'pendulo', name:'Pêndulo Enferrujado', hp:2800, atk:28, reward:45000,
+      { id:'pendulo', name:'Pêndulo Enferrujado', hp:3600, atk:42, reward:45000,
         desc:'Balança há décadas guardando a escada da torre.',
         art:'        |\n        |\n      .-+-.\n     ( 11h )\n      \'---\'' },
-      { id:'relogio_1159', name:'RELÓGIO PARADO — 11:59', hp:4800, atk:34, reward:120000, magic:3, boss:true,
+      { id:'relogio_1159', name:'RELÓGIO PARADO — 11:59', hp:6200, atk:50, reward:120000, magic:3, boss:true,
         desc:'Forma I do Guardião do Tempo. Recusa-se a virar para o meio-dia.',
         art:'     .-------.\n   .\'  11:59  \'.\n  |   \\  |  /   |\n  |    --o--    |\n   \'.  / | \\  .\'\n     \'-------\'' },
-      { id:'grande_adiamento', name:'O GRANDE ADIAMENTO — 12:00', hp:7200, atk:42, reward:300000, magic:5, socks:5, boss:true, finalBoss:true,
+      { id:'grande_adiamento', name:'O GRANDE ADIAMENTO — 12:00', hp:9000, atk:60, reward:300000, magic:5, socks:5, boss:true, finalBoss:true,
         desc:'Forma Final. A soma de tudo que o mundo deixou para depois.',
         art:'      .  *  .  *  .\n     /=============\\\n    |  (O)  12:00 (O)|\n    |   \\  ===  /    |\n   /|  [#########]   |\\\n  / |   \\#######/    | \\\n     \'._|#######|_.\'\n       ~ ~ ~ ~ ~ ~' }
     ]
